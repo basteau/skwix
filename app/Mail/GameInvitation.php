@@ -29,6 +29,11 @@ class GameInvitation extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        $avatarUrl = null;
+        if ($this->player->avatar_url) {
+            $avatarUrl = url("/images/faces/{$this->player->avatar_url}.png");
+        }
+
         return new Content(
             view: 'emails.game-invitation',
             with: [
@@ -36,6 +41,7 @@ class GameInvitation extends Mailable implements ShouldQueue
                 'inviteCode' => $this->player->invite_code,
                 'loginUrl' => url('/lobby'),
                 'startsAt' => $this->game->starts_at?->locale('nl')->isoFormat('D MMMM YYYY [om] HH:mm'),
+                'avatarUrl' => $avatarUrl,
             ],
         );
     }

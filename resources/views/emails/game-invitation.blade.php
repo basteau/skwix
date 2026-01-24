@@ -63,8 +63,19 @@
                     <!-- Content -->
                     <tr>
                         <td style="padding: 32px 28px;">
+                            @if($avatarUrl)
+                            <!-- Player Avatar -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                                <tr>
+                                    <td align="center">
+                                        <img src="{{ $avatarUrl }}" alt="{{ $playerName }}" width="80" height="80" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #3b6eb5; object-fit: cover; display: block;">
+                                    </td>
+                                </tr>
+                            </table>
+                            @endif
+
                             <!-- Greeting -->
-                            <p class="text-primary" style="margin: 0 0 20px; font-size: 17px; line-height: 1.5; color: #1e293b;">
+                            <p class="text-primary" style="margin: 0 0 20px; font-size: 17px; line-height: 1.5; color: #1e293b;{{ $avatarUrl ? ' text-align: center;' : '' }}">
                                 Hoi <strong>{{ $playerName }}</strong>! 👋
                             </p>
                             

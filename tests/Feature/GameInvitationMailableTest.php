@@ -84,3 +84,30 @@ it('passes correct data to view', function () {
         ->toContain('XYZ789')
         ->toContain(url('/lobby'));
 });
+
+it('includes player avatar when available', function () {
+    $game = Game::factory()->create(['starts_at' => now()->addDay()]);
+    $player = Player::factory()->for($game)->create([
+        'name' => 'Avatar Test',
+        'avatar_url' => 'player09',
+    ]);
+
+    $mailable = new GameInvitation($player, $game);
+    $rendered = $mailable->render();
+
+    expect($rendered)->toContain('/images/faces/player09.png');
+});
+
+it('does not include avatar section when player has no avatar', function () {
+    $game = Game::factory()->create(['starts_at' => now()->addDay()]);
+    $player = Player::factory()->for($game)->create([
+        'name' => 'No Avatar',
+        'avatar_url' => null,
+    ]);
+
+    $mailable = new GameInvitation($player, $game);
+    $rendered = $mailable->render();
+
+    expect($rendered)->not->toContain('/images/faces/')
+        ->and($rendered)->toContain('Hoi <strong>No Avatar</strong>');
+});
