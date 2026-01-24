@@ -39,6 +39,7 @@ interface Props {
         id: number;
         status: string;
         winner_id: number | null;
+        secret_word_length?: number;
     };
     questions?: QuestionItem[];
     error?: string;
@@ -352,6 +353,17 @@ export default function GuessPage({
                     points={points}
                     testId="guess-points-display"
                 />
+
+                {/* Word length hint */}
+                {game?.secret_word_length && (
+                    <div className="mx-4 mt-2 flex justify-center">
+                        <div className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1">
+                            <span className="text-xs text-muted-foreground">Het woord heeft</span>
+                            <span className="font-mono text-xs font-semibold text-foreground">{game.secret_word_length}</span>
+                            <span className="text-xs text-muted-foreground">letters</span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Message */}
                 {message && (

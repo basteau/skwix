@@ -67,6 +67,7 @@ class GuessController extends Controller
                 'id' => $game->id,
                 'status' => $game->status,
                 'winner_id' => $game->winner_id,
+                'secret_word_length' => mb_strlen($game->secret_word),
             ],
             'questions' => $questions,
             'isAdmin' => $user->is_admin,
@@ -83,6 +84,7 @@ class GuessController extends Controller
             'game' => [
                 'id' => $testGame['id'],
                 'status' => 'active',
+                'secret_word_length' => mb_strlen($testGame['secret_word']),
             ],
             'questions' => collect($testGame['questions'] ?? [])->map(fn ($q, $idx) => [
                 'id' => $idx + 1,

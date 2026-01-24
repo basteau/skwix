@@ -43,6 +43,28 @@ describe('GuessController show', function () {
             ->has('questions')
             ->where('player.points', 50)
             ->where('game.status', 'active')
+            ->where('game.secret_word_length', 6) // 'winter' has 6 letters
+        );
+    });
+
+    it('provides secret word length hint for varying word lengths', function () {
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'secret_word' => 'skivakantie', // 11 letters
+        ]);
+
+        Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+        ]);
+
+        $response = $this->actingAs($user)->get('/play/guess');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('game.secret_word_length', 11)
         );
     });
 
