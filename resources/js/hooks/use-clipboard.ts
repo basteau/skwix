@@ -1,32 +1,71 @@
-// Credit: https://usehooks-ts.com/
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type CopiedValue = string | null;
-export type CopyFn = (text: string) => Promise<boolean>;
-export type UseClipboardReturn = [CopiedValue, CopyFn];
+interface UseClipboardOptions {
+    resetDelay?: number;
+}
 
-export function useClipboard(): UseClipboardReturn {
-    const [copiedText, setCopiedText] = useState<CopiedValue>(null);
+interface UseClipboardReturn {
+    copiedText: string | null;
+    copy: (text: string) => Promise<boolean>;
+    isCopied: boolean;
+    reset: () => void;
+}
 
-    const copy: CopyFn = useCallback(async (text) => {
-        if (!navigator?.clipboard) {
-            console.warn('Clipboard not supported');
+export function useClipboard(options: UseClipboardOptions = {}): UseClipboardReturn {
+    const { resetDelay = 2000 } = options;
+    const [copiedText, setCopiedText] = useState<string | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-            return false;
-        }
-
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopiedText(text);
-
-            return true;
-        } catch (error) {
-            console.warn('Copy failed', error);
-            setCopiedText(null);
-
-            return false;
+    const reset = useCallback(() => {
+        setCopiedText(null);
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
         }
     }, []);
 
-    return [copiedText, copy];
+    const copy = useCallback(
+        async (text: string): Promise<boolean> => {
+            if (!navigator?.clipboard) {
+                console.warn('Clipboard not supported');
+                return false;
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                setCopiedText(text);
+
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(10);
+                }
+
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
+                timeoutRef.current = setTimeout(reset, resetDelay);
+
+                return true;
+            } catch (error) {
+                console.warn('Copy failed', error);
+                setCopiedText(null);
+                return false;
+            }
+        },
+        [resetDelay, reset]
+    );
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
+    return {
+        copiedText,
+        copy,
+        isCopied: copiedText !== null,
+        reset,
+    };
 }
