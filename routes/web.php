@@ -45,6 +45,8 @@ Route::get('/welcome', function () {
     return Inertia::render('welcome');
 })->name('welcome');
 
+Route::post('/resend-invitation', \App\Http\Controllers\ResendInvitationController::class)->name('resend-invitation');
+
 Route::get('/lobby', [LobbyController::class, 'show'])->name('lobby');
 
 Route::middleware('auth')->group(function () {

@@ -1,10 +1,12 @@
+import { ResendCodeModal } from '@/components/resend-code-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Head, useForm } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
-import { type FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 
 export default function Welcome() {
+    const [showResendModal, setShowResendModal] = useState(false);
     const form = useForm({
         code: '',
     });
@@ -156,9 +158,21 @@ export default function Welcome() {
 
                     {/* Footer hint */}
                     <p className="mt-8 text-sm text-muted-foreground">
-                        Geen code? Vraag de organisator om een uitnodiging.
+                        Geen code?{' '}
+                        <button
+                            type="button"
+                            onClick={() => setShowResendModal(true)}
+                            className="font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                            Code kwijt?
+                        </button>
                     </p>
                 </main>
+
+                <ResendCodeModal
+                    open={showResendModal}
+                    onOpenChange={setShowResendModal}
+                />
             </div>
         </>
     );
