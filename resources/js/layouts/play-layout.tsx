@@ -1,13 +1,17 @@
 import type { PropsWithChildren } from 'react';
+import { useCallback, useState } from 'react';
 import { BottomTabNav } from '@/components/bottom-tab-nav';
-import { TutorialModal, useTutorial } from '@/components/tutorial-modal';
+import { TutorialModal } from '@/components/tutorial-modal';
 
 interface PlayLayoutProps extends PropsWithChildren {
     title?: string;
 }
 
 export default function PlayLayout({ children }: PlayLayoutProps) {
-    const { showTutorial, openTutorial, closeTutorial } = useTutorial();
+    const [forceOpen, setForceOpen] = useState(false);
+
+    const openTutorial = useCallback(() => setForceOpen(true), []);
+    const closeTutorial = useCallback(() => setForceOpen(false), []);
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
@@ -18,8 +22,7 @@ export default function PlayLayout({ children }: PlayLayoutProps) {
                 {children}
             </main>
             <BottomTabNav onTutorialClick={openTutorial} />
-            <TutorialModal />
-            {showTutorial && <TutorialModal forceOpen onClose={closeTutorial} />}
+            <TutorialModal forceOpen={forceOpen} onClose={closeTutorial} />
         </div>
     );
 }

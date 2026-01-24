@@ -216,18 +216,4 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
     );
 }
 
-export function useTutorial() {
-    const [showTutorial, setShowTutorial] = useState(false);
 
-    const openTutorial = useCallback(() => setShowTutorial(true), []);
-    const closeTutorial = useCallback(() => setShowTutorial(false), []);
-
-    return {
-        showTutorial,
-        openTutorial,
-        closeTutorial,
-        TutorialModal: showTutorial ? (
-            <TutorialModal forceOpen onClose={closeTutorial} />
-        ) : null,
-    };
-}
