@@ -6,6 +6,7 @@ use App\Mail\GameInvitation;
 use App\Models\Game;
 use App\Models\Player;
 use App\Models\User;
+use App\Services\GameEndedNotificationService;
 use App\Services\WordlistService;
 use Carbon\Carbon;
 use Database\Seeders\DutchWordlistSeeder;
@@ -19,7 +20,8 @@ use Inertia\Response;
 class AdminController extends Controller
 {
     public function __construct(
-        private WordlistService $wordlistService
+        private WordlistService $wordlistService,
+        private GameEndedNotificationService $notificationService,
     ) {}
 
     public function dashboard(): Response
@@ -216,9 +218,11 @@ class AdminController extends Controller
             'ends_at' => Carbon::now(),
         ]);
 
+        $this->notificationService->notifyAllPlayers($game);
+
         return redirect()
             ->route('admin.game', $game)
-            ->with('success', 'Spel beëindigd');
+            ->with('success', 'Spel beëindigd, spelers zijn per email geïnformeerd');
     }
 
     public function invitePlayers(Game $game): RedirectResponse

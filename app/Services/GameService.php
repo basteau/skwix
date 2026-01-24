@@ -10,6 +10,12 @@ class GameService
 {
     private const TIMEZONE = 'Europe/Brussels';
 
+    public function __construct(
+        private ?GameEndedNotificationService $notificationService = null,
+    ) {
+        $this->notificationService ??= app(GameEndedNotificationService::class);
+    }
+
     public function isWordleAvailable(Game $game): bool
     {
         $now = Carbon::now(self::TIMEZONE);
@@ -66,12 +72,16 @@ class GameService
         return $secretWord === $guessWord;
     }
 
-    public function setWinner(Game $game, Player $player): Game
+    public function setWinner(Game $game, Player $player, bool $notify = true): Game
     {
         $game->winner_id = $player->id;
         $game->status = 'completed';
         $game->ends_at = Carbon::now();
         $game->save();
+
+        if ($notify) {
+            $this->notificationService->notifyAllPlayers($game);
+        }
 
         return $game;
     }
@@ -123,7 +133,7 @@ class GameService
             ->get();
     }
 
-    public function endExpiredGame(Game $game): array
+    public function endExpiredGame(Game $game, bool $notify = true): array
     {
         if ($game->status !== 'active') {
             return ['game' => $game, 'winner' => null];
@@ -142,6 +152,10 @@ class GameService
         $game->status = 'completed';
         $game->winner_id = $hasUniqueWinner ? $winner->id : null;
         $game->save();
+
+        if ($notify) {
+            $this->notificationService->notifyAllPlayers($game);
+        }
 
         return [
             'game' => $game,
