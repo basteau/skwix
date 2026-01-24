@@ -1,8 +1,6 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
@@ -38,43 +36,43 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentUrl } = useCurrentUrl();
 
     return (
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 lg:py-10">
             <Heading
                 title="Instellingen"
                 description="Beheer je profiel- en accountinstellingen"
             />
 
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
+            <div className="mt-8 flex flex-col gap-8 lg:mt-10 lg:flex-row lg:gap-12">
+                <aside className="w-full shrink-0 lg:w-52">
                     <nav
-                        className="flex flex-col space-y-1 space-x-0"
+                        className="flex flex-row gap-1 overflow-x-auto pb-2 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0"
                         aria-label="Settings"
                     >
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentUrl(item.href),
-                                })}
-                            >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
+                        {sidebarNavItems.map((item, index) => {
+                            const active = isCurrentUrl(item.href);
+                            return (
+                                <Link
+                                    key={`${toUrl(item.href)}-${index}`}
+                                    href={item.href}
+                                    className={cn(
+                                        'relative shrink-0 rounded-md px-3 py-2 text-sm transition-colors',
+                                        active
+                                            ? 'bg-primary/10 font-semibold text-primary'
+                                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                    )}
+                                >
+                                    {active && (
+                                        <span className="absolute left-0 top-1/2 hidden h-4 w-0.5 -translate-y-1/2 rounded-full bg-primary lg:block" />
                                     )}
                                     {item.title}
                                 </Link>
-                            </Button>
-                        ))}
+                            );
+                        })}
                     </nav>
                 </aside>
 
-                <Separator className="my-6 lg:hidden" />
-
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">
+                <div className="min-w-0 flex-1 lg:max-w-2xl">
+                    <section className="space-y-8 lg:space-y-10">
                         {children}
                     </section>
                 </div>
