@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { getInitials } from '@/hooks/use-initials';
 
 interface Props {
     winner: {
@@ -18,17 +19,12 @@ interface Props {
 }
 
 export default function LosePage({ winner, player, game }: Props) {
-    const winnerInitials = winner.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+    const winnerInitials = getInitials(winner.name);
 
     return (
         <>
             <Head title="Einde Spel" />
-            <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-muted/30 to-background px-6 py-12">
+            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-muted/30 to-background px-6 py-12">
                 {/* Snowflake decorations */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-50">
                     {Array.from({ length: 12 }).map((_, i) => (

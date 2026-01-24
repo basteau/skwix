@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
+import { getInitials } from '@/hooks/use-initials';
 
 interface Props {
     winner: {
@@ -24,17 +25,12 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
         return () => clearTimeout(timer);
     }, []);
 
-    const initials = winner.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+    const initials = getInitials(winner.name);
 
     return (
         <>
             <Head title="Gewonnen!" />
-            <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-primary/5 to-background px-6 py-12">
+            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-primary/5 to-background px-6 py-12">
                 {/* Confetti */}
                 {showConfetti && <Confetti />}
 

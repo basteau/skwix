@@ -1,7 +1,9 @@
 import { Head, router } from '@inertiajs/react';
-import { Snowflake, Users } from 'lucide-react';
+import Snowflake from 'lucide-react/icons/snowflake';
+import Users from 'lucide-react/icons/users';
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getInitials } from '@/hooks/use-initials';
 
 interface Player {
     id: number;
@@ -20,15 +22,6 @@ interface LobbyProps {
         starts_at: string | null;
     };
     players?: Player[];
-}
-
-function getInitials(name: string): string {
-    return name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
 }
 
 function formatCountdown(seconds: number): string {
