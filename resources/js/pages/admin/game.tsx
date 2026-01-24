@@ -3,6 +3,13 @@ import { useCallback, useState } from 'react';
 import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 interface PlayerData {
@@ -272,22 +279,24 @@ export default function AdminGameDetail({ game, players }: Props) {
                                     <label className="mb-2 block text-sm font-medium">
                                         Winnaar selecteren (optioneel)
                                     </label>
-                                    <select
-                                        value={selectedWinnerId ?? ''}
-                                        onChange={(e) =>
-                                            setSelectedWinnerId(
-                                                e.target.value ? parseInt(e.target.value, 10) : null
-                                            )
+                                    <Select
+                                        value={selectedWinnerId ? String(selectedWinnerId) : ''}
+                                        onValueChange={(value) =>
+                                            setSelectedWinnerId(value ? parseInt(value, 10) : null)
                                         }
-                                        className="flex h-11 w-full max-w-xs rounded-md border border-border-strong bg-card px-3 py-2 text-base shadow-sm focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 md:text-sm"
                                     >
-                                        <option value="">Geen winnaar</option>
-                                        {players.map((player) => (
-                                            <option key={player.id} value={player.id}>
-                                                {player.name} ({player.points} punten)
-                                            </option>
-                                        ))}
-                                    </select>
+                                        <SelectTrigger className="max-w-xs">
+                                            <SelectValue placeholder="Geen winnaar" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">Geen winnaar</SelectItem>
+                                            {players.map((player) => (
+                                                <SelectItem key={player.id} value={String(player.id)}>
+                                                    {player.name} ({player.points} punten)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <Button
                                     variant="destructive"

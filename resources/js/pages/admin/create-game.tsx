@@ -3,6 +3,13 @@ import { useCallback, useState } from 'react';
 import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface Props {
     sampleWords: string[];
@@ -134,15 +141,19 @@ export default function CreateGame({ sampleWords }: Props) {
                                     <label className="mb-1 block text-sm font-medium text-foreground">
                                         Duur (dagen)
                                     </label>
-                                    <select
-                                        value={durationDays}
-                                        onChange={(e) => setDurationDays(parseInt(e.target.value, 10))}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
+                                    <Select
+                                        value={String(durationDays)}
+                                        onValueChange={(value) => setDurationDays(parseInt(value, 10))}
                                     >
-                                        <option value={4}>4 dagen</option>
-                                        <option value={5}>5 dagen</option>
-                                        <option value={6}>6 dagen</option>
-                                    </select>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="4">4 dagen</SelectItem>
+                                            <SelectItem value="5">5 dagen</SelectItem>
+                                            <SelectItem value="6">6 dagen</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </section>
