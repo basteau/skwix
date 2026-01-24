@@ -199,7 +199,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
 
                     {/* Points badge */}
                     {step.points && (
-                        <div className="mt-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                        <div className="mt-3 inline-block rounded-full bg-primary-light px-3 py-1 text-xs font-medium text-primary">
                             {step.points}
                         </div>
                     )}
