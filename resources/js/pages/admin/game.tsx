@@ -39,8 +39,8 @@ export default function AdminGameDetail({ game, players }: Props) {
     const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(null);
 
     const statusColors: Record<string, string> = {
-        pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-        active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+        pending: 'bg-warning/15 text-[oklch(45%_0.15_85)]',
+        active: 'bg-success/15 text-[oklch(40%_0.15_145)]',
         completed: 'bg-muted text-muted-foreground',
     };
 
