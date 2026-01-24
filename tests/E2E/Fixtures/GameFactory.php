@@ -99,4 +99,67 @@ class GameFactory
 
         return $players;
     }
+
+    /**
+     * Set wordle words for a game.
+     */
+    public static function setWordleWords(Game $game, array $words): Game
+    {
+        $game->update(['wordle_words' => $words]);
+
+        return $game->fresh();
+    }
+
+    /**
+     * Set secret word for a game.
+     */
+    public static function setSecretWord(Game $game, string $word): Game
+    {
+        $game->update(['secret_word' => strtoupper($word)]);
+
+        return $game->fresh();
+    }
+
+    /**
+     * Create a game with all fixtures ready for testing.
+     */
+    public static function createGame(array $attributes = [], int $playerCount = 4): array
+    {
+        $game = self::active($attributes);
+        $players = self::players($game, $playerCount);
+
+        return [
+            'game' => $game,
+            'players' => $players,
+        ];
+    }
+
+    /**
+     * Create a simple login-ready user with player.
+     */
+    public static function loginablePlayer(Game $game, array $attributes = []): array
+    {
+        $password = 'password';
+        $email = $attributes['email'] ?? 'test-'.uniqid().'@test.com';
+
+        $user = User::create([
+            'name' => $attributes['name'] ?? 'Test Player',
+            'email' => $email,
+            'password' => bcrypt($password),
+        ]);
+
+        $player = Player::create(array_merge([
+            'game_id' => $game->id,
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'points' => 10,
+        ], $attributes));
+
+        return [
+            'user' => $user,
+            'player' => $player,
+            'email' => $email,
+            'password' => $password,
+        ];
+    }
 }

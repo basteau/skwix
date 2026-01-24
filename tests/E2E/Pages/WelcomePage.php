@@ -81,4 +81,31 @@ class WelcomePage
     {
         return $this->playwright->getText(self::CODE_ERROR);
     }
+
+    /**
+     * Assert an invalid code error is shown.
+     */
+    public function assertInvalidCode(): self
+    {
+        $this->playwright->waitFor(self::CODE_ERROR);
+
+        return $this;
+    }
+
+    /**
+     * Wait for redirect to lobby after successful join.
+     */
+    public function waitForLobbyRedirect(): void
+    {
+        $this->playwright->waitForUrl('/lobby');
+    }
+
+    /**
+     * Enter code and join, waiting for lobby redirect.
+     */
+    public function joinAndWaitForLobby(string $code): void
+    {
+        $this->enterCode($code)->clickJoin();
+        $this->waitForLobbyRedirect();
+    }
 }
