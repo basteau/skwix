@@ -101,26 +101,38 @@ class FortuneController extends Controller
 
         $wager = (int) $request->wager;
 
-        if ($wager > $player->points) {
-            return response()->json(['error' => 'insufficient_points'], 400);
-        }
-
         $won = $this->spinWheel();
         $pointsChange = $won ? $wager : -$wager;
 
-        $spinResult = \DB::transaction(function () use ($game, $player, $wager, $won, $pointsChange) {
-            $player->increment('points', $pointsChange);
+        $result = \DB::transaction(function () use ($game, $player, $wager, $won, $pointsChange) {
+            $lockedPlayer = \App\Models\Player::where('id', $player->id)->lockForUpdate()->first();
 
-            return SpinResult::create([
+            if ($wager > $lockedPlayer->points) {
+                return ['error' => 'insufficient_points'];
+            }
+
+            $newPoints = max(0, $lockedPlayer->points + $pointsChange);
+            $actualPointsChange = $newPoints - $lockedPlayer->points;
+
+            $lockedPlayer->update(['points' => $newPoints]);
+
+            $spinResult = SpinResult::create([
                 'game_id' => $game->id,
                 'player_id' => $player->id,
                 'amount_wagered' => $wager,
                 'won' => $won,
-                'points_change' => $pointsChange,
+                'points_change' => $actualPointsChange,
             ]);
+
+            return ['spinResult' => $spinResult, 'player' => $lockedPlayer];
         });
 
-        $player->refresh();
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 400);
+        }
+
+        $spinResult = $result['spinResult'];
+        $player = $result['player'];
 
         $landingSegment = $this->getLandingSegment($won);
         $rotations = random_int(3, 5);
@@ -154,7 +166,8 @@ class FortuneController extends Controller
 
         $won = $this->spinWheel();
         $pointsChange = $won ? $wager : -$wager;
-        $newPoints = $points + $pointsChange;
+        $newPoints = max(0, $points + $pointsChange);
+        $pointsChange = $newPoints - $points;
 
         $spinResult = [
             'id' => random_int(10000, 99999),

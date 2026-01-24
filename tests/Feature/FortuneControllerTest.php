@@ -294,4 +294,40 @@ describe('FortuneController spin', function () {
 
         $response->assertStatus(422);
     });
+
+    it('prevents points from going negative when losing', function () {
+        config(['e2e.fortune_driver' => 'fake']);
+        app()->singleton(\App\Services\FakeFortuneService::class, function () {
+            return new class
+            {
+                public function spin(): bool
+                {
+                    return false;
+                }
+            };
+        });
+
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create(['status' => 'active']);
+
+        $player = Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+            'points' => 10,
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/play/fortune/spin', [
+            'wager' => 10,
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'won' => false,
+            'points_change' => -10,
+            'points_remaining' => 0,
+        ]);
+
+        expect($player->fresh()->points)->toBe(0);
+    });
 });
