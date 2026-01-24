@@ -14,10 +14,10 @@ interface BottomTabNavProps {
 }
 
 const createTabs = (onTutorialClick?: () => void): TabItem[] => [
-    { label: 'Wordle', href: '/wordle', icon: Grid3x3 },
-    { label: 'Vraag', href: '/guess', icon: HelpCircle },
-    { label: 'Rad', href: '/fortune', icon: Disc3 },
-    { label: 'Spelers', href: '/players', icon: Users },
+    { label: 'Wordle', href: '/play/wordle', icon: Grid3x3 },
+    { label: 'Vraag', href: '/play/guess', icon: HelpCircle },
+    { label: 'Rad', href: '/play/fortune', icon: Disc3 },
+    { label: 'Spelers', href: '/play/players', icon: Users },
     { label: 'Uitleg', icon: BookOpen, onClick: onTutorialClick },
 ];
 

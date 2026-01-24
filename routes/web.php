@@ -18,14 +18,14 @@ if (app()->environment('e2e')) {
         $encrypter = app('encrypter');
         $key = $encrypter->getKey();
         $cookiePrefix = hash_hmac('sha1', 'skwix-session', $key);
-        
+
         // Get all session data
         $sessionData = session()->all();
-        $authKey = 'login_web_' . sha1('Illuminate\Auth\SessionGuard');
-        
+        $authKey = 'login_web_'.sha1('Illuminate\Auth\SessionGuard');
+
         return response()->json([
             'env' => app()->environment(),
-            'key_prefix' => substr(config('app.key'), 0, 20) . '...',
+            'key_prefix' => substr(config('app.key'), 0, 20).'...',
             'cookie_prefix' => $cookiePrefix,
             'session_driver' => config('session.driver'),
             'session_id' => session()->getId(),

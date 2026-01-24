@@ -45,7 +45,7 @@ class FortifyServiceProvider extends ServiceProvider
                 $activePlayer = $user->activePlayer();
                 if ($activePlayer) {
                     session(['player_id' => $activePlayer->id]);
-                    
+
                     // Mark player as joined if not already
                     if (! $activePlayer->joined_at) {
                         $activePlayer->update(['joined_at' => now()]);
