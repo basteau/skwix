@@ -40,8 +40,23 @@ await chef.collect("Any remarks?", "lfg", 60000); // returns {responses[], stopp
 await chef.notify("🎬 Lights, camera, coding!");
 ```
 
+## CLI Usage (ALWAYS use bun)
+
+```bash
+# ALWAYS use bun - NEVER use npx tsx
+bun /path/to/skwix/.agents/skills/chef/scripts/cli.ts <command> [args]
+
+# Commands:
+bun .agents/skills/chef/scripts/cli.ts notify "🎬 Message here"
+bun .agents/skills/chef/scripts/cli.ts collect "Question?" "stopword" 180000
+bun .agents/skills/chef/scripts/cli.ts question "Pick one?" '["A","B","C"]' 0
+bun .agents/skills/chef/scripts/cli.ts mark
+bun .agents/skills/chef/scripts/cli.ts gather
+```
+
 ## Rules
 
+- **ALWAYS use `bun` to run scripts - NEVER use `npx tsx`**
 - `ask()` → BLOCKING, waits for free text
 - `confirm()` → BLOCKING, waits for Yes/No
 - `choice()` → BLOCKING, waits for selection

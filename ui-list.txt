@@ -1,13 +1,13 @@
 # UI Review Checklist
-# Use ralph loop with frontend-design and react skills to review each item
+# 10 distinct UI areas covering the entire application
 
-- [ ] Pages: Game flow (welcome, lobby, win, lose)
-- [ ] Pages: Play screens (wordle, players, guess, fortune)
-- [ ] Pages: Admin screens (dashboard, create-game, game)
-- [ ] Layouts: All layout components
-- [ ] Components: Navigation (sidebar, header, nav-main, nav-user, bottom-tab-nav)
-- [ ] Components: App shell (app-shell, app-content, app-logo, breadcrumbs)
-- [ ] Components: Forms & feedback (input-error, alert-error, tutorial-modal)
-- [ ] UI primitives: shadcn components
-- [ ] Hooks: use-appearance, use-initials, use-mobile
-- [ ] Assets: Public icons, logos, player images
+- [x] Auth pages: Login, register, password reset, verify email, confirm password
+- [x] Game flow pages: Welcome screen, lobby waiting room, win celebration, lose results
+- [x] Play screens: Wordle game, players leaderboard, mystery word guess, wheel of fortune
+- [x] Admin pages: Dashboard overview, create game form, game management detail
+- [x] Layouts: App layout, auth layouts (card/simple/split), play layout, settings layout
+- [x] Navigation: App sidebar, app header, bottom tab nav, nav-main, nav-user, nav-footer
+- [x] Shell components: App shell, app content, app logo, breadcrumbs, user info
+- [ ] Form components: Inputs, buttons, selects, checkboxes, labels, input errors, alerts
+- [ ] Overlay components: Dialogs, sheets, dropdowns, tooltips, tutorial modal
+- [ ] Utilities: Hooks (appearance, mobile, initials, clipboard), theme system, PWA assets

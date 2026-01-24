@@ -1,5 +1,11 @@
 import { Head } from '@inertiajs/react';
+import { useMemo } from 'react';
 import { getInitials } from '@/hooks/use-initials';
+
+function seededRandom(seed: number) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
 
 interface Props {
     winner: {
@@ -21,22 +27,28 @@ interface Props {
 export default function LosePage({ winner, player, game }: Props) {
     const winnerInitials = getInitials(winner.name);
 
+    const snowflakes = useMemo(
+        () =>
+            Array.from({ length: 12 }).map((_, i) => ({
+                left: `${seededRandom(i * 100 + 1) * 100}%`,
+                top: `${seededRandom(i * 100 + 2) * 100}%`,
+                fontSize: `${16 + seededRandom(i * 100 + 3) * 20}px`,
+                animationDelay: `${seededRandom(i * 100 + 4) * 2}s`,
+            })),
+        []
+    );
+
     return (
         <>
             <Head title="Einde Spel" />
             <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-muted/30 to-background px-6 py-12">
                 {/* Snowflake decorations */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-50">
-                    {Array.from({ length: 12 }).map((_, i) => (
+                    {snowflakes.map((style, i) => (
                         <div
                             key={i}
                             className="absolute text-muted-foreground/30 animate-in fade-in duration-1000"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                fontSize: `${16 + Math.random() * 20}px`,
-                                animationDelay: `${Math.random() * 2}s`,
-                            }}
+                            style={style}
                         >
                             ❄
                         </div>
