@@ -1,8 +1,8 @@
 import { Head, router } from '@inertiajs/react';
+import { Snowflake } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useState, type FormEvent } from 'react';
-import { Snowflake } from 'lucide-react';
 
 export default function Welcome() {
     const [code, setCode] = useState('');

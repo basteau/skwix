@@ -10,7 +10,7 @@ Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 Route::post('/api/validate-invite', [InviteController::class, 'validate']);
 
 // Lobby route
-Route::get('/lobby', fn () => Inertia::render('lobby'))->name('lobby');
+Route::get('/lobby', [App\Http\Controllers\LobbyController::class, 'show'])->name('lobby');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
