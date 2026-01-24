@@ -64,6 +64,14 @@ class AdminController extends Controller
             'players.*.avatar' => 'nullable|string|max:100',
         ]);
 
+        $emails = array_map(fn ($p) => strtolower($p['email']), $request->players);
+        if (count($emails) !== count(array_unique($emails))) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['players' => 'Elke speler moet een uniek e-mailadres hebben']);
+        }
+
         $invalidWords = $this->validateWordleWordsAgainstWordlist($request->wordle_words);
         if (! empty($invalidWords)) {
             return redirect()

@@ -92,6 +92,14 @@ export default function CreateGame({ sampleWords }: Props) {
         setIsSubmitting(true);
         setErrors({});
 
+        const emails = players.map((p) => p.email.toLowerCase().trim());
+        const uniqueEmails = new Set(emails);
+        if (emails.length !== uniqueEmails.size) {
+            setErrors({ players: 'Elke speler moet een uniek e-mailadres hebben' });
+            setIsSubmitting(false);
+            return;
+        }
+
         const payload = {
             secret_word: secretWord,
             starts_at: startsAt,
