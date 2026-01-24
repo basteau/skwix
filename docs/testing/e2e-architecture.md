@@ -54,7 +54,9 @@ APP_URL=http://127.0.0.1:8010
 DB_CONNECTION=sqlite
 DB_DATABASE=storage/e2e.sqlite
 CACHE_STORE=array
-SESSION_DRIVER=file
+# Use cookie session driver for E2E to avoid file synchronization issues
+# Cookie sessions embed the entire session in the cookie, avoiding race conditions
+SESSION_DRIVER=cookie
 
 # Deterministic AI responses
 AI_DRIVER=fake

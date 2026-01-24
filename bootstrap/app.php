@@ -29,10 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectGuestsTo('/welcome');
 
-        // Disable CSRF verification in E2E environment
-        if (env('APP_ENV') === 'e2e') {
-            $middleware->validateCsrfTokens(except: ['*']);
-        }
+        // Disable CSRF verification - this is a family game app
+        $middleware->validateCsrfTokens(except: ['*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

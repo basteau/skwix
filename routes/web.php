@@ -12,6 +12,31 @@ use Inertia\Inertia;
 
 Route::get('/', fn () => redirect()->route('welcome'));
 
+// Debug endpoint for E2E testing
+if (app()->environment('e2e')) {
+    Route::get('/debug-env', function () {
+        $encrypter = app('encrypter');
+        $key = $encrypter->getKey();
+        $cookiePrefix = hash_hmac('sha1', 'skwix-session', $key);
+        
+        // Get all session data
+        $sessionData = session()->all();
+        $authKey = 'login_web_' . sha1('Illuminate\Auth\SessionGuard');
+        
+        return response()->json([
+            'env' => app()->environment(),
+            'key_prefix' => substr(config('app.key'), 0, 20) . '...',
+            'cookie_prefix' => $cookiePrefix,
+            'session_driver' => config('session.driver'),
+            'session_id' => session()->getId(),
+            'session_has_auth_key' => session()->has($authKey),
+            'session_keys' => array_keys($sessionData),
+            'auth_check' => auth()->check(),
+            'auth_id' => auth()->id(),
+        ]);
+    });
+}
+
 Route::get('/welcome', function () {
     if (auth()->check()) {
         return redirect('/play/wordle');
