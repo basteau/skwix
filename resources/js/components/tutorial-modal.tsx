@@ -1,4 +1,10 @@
-import { X, Grid3x3, HelpCircle, Disc3, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
+import ChevronLeft from 'lucide-react/icons/chevron-left';
+import ChevronRight from 'lucide-react/icons/chevron-right';
+import Disc3 from 'lucide-react/icons/disc-3';
+import Grid3x3 from 'lucide-react/icons/grid-3x3';
+import HelpCircle from 'lucide-react/icons/help-circle';
+import Trophy from 'lucide-react/icons/trophy';
+import X from 'lucide-react/icons/x';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
