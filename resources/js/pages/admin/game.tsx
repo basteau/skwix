@@ -39,9 +39,9 @@ export default function AdminGameDetail({ game, players }: Props) {
     const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(null);
 
     const statusColors: Record<string, string> = {
-        pending: 'bg-amber-100 text-amber-800',
-        active: 'bg-green-100 text-green-800',
-        completed: 'bg-gray-100 text-gray-800',
+        pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+        active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+        completed: 'bg-muted text-muted-foreground',
     };
 
     const statusLabels: Record<string, string> = {
@@ -105,7 +105,7 @@ export default function AdminGameDetail({ game, players }: Props) {
                     </div>
                 </header>
 
-                <main className="mx-auto max-w-4xl p-6">
+                <main className="mx-auto max-w-4xl p-6 pb-safe">
                     <div className="space-y-8">
                         {/* Game Info */}
                         <section className="rounded-lg border border-border bg-card p-6">
@@ -203,9 +203,9 @@ export default function AdminGameDetail({ game, players }: Props) {
                                         key={player.id}
                                         className={cn(
                                             'flex items-center justify-between rounded-lg border p-4',
-                                            index === 0 && 'border-amber-200 bg-amber-50',
-                                            index === 1 && 'border-gray-200 bg-gray-50',
-                                            index === 2 && 'border-orange-200 bg-orange-50',
+                                            index === 0 && 'border-amber-300/50 bg-amber-50 dark:border-amber-700/50 dark:bg-amber-900/20',
+                                            index === 1 && 'border-zinc-300/50 bg-zinc-50 dark:border-zinc-600/50 dark:bg-zinc-800/30',
+                                            index === 2 && 'border-orange-300/50 bg-orange-50 dark:border-orange-700/50 dark:bg-orange-900/20',
                                             index > 2 && 'border-border bg-background'
                                         )}
                                     >

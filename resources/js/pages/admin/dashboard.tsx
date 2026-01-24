@@ -32,7 +32,7 @@ export default function AdminDashboard({ games = [] }: Props) {
                     </div>
                 </header>
 
-                <main className="p-6">
+                <main className="p-6 pb-safe">
                     {games.length === 0 ? (
                         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center">
                             <p className="text-lg font-medium text-foreground">Geen spellen</p>
@@ -58,9 +58,9 @@ export default function AdminDashboard({ games = [] }: Props) {
 
 function GameCard({ game }: { game: GameData }) {
     const statusColors: Record<string, string> = {
-        pending: 'bg-amber-100 text-amber-800',
-        active: 'bg-green-100 text-green-800',
-        completed: 'bg-gray-100 text-gray-800',
+        pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+        active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+        completed: 'bg-muted text-muted-foreground',
     };
 
     const statusLabels: Record<string, string> = {

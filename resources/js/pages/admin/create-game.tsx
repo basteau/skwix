@@ -27,17 +27,18 @@ export default function CreateGame({ sampleWords }: Props) {
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const addPlayer = useCallback(() => {
-        if (players.length >= 8) return;
-        setPlayers((prev) => [
-            ...prev,
-            { id: crypto.randomUUID(), name: '', email: '', avatar_url: '' },
-        ]);
-    }, [players.length]);
+        setPlayers((prev) => {
+            if (prev.length >= 8) return prev;
+            return [...prev, { id: crypto.randomUUID(), name: '', email: '', avatar_url: '' }];
+        });
+    }, []);
 
     const removePlayer = useCallback((id: string) => {
-        if (players.length <= 2) return;
-        setPlayers((prev) => prev.filter((p) => p.id !== id));
-    }, [players.length]);
+        setPlayers((prev) => {
+            if (prev.length <= 2) return prev;
+            return prev.filter((p) => p.id !== id);
+        });
+    }, []);
 
     const updatePlayer = useCallback((id: string, field: keyof PlayerRow, value: string) => {
         setPlayers((prev) =>
@@ -93,7 +94,7 @@ export default function CreateGame({ sampleWords }: Props) {
                     <h1 className="text-2xl font-bold text-foreground">Nieuw Spel Aanmaken</h1>
                 </header>
 
-                <main className="mx-auto max-w-2xl p-6">
+                <main className="mx-auto max-w-2xl p-6 pb-safe">
                     <div className="space-y-8">
                         {/* Secret Word */}
                         <section>
