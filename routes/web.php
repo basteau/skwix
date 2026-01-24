@@ -89,3 +89,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/game/{game}/invite', [AdminController::class, 'invitePlayers'])->name('game.invite');
     Route::post('/game/{game}/end', [AdminController::class, 'endGame'])->name('game.end');
 });
+
+// Test Game Mode (admin only, ephemeral)
+Route::middleware(['auth', 'admin'])->prefix('test')->name('test.')->group(function () {
+    Route::post('/start', [\App\Http\Controllers\TestGameController::class, 'start'])->name('start');
+    Route::post('/exit', [\App\Http\Controllers\TestGameController::class, 'exit'])->name('exit');
+    Route::post('/reset', [\App\Http\Controllers\TestGameController::class, 'reset'])->name('reset');
+});

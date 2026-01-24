@@ -2,8 +2,8 @@ import { AdminHeader } from '@/components/admin-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Head, Link } from '@inertiajs/react';
-import { Clock, Mail, Play, Trophy, Users } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Clock, FlaskConical, Mail, Play, Trophy, Users } from 'lucide-react';
 
 type GameStatus = 'draft' | 'pending' | 'active' | 'completed';
 
@@ -29,9 +29,19 @@ export default function AdminDashboard({ games = [] }: Props) {
                     title="Admin Dashboard"
                     subtitle="Beheer Skwix spellen"
                     actions={
-                        <Link href="/admin/create">
-                            <Button>Nieuw Spel</Button>
-                        </Link>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => router.post('/test/start')}
+                                className="gap-2"
+                            >
+                                <FlaskConical className="size-4" />
+                                Test Mode
+                            </Button>
+                            <Link href="/admin/create">
+                                <Button>Nieuw Spel</Button>
+                            </Link>
+                        </div>
                     }
                 />
 

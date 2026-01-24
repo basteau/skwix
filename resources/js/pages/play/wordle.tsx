@@ -1,4 +1,5 @@
 import { PlayHeader } from '@/components/play-header';
+import { TestModeBanner } from '@/components/test-mode-banner';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -16,6 +17,10 @@ interface Guess {
 }
 
 interface Props {
+    testMode?: {
+        active: boolean;
+        wordleWord?: string;
+    };
     player?: {
         id: number;
         name: string;
@@ -57,7 +62,7 @@ const SNOWFLAKES = Array.from({ length: 8 }).map((_, i) => ({
     opacity: 0.08 + (i % 3) * 0.04,
 }));
 
-export default function WordlePage({ player, game, wordle, error }: Props) {
+export default function WordlePage({ testMode, player, game, wordle, error }: Props) {
     const [currentGuess, setCurrentGuess] = useState('');
     const [guesses, setGuesses] = useState<Guess[]>(wordle?.guesses ?? []);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -288,10 +293,15 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                     </div>
                 )}
 
+                {/* Test Mode Banner */}
+                {testMode?.active && (
+                    <TestModeBanner wordleWord={testMode.wordleWord} />
+                )}
+
                 {/* Header with animated points */}
                 <PlayHeader
                     title="Wordle"
-                    subtitle={`Dag ${game?.day_number ?? 1}`}
+                    subtitle={testMode?.active ? `Test Dag ${game?.day_number ?? 1}` : `Dag ${game?.day_number ?? 1}`}
                     points={displayPoints}
                 />
 
