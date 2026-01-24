@@ -1,26 +1,53 @@
 import { ResendCodeModal } from '@/components/resend-code-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useCallback, useState } from 'react';
 
 export default function Welcome() {
     const [showResendModal, setShowResendModal] = useState(false);
-    const form = useForm({
-        code: '',
-    });
+    const [code, setCode] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        if (!form.data.code.trim()) return;
+    const handleSubmit = useCallback(
+        async (e: FormEvent) => {
+            e.preventDefault();
+            if (!code.trim() || isSubmitting) return;
 
-        form.post('/login', {
-            onError: () => {
-                form.reset('code');
-            },
-        });
-    };
+            setIsSubmitting(true);
+            setError(null);
+
+            try {
+                const response = await fetch('/join', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-XSRF-TOKEN': document.cookie
+                            .split('; ')
+                            .find((row) => row.startsWith('XSRF-TOKEN='))
+                            ?.split('=')[1]?.replace(/%3D/g, '=') ?? '',
+                        Accept: 'application/json',
+                    },
+                    body: JSON.stringify({ code: code.trim() }),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    setError(data.message ?? 'Code ongeldig');
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                router.visit('/play/wordle');
+            } catch {
+                setError('Er ging iets mis. Probeer opnieuw.');
+                setIsSubmitting(false);
+            }
+        },
+        [code, isSubmitting],
+    );
 
     return (
         <>
@@ -117,30 +144,25 @@ export default function Welcome() {
                                 id="invite-code"
                                 data-testid="invite-code-input"
                                 type="text"
-                                value={form.data.code}
+                                value={code}
                                 onChange={(e) => {
-                                    form.setData(
-                                        'code',
-                                        e.target.value.toUpperCase(),
-                                    );
-                                    form.clearErrors('code');
+                                    setCode(e.target.value.toUpperCase());
+                                    setError(null);
                                 }}
                                 placeholder="Voer je code in"
                                 className="h-14 text-center font-mono text-lg tracking-[0.2em] uppercase placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:normal-case"
-                                maxLength={16}
+                                maxLength={6}
                                 autoComplete="off"
-                                aria-invalid={!!form.errors.code}
-                                aria-describedby={
-                                    form.errors.code ? 'code-error' : undefined
-                                }
+                                aria-invalid={!!error}
+                                aria-describedby={error ? 'code-error' : undefined}
                             />
-                            {form.errors.code && (
+                            {error && (
                                 <p
                                     id="code-error"
                                     data-testid="code-error"
                                     className="text-sm text-destructive"
                                 >
-                                    {form.errors.code}
+                                    {error}
                                 </p>
                             )}
                         </div>
@@ -150,9 +172,9 @@ export default function Welcome() {
                             size="lg"
                             data-testid="join-game-button"
                             className="mt-3 h-12 w-full text-base font-semibold"
-                            disabled={!form.data.code.trim() || form.processing}
+                            disabled={!code.trim() || isSubmitting}
                         >
-                            {form.processing ? 'Even kijken...' : 'Doe mee'}
+                            {isSubmitting ? 'Even kijken...' : 'Doe mee'}
                         </Button>
                     </form>
 
