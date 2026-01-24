@@ -178,6 +178,12 @@ class AdminController extends Controller
 
     public function updateWordleWords(Request $request, Game $game): RedirectResponse
     {
+        if ($game->status !== 'draft') {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Wordle woorden kunnen niet meer worden aangepast nadat uitnodigingen zijn verstuurd');
+        }
+
         $request->validate([
             'wordle_words' => 'required|array|min:4|max:6',
             'wordle_words.*' => 'string|size:5',

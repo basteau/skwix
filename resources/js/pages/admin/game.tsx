@@ -273,6 +273,13 @@ export default function AdminGameDetail({ game, players }: Props) {
                             <h2 className="mb-4 text-lg font-semibold text-foreground">
                                 Wordle Woorden
                             </h2>
+                            {game.status !== 'draft' && (
+                                <p className="mb-4 text-sm text-muted-foreground">
+                                    {game.status === 'completed'
+                                        ? 'Wordle woorden kunnen niet meer worden aangepast na afloop van het spel.'
+                                        : 'Wordle woorden kunnen niet meer worden aangepast nadat uitnodigingen zijn verstuurd.'}
+                                </p>
+                            )}
                             <div className="grid gap-2 sm:grid-cols-3">
                                 {wordleWords.map((word, i) => (
                                     <div key={i}>
@@ -289,14 +296,12 @@ export default function AdminGameDetail({ game, players }: Props) {
                                             }
                                             maxLength={5}
                                             className="font-mono uppercase"
-                                            disabled={
-                                                game.status === 'completed'
-                                            }
+                                            disabled={game.status !== 'draft'}
                                         />
                                     </div>
                                 ))}
                             </div>
-                            {game.status !== 'completed' && (
+                            {game.status === 'draft' && (
                                 <Button
                                     onClick={handleSaveWordleWords}
                                     disabled={isUpdatingWords}
