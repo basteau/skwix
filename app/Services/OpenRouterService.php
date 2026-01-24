@@ -138,6 +138,194 @@ PROMPT;
             }
         }
 
-        return 'yes';
+        return 'unclear';
+    }
+
+    /**
+     * Classify a question to determine if it's a direct word guess attempt.
+     *
+     * Returns:
+     * - 'direct_guess' with extracted word if user is directly guessing the mystery word
+     * - 'multi_guess' if user is listing multiple words (invalid)
+     * - 'property_question' if user is asking about properties of the word
+     *
+     * This uses the LLM to intelligently distinguish between:
+     * - "Is het woord hond?" → direct_guess, word: "hond"
+     * - "Is het hond, kat of muis?" → multi_guess (reject)
+     * - "Is het een hond?" → property_question (asking if it's a dog, not guessing "hond")
+     * - "Heeft een hond vier poten?" → property_question (word mentioned but not a guess)
+     */
+    public function classifyQuestion(string $question): array
+    {
+        if (empty($this->apiKey)) {
+            return [
+                'success' => false,
+                'error' => 'OpenRouter API key not configured',
+            ];
+        }
+
+        $rateLimitKey = 'openrouter-api';
+        if (RateLimiter::tooManyAttempts($rateLimitKey, self::MAX_REQUESTS_PER_MINUTE)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+
+            return [
+                'success' => false,
+                'error' => "Rate limited. Try again in {$seconds} seconds.",
+            ];
+        }
+
+        RateLimiter::hit($rateLimitKey, 60);
+
+        $systemPrompt = $this->buildClassificationPrompt();
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'Content-Type' => 'application/json',
+                    'HTTP-Referer' => config('app.url'),
+                    'X-Title' => 'Skwix',
+                ])
+                ->post(self::API_URL, [
+                    'model' => $this->model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $question],
+                    ],
+                    'max_tokens' => 100,
+                    'temperature' => 0.1,
+                ]);
+
+            if (! $response->successful()) {
+                Log::error('OpenRouter classification error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return [
+                    'success' => false,
+                    'error' => 'API request failed',
+                ];
+            }
+
+            $data = $response->json();
+            $answer = $data['choices'][0]['message']['content'] ?? '';
+
+            return $this->parseClassification($answer);
+
+        } catch (RequestException $e) {
+            Log::error('OpenRouter classification exception', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Request failed: '.$e->getMessage(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('OpenRouter classification unexpected error', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Unexpected error occurred',
+            ];
+        }
+    }
+
+    private function buildClassificationPrompt(): string
+    {
+        return <<<'PROMPT'
+You are classifying questions in a Dutch word-guessing game. Players ask questions to guess a secret mystery word.
+
+Classify each question into ONE of these categories:
+
+1. DIRECT_GUESS - Player is directly guessing what the mystery word is
+   Examples: "Is het woord hond?", "Is het 'winter'?", "Het woord is sneeuw", "Gok: tafel", "Is het antwoord boom?"
+   
+2. MULTI_GUESS - Player is listing multiple possible words (INVALID - they must guess one at a time)
+   Examples: "Is het hond, kat of muis?", "Is het woord sneeuw of winter?", "Kan het boom, plant of bloem zijn?"
+   
+3. PROPERTY_QUESTION - Player is asking about properties/characteristics of the mystery word
+   Examples: "Is het een dier?", "Kun je het eten?", "Is het koud?", "Heeft het vier poten?", "Is het groter dan een huis?"
+   Even if a word is mentioned: "Is het een soort hond?" = PROPERTY (asking if it's a type of dog)
+   "Heeft een hond hier iets mee te maken?" = PROPERTY (asking about relationship)
+
+CRITICAL RULES:
+- A direct guess MUST be the player claiming/asking if a SPECIFIC word IS the mystery word
+- If they ask "Is het EEN [word]?" (with article "een") = usually PROPERTY (asking category)
+- If they ask "Is het [word]?" or "Is HET WOORD [word]?" = DIRECT_GUESS
+- Accidental word mentions in property questions are NOT guesses
+- Be strict: when in doubt, classify as PROPERTY_QUESTION
+
+Respond in this EXACT JSON format:
+{"type": "direct_guess", "word": "the_guessed_word"} 
+{"type": "multi_guess", "words": ["word1", "word2"]}
+{"type": "property_question"}
+
+Only output the JSON, nothing else.
+PROMPT;
+    }
+
+    private function parseClassification(string $rawAnswer): array
+    {
+        $cleaned = trim($rawAnswer);
+
+        // Try to extract JSON from the response
+        if (preg_match('/\{[^}]+\}/', $cleaned, $matches)) {
+            $cleaned = $matches[0];
+        }
+
+        try {
+            $parsed = json_decode($cleaned, true, 512, JSON_THROW_ON_ERROR);
+
+            if (! isset($parsed['type'])) {
+                return [
+                    'success' => true,
+                    'type' => 'property_question',
+                ];
+            }
+
+            $type = strtolower($parsed['type']);
+
+            if ($type === 'direct_guess' && isset($parsed['word'])) {
+                $word = strtolower(trim($parsed['word']));
+                // Clean common punctuation and quotes
+                $word = preg_replace('/["\'\?\.\!]/', '', $word);
+
+                if (strlen($word) >= 2 && strlen($word) <= 50) {
+                    return [
+                        'success' => true,
+                        'type' => 'direct_guess',
+                        'guessed_word' => $word,
+                    ];
+                }
+            }
+
+            if ($type === 'multi_guess') {
+                return [
+                    'success' => true,
+                    'type' => 'multi_guess',
+                ];
+            }
+
+            return [
+                'success' => true,
+                'type' => 'property_question',
+            ];
+
+        } catch (\JsonException $e) {
+            Log::warning('Failed to parse classification JSON', [
+                'raw' => $rawAnswer,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Default to property question for safety
+            return [
+                'success' => true,
+                'type' => 'property_question',
+            ];
+        }
     }
 }

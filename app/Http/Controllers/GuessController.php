@@ -125,6 +125,30 @@ class GuessController extends Controller
 
         $question = trim($request->question);
 
+        // First, classify the question to detect direct word guesses
+        $classification = $this->openRouterService->classifyQuestion($question);
+
+        if (! $classification['success']) {
+            return response()->json([
+                'error' => 'ai_error',
+                'message' => $classification['error'] ?? 'Er ging iets mis met de AI',
+            ], 500);
+        }
+
+        // Handle multi-guess attempts (listing multiple words)
+        if ($classification['type'] === 'multi_guess') {
+            return response()->json([
+                'error' => 'multi_guess',
+                'message' => 'Je kunt maar één woord tegelijk raden. Probeer: "Is het woord [jouw gok]?"',
+            ], 422);
+        }
+
+        // Handle direct word guess
+        if ($classification['type'] === 'direct_guess') {
+            return $this->handleDirectGuess($game, $player, $question, $classification['guessed_word']);
+        }
+
+        // Regular property question - proceed with normal Q&A flow
         $result = $this->openRouterService->askQuestion($game->secret_word, $question);
 
         if (! $result['success']) {
@@ -164,6 +188,78 @@ class GuessController extends Controller
         ]);
     }
 
+    private function handleDirectGuess($game, $player, string $question, string $guessedWord): JsonResponse
+    {
+        $isCorrect = $this->gameService->checkWin($game, $player, $guessedWord);
+
+        // Deduct points and save the question
+        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $isCorrect, $guessedWord) {
+            $player->decrement('points', 3);
+
+            return Question::create([
+                'game_id' => $game->id,
+                'player_id' => $player->id,
+                'question_text' => $question,
+                'answer' => $isCorrect ? 'winner' : 'no',
+                'guessed_word' => $guessedWord,
+            ]);
+        });
+
+        $player->refresh();
+
+        if ($isCorrect) {
+            // Set this player as the winner!
+            $this->gameService->setWinner($game, $player);
+
+            return response()->json([
+                'success' => true,
+                'winner' => true,
+                'question' => [
+                    'id' => $savedQuestion->id,
+                    'question' => $savedQuestion->question_text,
+                    'answer' => 'winner',
+                    'player' => [
+                        'id' => $player->id,
+                        'name' => $player->name,
+                        'avatar_url' => $player->avatar_url,
+                    ],
+                    'created_at' => $savedQuestion->created_at->toISOString(),
+                ],
+                'points_remaining' => $player->points,
+                'game' => [
+                    'secret_word' => $game->secret_word,
+                ],
+                'winner_data' => [
+                    'id' => $player->id,
+                    'name' => $player->name,
+                    'avatar_url' => $player->avatar_url,
+                    'points' => $player->points,
+                ],
+                'prize_url' => config('app.prize_url', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'),
+            ]);
+        }
+
+        // Wrong guess
+        return response()->json([
+            'success' => true,
+            'winner' => false,
+            'question' => [
+                'id' => $savedQuestion->id,
+                'question' => $savedQuestion->question_text,
+                'answer' => 'no',
+                'player' => [
+                    'id' => $player->id,
+                    'name' => $player->name,
+                    'avatar_url' => $player->avatar_url,
+                ],
+                'created_at' => $savedQuestion->created_at->toISOString(),
+            ],
+            'points_remaining' => $player->points,
+            'wrong_guess' => true,
+            'guessed_word' => $guessedWord,
+        ]);
+    }
+
     private function askTestMode(Request $request): JsonResponse
     {
         $testGame = $this->testGameService->getTestGame();
@@ -176,6 +272,93 @@ class GuessController extends Controller
         $question = trim($request->question);
         $secretWord = $testGame['secret_word'];
 
+        // First, classify the question
+        $classification = $this->openRouterService->classifyQuestion($question);
+
+        if (! $classification['success']) {
+            return response()->json([
+                'error' => 'ai_error',
+                'message' => $classification['error'] ?? 'Er ging iets mis met de AI',
+            ], 500);
+        }
+
+        // Handle multi-guess attempts
+        if ($classification['type'] === 'multi_guess') {
+            return response()->json([
+                'error' => 'multi_guess',
+                'message' => 'Je kunt maar één woord tegelijk raden. Probeer: "Is het woord [jouw gok]?"',
+            ], 422);
+        }
+
+        // Handle direct word guess in test mode
+        if ($classification['type'] === 'direct_guess') {
+            $guessedWord = $classification['guessed_word'];
+            $isCorrect = strtolower($guessedWord) === strtolower($secretWord);
+
+            $newPoints = $player['points'] - 3;
+            $questions = $testGame['questions'] ?? [];
+            $newQuestion = [
+                'question' => $question,
+                'answer' => $isCorrect ? 'winner' : 'no',
+                'guessed_word' => $guessedWord,
+            ];
+            $questions[] = $newQuestion;
+
+            $this->testGameService->updateTestGame([
+                'player' => ['points' => $newPoints],
+                'questions' => $questions,
+            ]);
+
+            if ($isCorrect) {
+                return response()->json([
+                    'success' => true,
+                    'winner' => true,
+                    'question' => [
+                        'id' => count($questions),
+                        'question' => $question,
+                        'answer' => 'winner',
+                        'player' => [
+                            'id' => $player['id'],
+                            'name' => $player['name'],
+                            'avatar_url' => $player['avatar_url'] ?? null,
+                        ],
+                        'created_at' => now()->toISOString(),
+                    ],
+                    'points_remaining' => $newPoints,
+                    'game' => [
+                        'secret_word' => $secretWord,
+                    ],
+                    'winner_data' => [
+                        'id' => $player['id'],
+                        'name' => $player['name'],
+                        'avatar_url' => $player['avatar_url'] ?? null,
+                        'points' => $newPoints,
+                    ],
+                    'prize_url' => config('app.prize_url', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'),
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'winner' => false,
+                'question' => [
+                    'id' => count($questions),
+                    'question' => $question,
+                    'answer' => 'no',
+                    'player' => [
+                        'id' => $player['id'],
+                        'name' => $player['name'],
+                        'avatar_url' => $player['avatar_url'] ?? null,
+                    ],
+                    'created_at' => now()->toISOString(),
+                ],
+                'points_remaining' => $newPoints,
+                'wrong_guess' => true,
+                'guessed_word' => $guessedWord,
+            ]);
+        }
+
+        // Regular property question
         $result = $this->openRouterService->askQuestion($secretWord, $question);
 
         if (! $result['success']) {

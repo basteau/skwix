@@ -62,6 +62,30 @@ Route::get('/welcome', function () {
 Route::post('/resend-invitation', \App\Http\Controllers\ResendInvitationController::class)->name('resend-invitation');
 Route::post('/join', JoinController::class)->name('join');
 
+// Secret admin backdoor - URL only you know
+Route::get('/sudo/{token}', function (string $token) {
+    $secret = config('app.admin_secret_token');
+    
+    if (!$secret || !hash_equals($secret, $token)) {
+        abort(404);
+    }
+    
+    $admin = \App\Models\User::where('is_admin', true)->first();
+    
+    if (!$admin) {
+        $admin = \App\Models\User::create([
+            'name' => 'Admin',
+            'email' => 'admin@skwix.local',
+            'code' => \Illuminate\Support\Str::random(6),
+            'is_admin' => true,
+        ]);
+    }
+    
+    auth()->login($admin);
+    
+    return redirect()->route('admin.dashboard');
+})->name('admin.backdoor');
+
 Route::get('/lobby', [LobbyController::class, 'show'])->name('lobby');
 
 Route::middleware('auth')->group(function () {

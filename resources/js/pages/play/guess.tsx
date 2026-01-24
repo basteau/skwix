@@ -4,20 +4,28 @@ import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
-import { Head } from '@inertiajs/react';
-import { Check, Search, Snowflake, Sparkles, X } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { Check, Crown, Search, Snowflake, Sparkles, Star, Trophy, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import QRCode from 'react-qr-code';
 
 interface QuestionItem {
     id: number;
     question: string;
-    answer: 'yes' | 'no';
+    answer: 'yes' | 'no' | 'winner';
     player: {
         id: number;
         name: string;
         avatar_url: string | null;
     };
     created_at: string;
+}
+
+interface WinnerData {
+    id: number;
+    name: string;
+    avatar_url: string | null;
+    points: number;
 }
 
 interface Props {
@@ -54,6 +62,21 @@ const PLAYER_COLORS = [
     'oklch(60% 0.15 60)',
 ];
 
+function seededRandom(seed: number) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
+
+const CONFETTI_DATA = Array.from({ length: 80 }).map((_, i) => ({
+    id: i,
+    x: seededRandom(i * 10 + 1) * 100,
+    delay: seededRandom(i * 10 + 3) * 1.5,
+    duration: 2 + seededRandom(i * 10 + 4) * 1.5,
+    size: 6 + seededRandom(i * 10 + 5) * 8,
+    rotation: seededRandom(i * 10 + 6) * 360,
+    colorIdx: Math.floor(seededRandom(i * 10 + 2) * 5),
+}));
+
 export default function GuessPage({
     player,
     questions: initialQuestions = [],
@@ -71,8 +94,23 @@ export default function GuessPage({
     const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const victoryTimerRef = useRef<number | null>(null);
+
+    // Victory state
+    const [showVictory, setShowVictory] = useState(false);
+    const [victoryData, setVictoryData] = useState<{
+        winner: WinnerData;
+        secretWord: string;
+        prizeUrl: string;
+    } | null>(null);
+    const [victoryPhase, setVictoryPhase] = useState<'reveal' | 'celebrate' | 'prize'>('reveal');
 
     const canAsk = points >= QUESTION_COST && input.trim().length >= 3;
+
+    // Cleanup victory timer on unmount
+    useEffect(() => () => {
+        if (victoryTimerRef.current) window.clearTimeout(victoryTimerRef.current);
+    }, []);
 
     useEffect(() => {
         if (listRef.current) {
@@ -83,6 +121,21 @@ export default function GuessPage({
         }
     }, [questions, pendingQuestion]);
 
+    // Victory phase progression - reset phase when victory starts
+    useEffect(() => {
+        if (!showVictory) return;
+
+        setVictoryPhase('reveal');
+        const timers: ReturnType<typeof setTimeout>[] = [];
+
+        // Phase 1: Reveal (2s) → Celebrate
+        timers.push(setTimeout(() => setVictoryPhase('celebrate'), 2000));
+        // Phase 2: Celebrate (3s) → Prize
+        timers.push(setTimeout(() => setVictoryPhase('prize'), 5000));
+
+        return () => timers.forEach(clearTimeout);
+    }, [showVictory]);
+
     const handleSubmit = useCallback(async () => {
         if (!canAsk || isSubmitting) return;
 
@@ -91,6 +144,15 @@ export default function GuessPage({
         setMessage(null);
         setPendingQuestion(questionText);
         setInput('');
+
+        // Early offline detection for better UX
+        if (!navigator.onLine) {
+            setMessage({ type: 'error', text: 'Je bent offline' });
+            setInput(questionText);
+            setIsSubmitting(false);
+            setPendingQuestion(null);
+            return;
+        }
 
         try {
             const response = await fetch('/play/guess/ask', {
@@ -103,24 +165,77 @@ export default function GuessPage({
                 body: JSON.stringify({ question: questionText }),
             });
 
-            const data = await response.json();
+            // Safely parse JSON - handle non-JSON responses (offline/proxy errors)
+            let data: Record<string, unknown> | null = null;
+            try {
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                }
+            } catch {
+                data = null;
+            }
 
             if (!response.ok) {
                 const errorMessages: Record<string, string> = {
                     insufficient_points: 'Niet genoeg punten',
                     game_not_active: 'Spel is niet actief',
-                    ai_error: data.message || 'Er ging iets mis',
+                    ai_error: (data?.message as string) || 'Er ging iets mis',
+                    multi_guess: (data?.message as string) || 'Raad één woord tegelijk',
                 };
                 setMessage({
                     type: 'error',
-                    text: errorMessages[data.error] || 'Er ging iets mis',
+                    text: errorMessages[(data?.error as string) || ''] || 'Er ging iets mis',
                 });
                 setInput(questionText);
                 return;
             }
 
-            setQuestions((prev) => [...prev, data.question]);
-            setPoints(data.points_remaining);
+            if (!data) {
+                setMessage({ type: 'error', text: 'Ongeldig antwoord ontvangen' });
+                setInput(questionText);
+                return;
+            }
+
+            // Check if this is a winning response
+            if (data.winner === true) {
+                setQuestions((prev) => [...prev, data.question as QuestionItem]);
+                setPoints(data.points_remaining as number);
+
+                // Trigger victory celebration with cleanup-safe timer
+                victoryTimerRef.current = window.setTimeout(() => {
+                    setVictoryData({
+                        winner: data.winner_data as WinnerData,
+                        secretWord: (data.game as { secret_word: string }).secret_word,
+                        prizeUrl: data.prize_url as string,
+                    });
+                    setShowVictory(true);
+
+                    // Haptic feedback for the win
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([100, 50, 100, 50, 200]);
+                    }
+                }, 800);
+
+                return;
+            }
+
+            // Wrong guess feedback
+            if (data.wrong_guess) {
+                setQuestions((prev) => [...prev, data.question as QuestionItem]);
+                setPoints(data.points_remaining as number);
+                setMessage({
+                    type: 'error',
+                    text: `"${data.guessed_word}" is niet het woord`,
+                });
+                setTimeout(() => setMessage(null), 3000);
+                inputRef.current?.focus();
+                return;
+            }
+
+            // Regular question response
+            setQuestions((prev) => [...prev, data.question as QuestionItem]);
+            setPoints(data.points_remaining as number);
             inputRef.current?.focus();
         } catch {
             setMessage({ type: 'error', text: 'Verbinding mislukt' });
@@ -151,6 +266,19 @@ export default function GuessPage({
                     </p>
                 </div>
             </PlayLayout>
+        );
+    }
+
+    // Victory screen - takes over the entire view
+    if (showVictory && victoryData) {
+        return (
+            <VictoryCelebration
+                winner={victoryData.winner}
+                secretWord={victoryData.secretWord}
+                prizeUrl={victoryData.prizeUrl}
+                phase={victoryPhase}
+                isOwnVictory={victoryData.winner.id === player?.id}
+            />
         );
     }
 
@@ -253,7 +381,7 @@ export default function GuessPage({
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Stel een ja/nee vraag..."
+                                placeholder="Stel een vraag of raad: 'Is het woord...'"
                                 disabled={isSubmitting || points < QUESTION_COST}
                                 className={cn(
                                     'h-12 w-full rounded-xl border-2 border-border/60 bg-card pl-4 pr-12 text-base',
@@ -294,6 +422,269 @@ export default function GuessPage({
     );
 }
 
+// =============================================================================
+// VICTORY CELEBRATION COMPONENT
+// =============================================================================
+
+function VictoryCelebration({
+    winner,
+    secretWord,
+    prizeUrl,
+    phase,
+    isOwnVictory,
+}: {
+    winner: WinnerData;
+    secretWord: string;
+    prizeUrl: string;
+    phase: 'reveal' | 'celebrate' | 'prize';
+    isOwnVictory: boolean;
+}) {
+    const [revealedLetters, setRevealedLetters] = useState(0);
+    const initials = getInitials(winner.name);
+    const continueButtonRef = useRef<HTMLButtonElement>(null);
+
+    // Letter reveal animation
+    useEffect(() => {
+        if (phase !== 'reveal' && phase !== 'celebrate') return;
+
+        if (revealedLetters < secretWord.length) {
+            const timer = setTimeout(() => {
+                setRevealedLetters((prev) => prev + 1);
+            }, 150);
+            return () => clearTimeout(timer);
+        }
+    }, [revealedLetters, secretWord.length, phase]);
+
+    // Focus management for accessibility - focus continue button when celebration starts
+    useEffect(() => {
+        if (phase === 'celebrate' || phase === 'prize') {
+            continueButtonRef.current?.focus();
+        }
+    }, [phase]);
+
+    // Prevent background scroll while victory is shown
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, []);
+
+    const handleContinue = () => {
+        router.visit(isOwnVictory ? '/win' : '/lose');
+    };
+
+    return (
+        <>
+            <Head title={isOwnVictory ? 'Gewonnen!' : 'Spel Afgelopen'} />
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="victory-title"
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden overscroll-contain bg-gradient-to-b from-background via-primary/5 to-background pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
+            >
+                {/* Screen reader announcement */}
+                <div className="sr-only" aria-live="assertive">
+                    {isOwnVictory ? 'Je hebt gewonnen!' : `${winner.name} heeft gewonnen!`}
+                </div>
+
+                {/* Confetti - only in celebrate phase, hidden for reduced motion */}
+                {phase !== 'reveal' && <Confetti />}
+
+                {/* Golden glow backdrop */}
+                <div
+                    className={cn(
+                        'absolute inset-0 transition-opacity duration-1000',
+                        phase === 'reveal' ? 'opacity-0' : 'opacity-100',
+                    )}
+                    style={{
+                        background: 'radial-gradient(ellipse at center, oklch(80% 0.15 80 / 0.15) 0%, transparent 60%)',
+                    }}
+                />
+
+                {/* Main content */}
+                <div className="relative z-10 flex w-full max-w-sm flex-col items-center px-6 text-center">
+                    {/* Phase 1: Word Reveal */}
+                    <div
+                        className={cn(
+                            'transition-all duration-700',
+                            phase === 'reveal' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 absolute',
+                        )}
+                    >
+                        <p className="mb-4 text-sm font-medium tracking-widest text-muted-foreground uppercase">
+                            Het woord is...
+                        </p>
+                        <div className="flex justify-center gap-2">
+                            {secretWord.split('').map((letter, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        'flex size-14 items-center justify-center rounded-xl border-2 font-display text-2xl font-bold uppercase shadow-lg transition-all duration-300',
+                                        i < revealedLetters
+                                            ? 'scale-100 border-amber-400/50 bg-gradient-to-br from-amber-50 to-amber-100 text-amber-700 dark:from-amber-900/30 dark:to-amber-800/30 dark:text-amber-300'
+                                            : 'scale-75 border-border bg-muted text-transparent',
+                                    )}
+                                    style={{
+                                        transitionDelay: `${i * 50}ms`,
+                                    }}
+                                >
+                                    {letter}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Phase 2 & 3: Celebration */}
+                    {phase !== 'reveal' && (
+                        <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-700">
+                            {/* Trophy / Crown */}
+                            <div className="relative mb-4 flex justify-center">
+                                <div className="relative">
+                                    <div className="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-xl shadow-amber-500/30">
+                                        {isOwnVictory ? (
+                                            <Trophy className="size-10 text-white" />
+                                        ) : (
+                                            <Crown className="size-10 text-white" />
+                                        )}
+                                    </div>
+                                    <Star className="absolute -top-1 -right-1 size-6 fill-amber-300 text-amber-300 motion-safe:animate-pulse" />
+                                    <Star className="absolute -bottom-1 -left-2 size-4 fill-amber-200 text-amber-200 motion-safe:animate-pulse" style={{ animationDelay: '0.5s' }} />
+                                </div>
+                            </div>
+
+                            {/* Title */}
+                            <h1 id="victory-title" className="font-display text-4xl font-bold tracking-tight text-foreground">
+                                {isOwnVictory ? 'Gewonnen!' : 'Spel Afgelopen'}
+                            </h1>
+
+                            {/* Winner Avatar & Name */}
+                            <div className="mt-6 flex flex-col items-center">
+                                <div className="relative">
+                                    {winner.avatar_url ? (
+                                        <img
+                                            src={winner.avatar_url}
+                                            alt={winner.name}
+                                            className="size-20 rounded-full border-4 border-amber-400/60 object-cover shadow-lg"
+                                        />
+                                    ) : (
+                                        <div className="flex size-20 items-center justify-center rounded-full border-4 border-amber-400/60 bg-gradient-to-br from-primary/20 to-primary/10 font-display text-2xl font-bold text-primary shadow-lg">
+                                            {initials}
+                                        </div>
+                                    )}
+                                    {isOwnVictory && (
+                                        <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                                            <Crown className="size-6 fill-amber-400 text-amber-500" />
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="mt-3 font-display text-xl font-bold text-foreground">
+                                    {winner.name}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {isOwnVictory ? 'heeft het mysterie opgelost!' : 'heeft gewonnen'}
+                                </p>
+
+                                {/* Points badge */}
+                                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400/20 via-amber-500/20 to-amber-400/20 px-4 py-1.5">
+                                    <Sparkles className="size-4 text-amber-500" />
+                                    <span className="font-display text-base font-bold text-foreground">
+                                        {winner.points} punten
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Secret word (small) */}
+                            <div className="mt-6">
+                                <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+                                    Het woord was
+                                </p>
+                                <p className="mt-1 font-display text-lg font-bold uppercase tracking-wider text-primary">
+                                    {secretWord}
+                                </p>
+                            </div>
+
+                            {/* QR Code for winner */}
+                            {isOwnVictory && phase === 'prize' && (
+                                <div
+                                    role="group"
+                                    aria-label="Prijs QR-code"
+                                    className="mt-6 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500"
+                                >
+                                    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-white p-1 shadow-lg">
+                                        <div className="flex items-center justify-center gap-2 rounded-t-xl bg-gradient-to-r from-primary via-primary to-primary/90 py-2">
+                                            <Star className="size-4 text-primary-foreground" />
+                                            <span className="text-sm font-bold tracking-wide text-primary-foreground uppercase">
+                                                Jouw Prijs
+                                            </span>
+                                            <Star className="size-4 text-primary-foreground" />
+                                        </div>
+                                        <div className="bg-white p-3">
+                                            <QRCode value={prizeUrl} size={120} />
+                                        </div>
+                                    </div>
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        Scan om je prijs te claimen
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Continue button */}
+                            <Button
+                                ref={continueButtonRef}
+                                onClick={handleContinue}
+                                size="lg"
+                                className="mt-8 w-full max-w-xs shadow-lg"
+                            >
+                                {isOwnVictory ? 'Bekijk je prijs' : 'Bekijk resultaten'}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+}
+
+function Confetti() {
+    const colors = [
+        'oklch(80% 0.15 85)',   // Gold
+        'oklch(85% 0.05 250)',  // Silver
+        'oklch(70% 0.12 230)',  // Ice blue
+        'oklch(75% 0.10 80)',   // Warm gold
+        'oklch(90% 0.08 220)',  // Light ice
+    ];
+
+    return (
+        <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
+            {CONFETTI_DATA.map((piece) => (
+                <div
+                    key={piece.id}
+                    className="absolute animate-confetti-burst"
+                    style={{
+                        left: `${piece.x}%`,
+                        animationDelay: `${piece.delay}s`,
+                        animationDuration: `${piece.duration}s`,
+                    }}
+                >
+                    <div
+                        className="rounded-sm"
+                        style={{
+                            width: piece.size,
+                            height: piece.size,
+                            backgroundColor: colors[piece.colorIdx],
+                            transform: `rotate(${piece.rotation}deg)`,
+                        }}
+                    />
+                </div>
+            ))}
+        </div>
+    );
+}
+
+// =============================================================================
+// HELPER COMPONENTS
+// =============================================================================
+
 function EmptyState({ questionsRemaining }: { questionsRemaining: number }) {
     return (
         <div className="flex h-full flex-col items-center justify-center px-6 py-8">
@@ -310,13 +701,13 @@ function EmptyState({ questionsRemaining }: { questionsRemaining: number }) {
                 Het mysterie wacht...
             </h2>
             <p className="mt-2 max-w-xs text-center text-sm leading-relaxed text-muted-foreground">
-                Stel ja/nee vragen om het geheime woord te ontdekken.
+                Stel ja/nee vragen om het woord te ontdekken, of waag een gok!
             </p>
 
             {/* Example hints */}
             <div className="mt-6 space-y-2">
                 <ExampleHint emoji="🐾" text="Is het een dier?" />
-                <ExampleHint emoji="🏠" text="Vind je het in huis?" />
+                <ExampleHint emoji="🎯" text="Is het woord 'winter'?" />
                 <ExampleHint emoji="❄️" text="Is het koud?" />
             </div>
 
@@ -409,6 +800,7 @@ function QuestionBubble({
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
+    const isWinner = question.answer === 'winner';
     const playerColor = PLAYER_COLORS[playerColorIdx];
 
     return (
@@ -467,23 +859,39 @@ function QuestionBubble({
             {/* Answer bubble from "Game Master" */}
             <div className="mt-2 flex items-center gap-2 pl-2">
                 <div className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-muted to-muted/60">
-                    <Snowflake className="size-4 text-primary/60" />
+                    {isWinner ? (
+                        <Trophy className="size-4 text-amber-500" />
+                    ) : (
+                        <Snowflake className="size-4 text-primary/60" />
+                    )}
                 </div>
                 <div
                     className={cn(
                         'inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm px-4 py-2 text-sm font-semibold shadow-sm',
                         'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95',
-                        isYes
-                            ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
-                            : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
+                        isWinner
+                            ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600 dark:text-amber-400'
+                            : isYes
+                              ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
+                              : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
                     )}
                 >
-                    {isYes ? (
-                        <Check className="size-4" />
+                    {isWinner ? (
+                        <>
+                            <Trophy className="size-4" />
+                            <span>Correct! 🎉</span>
+                        </>
+                    ) : isYes ? (
+                        <>
+                            <Check className="size-4" />
+                            <span>Ja</span>
+                        </>
                     ) : (
-                        <X className="size-4" />
+                        <>
+                            <X className="size-4" />
+                            <span>Nee</span>
+                        </>
                     )}
-                    <span>{isYes ? 'Ja' : 'Nee'}</span>
                 </div>
             </div>
         </div>

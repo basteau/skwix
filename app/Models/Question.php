@@ -15,6 +15,7 @@ class Question extends Model
         'player_id',
         'question_text',
         'answer',
+        'guessed_word',
     ];
 
     public function game(): BelongsTo
