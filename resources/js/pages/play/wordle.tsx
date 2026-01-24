@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import PlayLayout from '@/layouts/play-layout';
 
 interface GuessResult {
@@ -48,7 +48,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
     const isCompleted = wordle?.completed ?? false;
     const isAvailable = wordle?.available ?? false;
 
-    const letterStates = useCallback(() => {
+    const letterStates = useMemo(() => {
         const states: Record<string, 'correct' | 'present' | 'absent'> = {};
         for (const guess of guesses) {
             for (const { letter, status } of guess.result) {
@@ -174,7 +174,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
         );
     }
 
-    const states = letterStates();
+    const states = letterStates;
 
     return (
         <PlayLayout>
