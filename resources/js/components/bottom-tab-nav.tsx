@@ -1,22 +1,29 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Grid3x3, HelpCircle, Users, Disc3 } from 'lucide-react';
+import { Grid3x3, HelpCircle, Users, Disc3, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabItem {
     label: string;
-    href: string;
+    href?: string;
     icon: React.ComponentType<{ className?: string }>;
+    onClick?: () => void;
 }
 
-const tabs: TabItem[] = [
+interface BottomTabNavProps {
+    onTutorialClick?: () => void;
+}
+
+const createTabs = (onTutorialClick?: () => void): TabItem[] => [
     { label: 'Wordle', href: '/play/wordle', icon: Grid3x3 },
     { label: 'Vraag', href: '/play/guess', icon: HelpCircle },
     { label: 'Rad', href: '/play/fortune', icon: Disc3 },
     { label: 'Spelers', href: '/play/players', icon: Users },
+    { label: 'Uitleg', icon: BookOpen, onClick: onTutorialClick },
 ];
 
-export function BottomTabNav() {
+export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
     const { url } = usePage();
+    const tabs = createTabs(onTutorialClick);
 
     return (
         <nav
@@ -25,13 +32,32 @@ export function BottomTabNav() {
         >
             <div className="flex h-16 items-center justify-around">
                 {tabs.map((tab) => {
-                    const isActive = url.startsWith(tab.href);
+                    const isActive = tab.href ? url.startsWith(tab.href) : false;
                     const Icon = tab.icon;
+
+                    if (tab.onClick) {
+                        return (
+                            <button
+                                key={tab.label}
+                                onClick={tab.onClick}
+                                className={cn(
+                                    'flex min-w-[48px] flex-col items-center justify-center gap-0.5 px-3 py-2',
+                                    'transition-colors duration-150',
+                                    'text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                <Icon className="h-6 w-6" />
+                                <span className="text-[11px] font-medium leading-tight">
+                                    {tab.label}
+                                </span>
+                            </button>
+                        );
+                    }
 
                     return (
                         <Link
                             key={tab.href}
-                            href={tab.href}
+                            href={tab.href!}
                             className={cn(
                                 'flex min-w-[48px] flex-col items-center justify-center gap-0.5 px-3 py-2',
                                 'transition-colors duration-150',
