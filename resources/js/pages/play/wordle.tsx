@@ -320,7 +320,7 @@ function KeyboardKey({
     const label = keyVal === 'backspace' ? '←' : keyVal === 'enter' ? 'Enter' : keyVal;
 
     const baseClasses =
-        'flex h-[43px] items-center justify-center rounded-sm text-sm font-semibold uppercase transition-colors active:scale-95';
+        'flex h-11 items-center justify-center rounded-sm text-sm font-semibold uppercase transition-colors active:scale-95';
 
     const widthClass = isSpecial ? 'min-w-[65px] px-2' : 'min-w-[32px]';
 
