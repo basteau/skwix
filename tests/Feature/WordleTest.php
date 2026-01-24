@@ -128,6 +128,32 @@ describe('Wordle Controller', function () {
         Carbon::setTestNow();
     });
 
+    it('rejects invalid words not in wordlist', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::now()->subDays(1),
+            'wordle_words' => ['woord', 'appel'],
+        ]);
+
+        Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
+            'guess' => 'xxxxx',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJson(['message' => 'Ongeldig woord']);
+
+        Carbon::setTestNow();
+    });
+
     it('rejects guess when wordle already completed', function () {
         Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 

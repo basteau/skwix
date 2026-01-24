@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\WordleAttempt;
 use App\Services\GameService;
 use App\Services\WordleService;
+use App\Services\WordlistService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +16,7 @@ class WordleController extends Controller
     public function __construct(
         private GameService $gameService,
         private WordleService $wordleService,
+        private WordlistService $wordlistService,
     ) {}
 
     public function show(Request $request): Response
@@ -104,6 +106,11 @@ class WordleController extends Controller
         }
 
         $guess = strtolower(trim($request->guess));
+
+        if (! $this->wordlistService->isValidWord($guess)) {
+            return response()->json(['message' => 'Ongeldig woord'], 422);
+        }
+
         $result = $this->wordleService->evaluateGuess($guess, $targetWord);
 
         $guesses[] = [
