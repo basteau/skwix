@@ -73,5 +73,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/random-words', [AdminController::class, 'getRandomWords'])->name('random-words');
     Route::get('/game/{game}', [AdminController::class, 'showGame'])->name('game');
     Route::put('/game/{game}/wordle-words', [AdminController::class, 'updateWordleWords'])->name('game.wordle-words');
+    Route::post('/game/{game}/invite', [AdminController::class, 'invitePlayers'])->name('game.invite');
     Route::post('/game/{game}/end', [AdminController::class, 'endGame'])->name('game.end');
 });

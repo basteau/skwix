@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\GameInvitation;
 use App\Models\Game;
 use App\Models\Player;
 use App\Models\User;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Database\Seeders\DutchWordlistSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -185,5 +187,26 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.game', $game)
             ->with('success', 'Spel beëindigd');
+    }
+
+    public function invitePlayers(Game $game): RedirectResponse
+    {
+        if ($game->status !== 'draft') {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Uitnodigingen zijn al verstuurd');
+        }
+
+        $game->load('players');
+
+        foreach ($game->players as $player) {
+            Mail::to($player->email)->queue(new GameInvitation($player, $game));
+        }
+
+        $game->update(['status' => 'pending']);
+
+        return redirect()
+            ->route('admin.game', $game)
+            ->with('success', $game->players->count().' uitnodigingen verstuurd');
     }
 }
