@@ -1,8 +1,9 @@
+import { getPortraitUrl } from '@/components/avatar-picker';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 
 function seededRandom(seed: number) {
@@ -62,6 +63,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
     }, [revealedLetters, game.secret_word]);
 
     const initials = getInitials(winner.name);
+    const portraitUrl = getPortraitUrl(winner.avatar_url);
 
     return (
         <>
@@ -158,16 +160,23 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                         Gewonnen!
                     </h1>
 
-                    {/* Winner Avatar */}
+                    {/* Winner Portrait/Avatar */}
                     <div className="relative mt-6 motion-safe:animate-in motion-safe:delay-100 motion-safe:duration-700 motion-safe:zoom-in">
                         {/* Glow ring */}
                         <div
-                            className="absolute -inset-3 rounded-full motion-safe:animate-pulse"
+                            className="absolute -inset-4 motion-safe:animate-pulse"
                             style={{
                                 background: 'radial-gradient(circle, oklch(75% 0.18 80 / 0.4) 0%, transparent 70%)',
                             }}
                         />
-                        {winner.avatar_url ? (
+                        {portraitUrl ? (
+                            <img
+                                src={portraitUrl}
+                                alt={winner.name}
+                                data-testid="winner-portrait"
+                                className="relative size-44 rounded-2xl border-4 border-amber-400/80 object-cover shadow-xl"
+                            />
+                        ) : winner.avatar_url ? (
                             <img
                                 src={winner.avatar_url}
                                 alt={winner.name}
@@ -179,8 +188,8 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                             </div>
                         )}
                         {/* Crown */}
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                            <svg viewBox="0 0 32 24" className="size-8">
+                        <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                            <svg viewBox="0 0 32 24" className="size-10">
                                 <path
                                     d="M2 20 L6 8 L12 14 L16 4 L20 14 L26 8 L30 20 Z"
                                     fill="oklch(80% 0.18 80)"

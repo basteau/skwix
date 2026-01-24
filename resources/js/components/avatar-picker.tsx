@@ -28,6 +28,17 @@ export function getAvatarUrl(avatar: string | null | undefined): string | undefi
     return `/images/faces/${avatar}.png`;
 }
 
+export function getPortraitUrl(avatarUrl: string | null | undefined): string | undefined {
+    if (!avatarUrl) return undefined;
+    const match = avatarUrl.match(/\/images\/faces\/([^/.]+)\.png$/);
+    if (!match) return undefined;
+    const avatarName = match[1];
+    if (!AVAILABLE_AVATARS.includes(avatarName as (typeof AVAILABLE_AVATARS)[number])) {
+        return undefined;
+    }
+    return `/images/portraits/${avatarName}.png`;
+}
+
 export function AvatarPicker({ value, onChange, disabled }: AvatarPickerProps) {
     return (
         <div className="flex flex-wrap gap-2">

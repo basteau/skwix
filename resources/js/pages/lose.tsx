@@ -1,3 +1,4 @@
+import { getPortraitUrl } from '@/components/avatar-picker';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export default function LosePage({ winner, player, game }: Props) {
     const [revealedLetters, setRevealedLetters] = useState(0);
 
     const winnerInitials = getInitials(winner.name);
+    const winnerPortraitUrl = getPortraitUrl(winner.avatar_url);
 
     useEffect(() => {
         if (countedRank < player.rank) {
@@ -175,26 +177,46 @@ export default function LosePage({ winner, player, game }: Props) {
                             ))}
                         </div>
 
-                        {/* Winner credit */}
-                        <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                            <span>Geraden door</span>
-                            {winner.avatar_url ? (
-                                <img
-                                    src={winner.avatar_url}
-                                    alt={winner.name}
-                                    className="size-6 rounded-full border border-border object-cover"
-                                />
-                            ) : (
-                                <div className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                                    {winnerInitials}
+                        {/* Winner credit with portrait */}
+                        <div className="mt-5 flex flex-col items-center gap-3">
+                            <p className="text-xs text-muted-foreground">Geraden door</p>
+                            <div className="relative">
+                                {winnerPortraitUrl ? (
+                                    <img
+                                        src={winnerPortraitUrl}
+                                        alt={winner.name}
+                                        data-testid="winner-portrait"
+                                        className="size-24 rounded-xl border-2 border-amber-400/60 object-cover shadow-md"
+                                    />
+                                ) : winner.avatar_url ? (
+                                    <img
+                                        src={winner.avatar_url}
+                                        alt={winner.name}
+                                        className="size-16 rounded-full border-2 border-border object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
+                                        {winnerInitials}
+                                    </div>
+                                )}
+                                {/* Mini crown for winner */}
+                                <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                                    <svg viewBox="0 0 16 12" className="size-5 text-amber-500">
+                                        <path
+                                            d="M1 10 L3 4 L6 7 L8 2 L10 7 L13 4 L15 10 Z"
+                                            fill="currentColor"
+                                        />
+                                    </svg>
                                 </div>
-                            )}
-                            <span data-testid="winner-name" className="font-medium text-foreground">
-                                {winner.name}
-                            </span>
-                            <svg viewBox="0 0 16 16" className="size-4 text-amber-500" fill="currentColor">
-                                <path d="M8 2L9.5 6H14L10.5 9L12 14L8 11L4 14L5.5 9L2 6H6.5L8 2Z" />
-                            </svg>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span data-testid="winner-name" className="font-medium text-foreground">
+                                    {winner.name}
+                                </span>
+                                <svg viewBox="0 0 16 16" className="size-4 text-amber-500" fill="currentColor">
+                                    <path d="M8 2L9.5 6H14L10.5 9L12 14L8 11L4 14L5.5 9L2 6H6.5L8 2Z" />
+                                </svg>
+                            </div>
                         </div>
                     </div>
 

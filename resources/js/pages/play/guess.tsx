@@ -1,3 +1,4 @@
+import { getPortraitUrl } from '@/components/avatar-picker';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
@@ -450,6 +451,7 @@ function VictoryCelebration({
 }) {
     const [revealedLetters, setRevealedLetters] = useState(0);
     const initials = getInitials(winner.name);
+    const portraitUrl = getPortraitUrl(winner.avatar_url);
     const continueButtonRef = useRef<HTMLButtonElement>(null);
 
     // Letter reveal animation
@@ -566,10 +568,17 @@ function VictoryCelebration({
                                 {isOwnVictory ? 'Gewonnen!' : 'Spel Afgelopen'}
                             </h1>
 
-                            {/* Winner Avatar & Name */}
+                            {/* Winner Portrait/Avatar & Name */}
                             <div className="mt-6 flex flex-col items-center">
                                 <div className="relative">
-                                    {winner.avatar_url ? (
+                                    {portraitUrl ? (
+                                        <img
+                                            src={portraitUrl}
+                                            alt={winner.name}
+                                            data-testid="winner-portrait"
+                                            className="size-32 rounded-2xl border-4 border-amber-400/60 object-cover shadow-lg"
+                                        />
+                                    ) : winner.avatar_url ? (
                                         <img
                                             src={winner.avatar_url}
                                             alt={winner.name}
@@ -581,8 +590,8 @@ function VictoryCelebration({
                                         </div>
                                     )}
                                     {isOwnVictory && (
-                                        <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                                            <Crown className="size-6 fill-amber-400 text-amber-500" />
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                            <Crown className="size-7 fill-amber-400 text-amber-500" />
                                         </div>
                                     )}
                                 </div>
