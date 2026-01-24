@@ -6,6 +6,7 @@ use App\Mail\GameInvitation;
 use App\Models\Game;
 use App\Models\Player;
 use App\Models\User;
+use App\Services\WordlistService;
 use Carbon\Carbon;
 use Database\Seeders\DutchWordlistSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -17,6 +18,10 @@ use Inertia\Response;
 
 class AdminController extends Controller
 {
+    public function __construct(
+        private WordlistService $wordlistService
+    ) {}
+
     public function dashboard(): Response
     {
         $games = Game::with('players')
@@ -59,6 +64,14 @@ class AdminController extends Controller
             'players.*.avatar' => 'nullable|string|max:100',
         ]);
 
+        $invalidWords = $this->validateWordleWordsAgainstWordlist($request->wordle_words);
+        if (! empty($invalidWords)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['wordle_words' => 'Onbekende woorden: '.implode(', ', $invalidWords)]);
+        }
+
         $game = \DB::transaction(function () use ($request) {
             $startsAt = Carbon::parse($request->starts_at);
             $endsAt = $startsAt->copy()->addDays($request->duration_days);
@@ -68,7 +81,7 @@ class AdminController extends Controller
                 'status' => 'draft',
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
-                'wordle_words' => $request->wordle_words,
+                'wordle_words' => array_map('strtolower', $request->wordle_words),
             ]);
 
             foreach ($request->players as $playerData) {
@@ -160,6 +173,14 @@ class AdminController extends Controller
             'wordle_words.*' => 'string|size:5',
         ]);
 
+        $invalidWords = $this->validateWordleWordsAgainstWordlist($request->wordle_words);
+        if (! empty($invalidWords)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['wordle_words' => 'Onbekende woorden: '.implode(', ', $invalidWords)]);
+        }
+
         $game->update([
             'wordle_words' => array_map('strtolower', $request->wordle_words),
         ]);
@@ -211,5 +232,17 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.game', $game)
             ->with('success', $game->players->count().' uitnodigingen verstuurd');
+    }
+
+    private function validateWordleWordsAgainstWordlist(array $words): array
+    {
+        $invalidWords = [];
+        foreach ($words as $word) {
+            if (! $this->wordlistService->isValidWord($word)) {
+                $invalidWords[] = $word;
+            }
+        }
+
+        return $invalidWords;
     }
 }
