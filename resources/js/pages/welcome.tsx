@@ -60,8 +60,8 @@ export default function Welcome() {
                                     form.setData('code', e.target.value.toUpperCase());
                                     form.clearErrors('code');
                                 }}
-                                placeholder="VOER JE CODE IN"
-                                className="h-14 text-center font-mono text-xl tracking-[0.3em] uppercase placeholder:tracking-normal placeholder:text-sm placeholder:lowercase"
+                                placeholder="Voer je code in"
+                                className="h-14 text-center font-mono text-lg tracking-[0.2em] uppercase placeholder:text-base placeholder:font-sans placeholder:tracking-normal placeholder:normal-case"
                                 maxLength={16}
                                 autoComplete="off"
                                 aria-invalid={!!form.errors.code}

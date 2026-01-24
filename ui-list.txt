@@ -8,6 +8,6 @@
 - [x] Layouts: App layout, auth layouts (card/simple/split), play layout, settings layout
 - [x] Navigation: App sidebar, app header, bottom tab nav, nav-main, nav-user, nav-footer
 - [x] Shell components: App shell, app content, app logo, breadcrumbs, user info
-- [ ] Form components: Inputs, buttons, selects, checkboxes, labels, input errors, alerts
-- [ ] Overlay components: Dialogs, sheets, dropdowns, tooltips, tutorial modal
+- [x] Form components: Inputs, buttons, selects, checkboxes, labels, input errors, alerts
+- [x] Overlay components: Dialogs, sheets, dropdowns, tooltips, tutorial modal
 - [ ] Utilities: Hooks (appearance, mobile, initials, clipboard), theme system, PWA assets
