@@ -82,3 +82,39 @@ it('rejects wordle word updates for completed games', function () {
     $game->refresh();
     expect($game->wordle_words)->toBe($this->wordlist);
 });
+
+it('validates a valid word', function () {
+    $validWord = DutchWordlistSeeder::getRandomWords(1)[0];
+
+    $response = $this->actingAs($this->admin)
+        ->get("/admin/validate-word?word={$validWord}");
+
+    $response->assertOk();
+    $response->assertJson([
+        'valid' => true,
+        'message' => 'Geldig woord',
+    ]);
+});
+
+it('validates an invalid word and returns suggestions', function () {
+    $response = $this->actingAs($this->admin)
+        ->get('/admin/validate-word?word=xxxxx');
+
+    $response->assertOk();
+    $response->assertJson([
+        'valid' => false,
+        'message' => 'Onbekend woord',
+    ]);
+    expect($response->json('suggestions'))->toBeArray();
+});
+
+it('rejects words that are not 5 letters', function () {
+    $response = $this->actingAs($this->admin)
+        ->get('/admin/validate-word?word=abc');
+
+    $response->assertOk();
+    $response->assertJson([
+        'valid' => false,
+        'message' => 'Woord moet 5 letters zijn',
+    ]);
+});

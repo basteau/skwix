@@ -109,6 +109,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/create', [AdminController::class, 'createForm'])->name('create');
     Route::post('/create', [AdminController::class, 'store'])->name('store');
     Route::get('/random-words', [AdminController::class, 'getRandomWords'])->name('random-words');
+    Route::get('/validate-word', [AdminController::class, 'validateWord'])->name('validate-word');
     Route::get('/game/{game}', [AdminController::class, 'showGame'])->name('game');
     Route::put('/game/{game}/wordle-words', [AdminController::class, 'updateWordleWords'])->name('game.wordle-words');
     Route::post('/game/{game}/invite', [AdminController::class, 'invitePlayers'])->name('game.invite');

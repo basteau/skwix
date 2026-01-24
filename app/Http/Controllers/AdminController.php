@@ -138,6 +138,43 @@ class AdminController extends Controller
         return response()->json(['words' => $words]);
     }
 
+    public function validateWord(Request $request)
+    {
+        $word = strtolower(trim($request->get('word', '')));
+
+        if (strlen($word) !== 5) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Woord moet 5 letters zijn',
+                'suggestions' => [],
+            ]);
+        }
+
+        $isValid = $this->wordlistService->isValidWord($word);
+
+        $suggestions = [];
+        if (! $isValid) {
+            $suggestions = $this->getSimilarWords($word);
+        }
+
+        return response()->json([
+            'valid' => $isValid,
+            'message' => $isValid ? 'Geldig woord' : 'Onbekend woord',
+            'suggestions' => $suggestions,
+        ]);
+    }
+
+    private function getSimilarWords(string $word): array
+    {
+        $allWords = $this->wordlistService->getWords();
+
+        return $allWords
+            ->filter(fn ($w) => similar_text($word, $w) >= 3 || levenshtein($word, $w) <= 2)
+            ->take(5)
+            ->values()
+            ->all();
+    }
+
     public function showGame(Game $game): Response
     {
         $game->load(['players', 'winner', 'wordleAttempts', 'spinResults', 'questions']);
