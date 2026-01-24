@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FortuneController;
+use App\Http\Controllers\GameEndController;
 use App\Http\Controllers\GuessController;
 use App\Http\Controllers\LobbyController;
 use App\Http\Controllers\PlayersController;
@@ -19,6 +20,11 @@ Route::get('/welcome', function () {
 })->name('welcome');
 
 Route::get('/lobby', [LobbyController::class, 'show'])->name('lobby');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/win', [GameEndController::class, 'win'])->name('win');
+    Route::get('/lose', [GameEndController::class, 'lose'])->name('lose');
+});
 
 Route::middleware('auth')->prefix('play')->name('play.')->group(function () {
     Route::get('wordle', [WordleController::class, 'show'])->name('wordle');
