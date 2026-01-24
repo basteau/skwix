@@ -1,5 +1,5 @@
 import { X, Grid3x3, HelpCircle, Disc3, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +31,7 @@ const steps: TutorialStep[] = [
         ),
     },
     {
-        icon: <Grid3x3 className="h-12 w-12 text-primary" />,
+        icon: <Grid3x3 className="size-12 text-primary" />,
         title: 'Wordle',
         description:
             'Elke dag krijg je een 5-letter woord om te raden. Je hebt 6 pogingen. Groene letters zijn correct, gele letters zitten in het woord maar op de verkeerde plek.',
@@ -42,8 +42,8 @@ const steps: TutorialStep[] = [
                     <div
                         key={i}
                         className={cn(
-                            'flex h-10 w-10 items-center justify-center rounded-md font-mono text-lg font-bold text-white',
-                            i === 0 || i === 4 ? 'bg-green-500' : i === 2 ? 'bg-yellow-500' : 'bg-gray-400'
+                            'flex size-10 items-center justify-center rounded-md font-mono text-lg font-bold text-white',
+                            i === 0 || i === 4 ? 'bg-wordle-correct' : i === 2 ? 'bg-wordle-present' : 'bg-wordle-absent'
                         )}
                     >
                         {letter}
@@ -53,7 +53,7 @@ const steps: TutorialStep[] = [
         ),
     },
     {
-        icon: <HelpCircle className="h-12 w-12 text-primary" />,
+        icon: <HelpCircle className="size-12 text-primary" />,
         title: 'Vragen Stellen',
         description:
             'Stel ja/nee vragen over het mystery-woord. Elke vraag kost 3 punten. Gebruik je vragen slim om het woord te raden!',
@@ -62,13 +62,13 @@ const steps: TutorialStep[] = [
             <div className="mt-4 space-y-2">
                 <div className="rounded-lg border border-border bg-card p-3">
                     <p className="text-sm">"Is het een dier?"</p>
-                    <p className="text-xs font-medium text-green-600">→ JA</p>
+                    <p className="text-xs font-medium text-success">→ JA</p>
                 </div>
             </div>
         ),
     },
     {
-        icon: <Disc3 className="h-12 w-12 text-primary" />,
+        icon: <Disc3 className="size-12 text-primary" />,
         title: 'Rad van Fortuin',
         description:
             'Waag een gokje met je punten! Zet in wat je durft en draai aan het rad. Je kunt je inzet verdubbelen... of verliezen!',
@@ -84,38 +84,33 @@ const steps: TutorialStep[] = [
         ),
     },
     {
-        icon: <Trophy className="h-12 w-12 text-amber-500" />,
+        icon: <Trophy className="size-12 text-warning" />,
         title: 'Winnen!',
         description:
             'Verzamel genoeg punten en raad het mystery-woord correct. De eerste die het woord raadt, wint de prijs!',
         example: (
-            <div className="mt-4 rounded-lg bg-gradient-to-r from-amber-100 to-amber-50 p-4 text-center">
-                <p className="text-lg font-bold text-amber-700">🏆 Jij bent de winnaar! 🏆</p>
+            <div className="mt-4 rounded-lg bg-gradient-to-r from-success/20 to-success/10 p-4 text-center">
+                <p className="text-lg font-bold text-success">🏆 Jij bent de winnaar! 🏆</p>
             </div>
         ),
     },
 ];
 
+function getInitialOpenState(forceOpen: boolean): boolean {
+    if (forceOpen) return true;
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem(TUTORIAL_SEEN_KEY);
+}
+
 export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(() => getInitialOpenState(forceOpen));
     const [currentStep, setCurrentStep] = useState(0);
 
-    useEffect(() => {
-        if (forceOpen) {
-            setIsOpen(true);
-            setCurrentStep(0);
-            return;
-        }
-
-        const seen = localStorage.getItem(TUTORIAL_SEEN_KEY);
-        if (!seen) {
-            setIsOpen(true);
-        }
-    }, [forceOpen]);
+    const isOpen = forceOpen || internalOpen;
 
     const handleClose = useCallback(() => {
         localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
-        setIsOpen(false);
+        setInternalOpen(false);
         setCurrentStep(0);
         onClose?.();
     }, [onClose]);
@@ -150,8 +145,9 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                 <button
                     onClick={handleSkip}
                     className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="Sluiten"
                 >
-                    <X className="h-5 w-5" />
+                    <X className="size-5" />
                 </button>
 
                 {/* Content */}
@@ -199,7 +195,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                         disabled={currentStep === 0}
                         className="gap-1"
                     >
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="size-4" />
                         Vorige
                     </Button>
 
@@ -212,7 +208,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
 
                     <Button size="sm" onClick={handleNext} className="gap-1">
                         {isLastStep ? 'Starten!' : 'Volgende'}
-                        {!isLastStep && <ChevronRight className="h-4 w-4" />}
+                        {!isLastStep && <ChevronRight className="size-4" />}
                     </Button>
                 </div>
             </div>

@@ -8,10 +8,12 @@ export default function AlertError({
     errors: string[];
     title?: string;
 }) {
+    if (errors.length === 0) return null;
+
     return (
-        <Alert variant="destructive">
-            <AlertCircleIcon />
-            <AlertTitle>{title || 'Something went wrong.'}</AlertTitle>
+        <Alert variant="destructive" role="alert" aria-live="assertive">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>{title || 'Er ging iets mis.'}</AlertTitle>
             <AlertDescription>
                 <ul className="list-inside list-disc text-sm">
                     {Array.from(new Set(errors)).map((error, index) => (
