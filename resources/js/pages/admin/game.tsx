@@ -205,30 +205,37 @@ export default function AdminGameDetail({ game, players }: Props) {
                                     <div
                                         key={player.id}
                                         className={cn(
-                                            'flex items-center justify-between rounded-lg border p-4',
+                                            'rounded-lg border p-4',
                                             index === 0 && 'border-amber-300/50 bg-amber-50 dark:border-amber-700/50 dark:bg-amber-900/20',
                                             index === 1 && 'border-zinc-300/50 bg-zinc-50 dark:border-zinc-600/50 dark:bg-zinc-800/30',
                                             index === 2 && 'border-orange-300/50 bg-orange-50 dark:border-orange-700/50 dark:bg-orange-900/20',
                                             index > 2 && 'border-border bg-background'
                                         )}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
-                                                {index === 0 && '🥇'}
-                                                {index === 1 && '🥈'}
-                                                {index === 2 && '🥉'}
-                                                {index > 2 && index + 1}
+                                        {/* Player info row */}
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
+                                                    {index === 0 && '🥇'}
+                                                    {index === 1 && '🥈'}
+                                                    {index === 2 && '🥉'}
+                                                    {index > 2 && index + 1}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-medium text-foreground">
+                                                        {player.name}
+                                                    </p>
+                                                    <p className="truncate text-sm text-muted-foreground">
+                                                        {player.email}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-medium text-foreground">
-                                                    {player.name}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {player.email}
-                                                </p>
+                                            <div className="shrink-0 font-mono text-xs text-muted-foreground">
+                                                {player.invite_code}
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-6 text-sm">
+                                        {/* Stats row */}
+                                        <div className="mt-3 grid grid-cols-4 gap-2 border-t border-border/50 pt-3 text-sm">
                                             <div className="text-center">
                                                 <p className="font-semibold text-foreground">
                                                     {player.points}
@@ -252,9 +259,6 @@ export default function AdminGameDetail({ game, players }: Props) {
                                                     {player.spins_count}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">Spins</p>
-                                            </div>
-                                            <div className="font-mono text-xs text-muted-foreground">
-                                                {player.invite_code}
                                             </div>
                                         </div>
                                     </div>
