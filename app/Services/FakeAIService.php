@@ -30,17 +30,11 @@ class FakeAIService
         ];
     }
 
-    /**
-     * Reset sequence index to start.
-     */
     public function reset(): void
     {
         $this->index = 0;
     }
 
-    /**
-     * Set a specific sequence for testing.
-     */
     public function setSequence(array $sequence): void
     {
         $this->sequence = $sequence;

@@ -135,20 +135,54 @@ composer test:e2e
 
 ## Playwright MCP Integration
 
-Use Playwright MCP for browser automation:
-- Navigate to pages
-- Fill inputs, click buttons
-- Wait for elements
-- Assert text content
-- Take screenshots
+**Important:** Tests are designed to be run interactively using the `playwriter` skill.
 
-Example usage:
-```php
-// Navigate and interact
-$this->playwright->navigate('http://127.0.0.1:8010/welcome');
-$this->playwright->fill('[data-testid="invite-code-input"]', $inviteCode);
-$this->playwright->click('[data-testid="join-game-button"]');
-$this->playwright->waitForSelector('[data-testid="countdown"]');
+### How to Run E2E Tests
+
+1. **Start the E2E server:**
+   ```bash
+   php artisan serve --env=e2e --port=8010
+   ```
+
+2. **Load the playwriter skill:**
+   Say: "use playwriter" to enable browser automation
+
+3. **Run test scenarios manually or via agent:**
+   The agent uses Playwright MCP commands to interact with the browser.
+
+### Playwright MCP Commands Reference
+
+| Action | MCP Command |
+|--------|-------------|
+| Navigate | `browser_navigate(url)` |
+| Click | `browser_click(selector)` |
+| Type text | `browser_type(selector, text)` |
+| Press key | `browser_press(key)` (e.g., "Enter", "Backspace") |
+| Wait for element | `browser_wait_for(selector)` |
+| Get text | `browser_get_text(selector)` |
+| Screenshot | `browser_screenshot()` |
+| Get URL | `browser_get_url()` |
+
+### Selector Pattern
+
+All interactive elements have `data-testid` attributes:
+```
+[data-testid="invite-code-input"]
+[data-testid="join-game-button"]
+[data-testid="wordle-key-enter"]
+```
+
+### Example: Test Wordle Flow
+
+```
+1. browser_navigate("http://127.0.0.1:8010/welcome")
+2. browser_type("[data-testid='invite-code-input']", "ABC123")
+3. browser_click("[data-testid='join-game-button']")
+4. browser_wait_for("[data-testid='wordle-grid']")
+5. browser_press("s") browser_press("n") browser_press("e") browser_press("e") browser_press("u") browser_press("w")
+6. browser_press("Enter")
+7. browser_wait_for("[data-testid='wordle-message']")
+8. browser_screenshot()
 ```
 
 ## Avoiding Flakiness

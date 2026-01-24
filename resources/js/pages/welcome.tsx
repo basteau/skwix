@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import Snowflake from 'lucide-react/icons/snowflake';
+import { Snowflake } from 'lucide-react';
 import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

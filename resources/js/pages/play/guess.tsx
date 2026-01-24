@@ -1,6 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import Check from 'lucide-react/icons/check';
-import X from 'lucide-react/icons/x';
+import { Check, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PlayHeader } from '@/components/play-header';
 import { Button } from '@/components/ui/button';

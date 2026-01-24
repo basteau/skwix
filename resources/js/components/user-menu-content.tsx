@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import LogOut from 'lucide-react/icons/log-out';
+import { LogOut } from 'lucide-react';
 import {
     DropdownMenuItem,
     DropdownMenuLabel,

@@ -1,11 +1,9 @@
 import { Head, router } from '@inertiajs/react';
-import Crown from 'lucide-react/icons/crown';
-import Snowflake from 'lucide-react/icons/snowflake';
-import Users from 'lucide-react/icons/users';
+import { Crown, Snowflake, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
 import { getInitials } from '@/hooks/use-initials';
+import { cn } from '@/lib/utils';
 
 interface Player {
     id: number;

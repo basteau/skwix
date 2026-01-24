@@ -1,6 +1,4 @@
-import ChevronLeft from 'lucide-react/icons/chevron-left';
-import ChevronRight from 'lucide-react/icons/chevron-right';
-import X from 'lucide-react/icons/x';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {

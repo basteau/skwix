@@ -2,31 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class GameEndController extends Controller
 {
-    public function win(Request $request): Response
+    public function win(Request $request): Response|RedirectResponse
     {
-        $user = $request->user();
-        $player = $user->players()
-            ->whereHas('game', fn ($q) => $q->where('status', 'completed'))
-            ->with(['game.winner'])
-            ->latest()
-            ->first();
+        [$player, $game, $winner] = $this->getCompletedGameContext($request);
 
-        if (! $player || ! $player->game->winner) {
+        if (! $player || ! $winner) {
             return redirect()->route('play.wordle');
         }
 
-        $game = $player->game;
-        $winner = $game->winner;
-
-        $isWinner = $winner->id === $player->id;
-
-        if (! $isWinner) {
+        if ($winner->id !== $player->id) {
             return redirect()->route('lose');
         }
 
@@ -45,31 +36,19 @@ class GameEndController extends Controller
         ]);
     }
 
-    public function lose(Request $request): Response
+    public function lose(Request $request): Response|RedirectResponse
     {
-        $user = $request->user();
-        $player = $user->players()
-            ->whereHas('game', fn ($q) => $q->where('status', 'completed'))
-            ->with(['game.winner'])
-            ->latest()
-            ->first();
+        [$player, $game, $winner] = $this->getCompletedGameContext($request);
 
-        if (! $player || ! $player->game->winner) {
+        if (! $player || ! $winner) {
             return redirect()->route('play.wordle');
         }
 
-        $game = $player->game;
-        $winner = $game->winner;
-
-        $isWinner = $winner->id === $player->id;
-
-        if ($isWinner) {
+        if ($winner->id === $player->id) {
             return redirect()->route('win');
         }
 
         $allPlayers = $game->players()->orderByDesc('points')->get();
-        $totalPlayers = $allPlayers->count();
-        $rank = $allPlayers->search(fn ($p) => $p->id === $player->id) + 1;
 
         return Inertia::render('lose', [
             'winner' => [
@@ -81,13 +60,28 @@ class GameEndController extends Controller
                 'id' => $player->id,
                 'name' => $player->name,
                 'points' => $player->points,
-                'rank' => $rank,
+                'rank' => $allPlayers->search(fn ($p) => $p->id === $player->id) + 1,
             ],
             'game' => [
                 'id' => $game->id,
                 'secret_word' => $game->secret_word,
-                'total_players' => $totalPlayers,
+                'total_players' => $allPlayers->count(),
             ],
         ]);
+    }
+
+    private function getCompletedGameContext(Request $request): array
+    {
+        $player = $request->user()->players()
+            ->whereHas('game', fn ($q) => $q->where('status', 'completed'))
+            ->with(['game.winner'])
+            ->latest()
+            ->first();
+
+        if (! $player) {
+            return [null, null, null];
+        }
+
+        return [$player, $player->game, $player->game->winner];
     }
 }

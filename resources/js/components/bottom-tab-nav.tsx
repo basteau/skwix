@@ -1,9 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import BookOpen from 'lucide-react/icons/book-open';
-import Disc3 from 'lucide-react/icons/disc-3';
-import Grid3x3 from 'lucide-react/icons/grid-3x3';
-import HelpCircle from 'lucide-react/icons/help-circle';
-import Users from 'lucide-react/icons/users';
+import { BookOpen, Disc3, Grid3x3, HelpCircle, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabItem {

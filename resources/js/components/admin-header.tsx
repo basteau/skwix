@@ -1,8 +1,7 @@
 import { Link } from '@inertiajs/react';
-import ArrowLeft from 'lucide-react/icons/arrow-left';
-import ChevronRight from 'lucide-react/icons/chevron-right';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface Breadcrumb {
     label: string;

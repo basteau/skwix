@@ -10,9 +10,6 @@ use Illuminate\Support\ServiceProvider;
 
 class E2EServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services.
-     */
     public function register(): void
     {
         // Only register fake services when AI_DRIVER=fake
@@ -30,9 +27,6 @@ class E2EServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
         // Freeze time if E2E_NOW is set
