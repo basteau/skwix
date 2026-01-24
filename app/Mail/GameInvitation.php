@@ -39,5 +39,4 @@ class GameInvitation extends Mailable implements ShouldQueue
             ],
         );
     }
-
 }

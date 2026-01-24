@@ -1,5 +1,3 @@
-import { Link } from '@inertiajs/react';
-import type { ComponentPropsWithoutRef } from 'react';
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -9,6 +7,8 @@ import {
 } from '@/components/ui/sidebar';
 import { toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
+import { Link } from '@inertiajs/react';
+import type { ComponentPropsWithoutRef } from 'react';
 
 function isInternalUrl(href: string): boolean {
     return href.startsWith('/') && !href.startsWith('//');

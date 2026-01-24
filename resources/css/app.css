@@ -9,7 +9,10 @@
 
 @theme {
     /* Typography */
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
     --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
@@ -65,61 +68,61 @@
     --safe-right: env(safe-area-inset-right, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
-    
+
     /* Winter Blue Theme - Light Mode Only */
-    
+
     /* Core Colors */
     --background: oklch(100% 0 0);
     --background-subtle: oklch(97% 0.01 230);
     --foreground: oklch(20% 0.02 250);
-    
+
     /* Primary - Winter Blue (WCAG AA contrast with white text) */
     --primary: oklch(45% 0.15 230);
     --primary-hover: oklch(38% 0.15 230);
     --primary-light: oklch(92% 0.04 230);
     --primary-foreground: oklch(100% 0 0);
-    
+
     /* Secondary - Ice Blue */
     --secondary: oklch(70% 0.12 220);
     --secondary-foreground: oklch(20% 0.02 250);
-    
+
     /* Surface & Cards */
     --card: oklch(99% 0.005 230);
     --card-foreground: oklch(20% 0.02 250);
     --popover: oklch(100% 0 0);
     --popover-foreground: oklch(20% 0.02 250);
-    
+
     /* Muted */
     --muted: oklch(97% 0.01 230);
     --muted-foreground: oklch(40% 0.02 250);
-    
+
     /* Accent */
     --accent: oklch(92% 0.04 230);
     --accent-foreground: oklch(20% 0.02 250);
-    
+
     /* Borders */
     --border: oklch(90% 0.02 230);
     --border-strong: oklch(80% 0.03 230);
     --input: oklch(90% 0.02 230);
     --ring: oklch(45% 0.15 230);
-    
+
     /* Destructive */
     --destructive: oklch(55% 0.22 25);
     --destructive-foreground: oklch(100% 0 0);
-    
+
     /* Status Colors */
     --success: oklch(55% 0.18 145);
     --warning: oklch(65% 0.18 85);
-    
+
     /* Wordle Colors */
     --wordle-correct: oklch(55% 0.18 145);
     --wordle-present: oklch(65% 0.18 85);
     --wordle-absent: oklch(55% 0.02 250);
-    
+
     /* Wheel of Fortune */
     --wheel-win: oklch(45% 0.15 230);
     --wheel-lose: oklch(65% 0.02 250);
-    
+
     /* Legacy radius for shadcn compatibility */
     --radius: 10px;
 }
@@ -131,27 +134,50 @@
 
     body {
         @apply bg-background text-foreground;
-        font-feature-settings: 'rlig' 1, 'calt' 1;
+        font-feature-settings:
+            'rlig' 1,
+            'calt' 1;
     }
 }
 
 /* Wordle Animations */
 @keyframes pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes flip {
-    0% { transform: rotateX(0deg); }
-    50% { transform: rotateX(90deg); }
-    100% { transform: rotateX(0deg); }
+    0% {
+        transform: rotateX(0deg);
+    }
+    50% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-6px); }
-    40%, 80% { transform: translateX(6px); }
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    20%,
+    60% {
+        transform: translateX(-6px);
+    }
+    40%,
+    80% {
+        transform: translateX(6px);
+    }
 }
 
 .animate-pop {

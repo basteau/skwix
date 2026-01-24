@@ -1,11 +1,11 @@
-import { Head, router } from '@inertiajs/react';
-import { Check, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { PlayHeader } from '@/components/play-header';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
+import { Head } from '@inertiajs/react';
+import { Check, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface QuestionItem {
     id: number;
@@ -35,12 +35,20 @@ interface Props {
 
 const QUESTION_COST = 3;
 
-export default function GuessPage({ player, game, questions: initialQuestions = [], error }: Props) {
-    const [questions, setQuestions] = useState<QuestionItem[]>(initialQuestions);
+export default function GuessPage({
+    player,
+    questions: initialQuestions = [],
+    error,
+}: Props) {
+    const [questions, setQuestions] =
+        useState<QuestionItem[]>(initialQuestions);
     const [input, setInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [points, setPoints] = useState(player?.points ?? 0);
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [message, setMessage] = useState<{
+        type: 'success' | 'error';
+        text: string;
+    } | null>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -107,7 +115,9 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
             <PlayLayout>
                 <Head title="Vraag" />
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <h1 className="text-2xl font-bold text-foreground">Geen actief spel</h1>
+                    <h1 className="text-2xl font-bold text-foreground">
+                        Geen actief spel
+                    </h1>
                     <p className="mt-2 text-muted-foreground">
                         Wacht tot de beheerder een spel start.
                     </p>
@@ -120,7 +130,11 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
         <PlayLayout>
             <Head title="Vraag" />
             <div className="flex h-full flex-col">
-                <PlayHeader title="Mystery Woord" points={points} testId="guess-points-display" />
+                <PlayHeader
+                    title="Mystery Woord"
+                    points={points}
+                    testId="guess-points-display"
+                />
 
                 {/* Message */}
                 {message && (
@@ -129,7 +143,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                             'mx-4 mt-3 rounded-md px-4 py-2 text-center text-sm font-medium',
                             message.type === 'error'
                                 ? 'bg-destructive/10 text-destructive'
-                                : 'bg-primary/10 text-primary'
+                                : 'bg-primary/10 text-primary',
                         )}
                     >
                         {message.text}
@@ -137,20 +151,22 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                 )}
 
                 {/* Question History */}
-                <div
-                    ref={listRef}
-                    className="flex-1 overflow-y-auto px-4 py-4"
-                >
+                <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4">
                     {questions.length === 0 ? (
                         <div className="flex h-full flex-col items-center justify-center px-4">
-                            <span className="font-display text-6xl font-bold text-primary/20">?</span>
+                            <span className="font-display text-6xl font-bold text-primary/20">
+                                ?
+                            </span>
                             <p className="mt-4 max-w-xs text-center text-sm leading-relaxed text-muted-foreground">
-                                Stel ja/nee vragen om het mystery woord te raden.
+                                Stel ja/nee vragen om het mystery woord te
+                                raden.
                                 <br />
-                                <span className="text-foreground">Elke vraag kost {QUESTION_COST} punten.</span>
+                                <span className="text-foreground">
+                                    Elke vraag kost {QUESTION_COST} punten.
+                                </span>
                             </p>
                             <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3">
-                                <p className="text-center text-sm italic text-muted-foreground">
+                                <p className="text-center text-sm text-muted-foreground italic">
                                     "Is het een dier?"
                                 </p>
                             </div>
@@ -170,7 +186,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-border bg-background px-4 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3">
+                <div className="border-t border-border bg-background px-4 pt-3 pb-[calc(var(--safe-bottom)+0.75rem)]">
                     <div className="flex gap-2">
                         <input
                             ref={inputRef}
@@ -181,7 +197,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                             onKeyDown={handleKeyDown}
                             placeholder="Stel een ja/nee vraag..."
                             disabled={isSubmitting || points < QUESTION_COST}
-                            className="h-11 flex-1 rounded-md border border-border-strong bg-card px-3 text-base outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            className="h-11 flex-1 rounded-md border border-border-strong bg-card px-3 text-base transition-colors outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         />
                         <Button
                             data-testid="guess-submit-button"
@@ -218,7 +234,8 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                     </div>
                     {points < QUESTION_COST && (
                         <p className="mt-2 text-center text-xs text-muted-foreground">
-                            Je hebt {QUESTION_COST} punten nodig om een vraag te stellen
+                            Je hebt {QUESTION_COST} punten nodig om een vraag te
+                            stellen
                         </p>
                     )}
                 </div>
@@ -244,7 +261,8 @@ function QuestionBubble({
             data-testid={`guess-item-${question.id}`}
             className={cn(
                 'motion-safe:transition-all',
-                isNew && 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300'
+                isNew &&
+                    'motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
             )}
         >
             {/* Question */}
@@ -269,19 +287,27 @@ function QuestionBubble({
                     <span className="text-xs font-medium text-muted-foreground">
                         {isOwn ? 'Jij' : question.player.name}
                     </span>
-                    <p className="mt-0.5 text-sm text-foreground">{question.question}</p>
+                    <p className="mt-0.5 text-sm text-foreground">
+                        {question.question}
+                    </p>
                 </div>
             </div>
 
             {/* Answer */}
-            <div className="ml-11 mt-2">
+            <div className="mt-2 ml-11">
                 <div
                     className={cn(
                         'inline-flex items-center gap-1.5 rounded-full px-3 py-1',
-                        isYes ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'
+                        isYes
+                            ? 'bg-success/15 text-success'
+                            : 'bg-destructive/15 text-destructive',
                     )}
                 >
-                    {isYes ? <Check className="size-4" /> : <X className="size-4" />}
+                    {isYes ? (
+                        <Check className="size-4" />
+                    ) : (
+                        <X className="size-4" />
+                    )}
                     <span className="text-sm font-semibold">
                         {isYes ? 'Ja' : 'Nee'}
                     </span>

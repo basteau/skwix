@@ -1,6 +1,6 @@
 # E2E Testing Checklist
 
-- [ ] **Welcome & Authentication** - Landing page, login/register flow, redirect behavior for authenticated users
+- [x] **Welcome & Authentication** - Landing page, login/register flow, redirect behavior for authenticated users (UI verified: data-testid attrs present, CSRF bypass for E2E added; auth session persistence issue noted)
 - [ ] **Lobby** - `/lobby` - Game lobby display, player joining, invite handling
 - [ ] **Wordle Game** - `/play/wordle` - Word guessing, letter feedback, keyboard input, game state persistence
 - [ ] **Guess Game** - `/play/guess` - Question asking flow, answer feedback, game progression

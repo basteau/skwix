@@ -38,6 +38,7 @@ class LosePage
     public function assertWinner(string $expectedName): self
     {
         $actual = $this->playwright->getText(self::WINNER_NAME);
+
         // Assert $actual contains $expectedName
         return $this;
     }
@@ -56,6 +57,7 @@ class LosePage
     public function assertSecretWord(string $expectedWord): self
     {
         $actual = $this->playwright->getText(self::SECRET_WORD);
+
         // Assert $actual contains $expectedWord
         return $this;
     }

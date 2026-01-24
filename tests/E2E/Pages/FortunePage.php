@@ -106,6 +106,7 @@ class FortunePage
     public function assertWin(): self
     {
         $result = $this->playwright->getText(self::RESULT);
+
         // Assert contains '+' or 'Gewonnen'
         return $this;
     }
@@ -116,6 +117,7 @@ class FortunePage
     public function assertLoss(): self
     {
         $result = $this->playwright->getText(self::RESULT);
+
         // Assert contains '-' or 'Helaas'
         return $this;
     }

@@ -1,7 +1,7 @@
+import { getInitials } from '@/hooks/use-initials';
 import { Head } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { getInitials } from '@/hooks/use-initials';
 
 function seededRandom(seed: number) {
     const x = Math.sin(seed) * 10000;
@@ -40,7 +40,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                 fontSize: `${16 + seededRandom(i * 100 + 3) * 24}px`,
                 animationDelay: `${seededRandom(i * 100 + 4) * 2}s`,
             })),
-        []
+        [],
     );
 
     return (
@@ -55,7 +55,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     {snowflakes.map((style, i) => (
                         <div
                             key={i}
-                            className="absolute text-primary/20 animate-in fade-in duration-1000"
+                            className="absolute animate-in text-primary/20 duration-1000 fade-in"
                             style={style}
                         >
                             ❄
@@ -66,7 +66,10 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center text-center">
                     {/* Celebration heading - primary visual hierarchy */}
-                    <h1 data-testid="win-title" className="text-5xl font-bold tracking-tight text-primary animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <h1
+                        data-testid="win-title"
+                        className="animate-in text-5xl font-bold tracking-tight text-primary duration-700 fade-in slide-in-from-bottom-4"
+                    >
                         🏆 GEWONNEN! 🏆
                     </h1>
 
@@ -76,16 +79,18 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                             <img
                                 src={winner.avatar_url}
                                 alt={winner.name}
-                                className="size-36 rounded-full border-[6px] border-primary object-cover animate-in zoom-in duration-500"
+                                className="size-36 animate-in rounded-full border-[6px] border-primary object-cover duration-500 zoom-in"
                                 style={{
-                                    boxShadow: '0 0 40px oklch(55% 0.15 230 / 0.5), 0 0 80px oklch(65% 0.18 85 / 0.3)',
+                                    boxShadow:
+                                        '0 0 40px oklch(55% 0.15 230 / 0.5), 0 0 80px oklch(65% 0.18 85 / 0.3)',
                                 }}
                             />
                         ) : (
                             <div
-                                className="flex size-36 items-center justify-center rounded-full border-[6px] border-primary bg-primary/10 text-4xl font-bold text-primary animate-in zoom-in duration-500"
+                                className="flex size-36 animate-in items-center justify-center rounded-full border-[6px] border-primary bg-primary/10 text-4xl font-bold text-primary duration-500 zoom-in"
                                 style={{
-                                    boxShadow: '0 0 40px oklch(55% 0.15 230 / 0.5), 0 0 80px oklch(65% 0.18 85 / 0.3)',
+                                    boxShadow:
+                                        '0 0 40px oklch(55% 0.15 230 / 0.5), 0 0 80px oklch(65% 0.18 85 / 0.3)',
                                 }}
                             >
                                 {initials}
@@ -94,29 +99,44 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     </div>
 
                     {/* Winner name - secondary hierarchy */}
-                    <p data-testid="winner-name" className="mt-4 text-2xl font-bold text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                    <p
+                        data-testid="winner-name"
+                        className="mt-4 animate-in text-2xl font-bold text-foreground delay-100 duration-700 fade-in slide-in-from-bottom-4"
+                    >
                         {winner.name}
                     </p>
 
-                    <p className="mt-1 text-base text-muted-foreground animate-in fade-in duration-700 delay-200">
+                    <p className="mt-1 animate-in text-base text-muted-foreground delay-200 duration-700 fade-in">
                         heeft het mystery woord geraden
                     </p>
 
                     {/* Secret word reveal - tertiary hierarchy */}
-                    <div data-testid="secret-word-reveal" className="mt-6 rounded-xl bg-primary/10 px-8 py-4 animate-in fade-in zoom-in duration-700 delay-300">
-                        <p className="text-xs uppercase tracking-widest text-muted-foreground">Het woord was</p>
-                        <p className="mt-1 text-3xl font-bold uppercase tracking-[0.2em] text-primary">
+                    <div
+                        data-testid="secret-word-reveal"
+                        className="mt-6 animate-in rounded-xl bg-primary/10 px-8 py-4 delay-300 duration-700 fade-in zoom-in"
+                    >
+                        <p className="text-xs tracking-widest text-muted-foreground uppercase">
+                            Het woord was
+                        </p>
+                        <p className="mt-1 text-3xl font-bold tracking-[0.2em] text-primary uppercase">
                             {game.secret_word}
                         </p>
                     </div>
 
                     {/* Points - supporting info */}
-                    <p className="mt-4 text-lg text-foreground animate-in fade-in duration-700 delay-400">
-                        Eindscore: <span className="font-bold text-primary">{winner.points}</span> punten
+                    <p className="mt-4 animate-in text-lg text-foreground delay-400 duration-700 fade-in">
+                        Eindscore:{' '}
+                        <span className="font-bold text-primary">
+                            {winner.points}
+                        </span>{' '}
+                        punten
                     </p>
 
                     {/* QR Code Prize with themed container */}
-                    <div data-testid="prize-qr-code" className="mt-8 animate-in fade-in zoom-in duration-700 delay-500">
+                    <div
+                        data-testid="prize-qr-code"
+                        className="mt-8 animate-in delay-500 duration-700 fade-in zoom-in"
+                    >
                         <div
                             className="rounded-2xl border-2 border-primary/30 bg-white p-1"
                             style={{
@@ -124,7 +144,9 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                             }}
                         >
                             <div className="rounded-xl bg-gradient-to-b from-primary/5 to-transparent px-6 pt-3 pb-4">
-                                <p className="mb-3 text-sm font-semibold text-primary">Claim je prijs</p>
+                                <p className="mb-3 text-sm font-semibold text-primary">
+                                    Claim je prijs
+                                </p>
                                 <div className="rounded-lg bg-white p-3">
                                     <QRCode value={prizeUrl} size={140} />
                                 </div>
@@ -132,7 +154,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                         </div>
                     </div>
 
-                    <p className="mt-4 text-sm text-muted-foreground animate-in fade-in duration-700 delay-600">
+                    <p className="mt-4 animate-in text-sm text-muted-foreground delay-600 duration-700 fade-in">
                         Scan de QR-code om je prijs op te halen
                     </p>
                 </div>
@@ -144,14 +166,14 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
 const confettiPieces = (() => {
     // Theme-aligned OKLCH colors: gold, silver, ice blue variations
     const colors = [
-        'oklch(80% 0.15 85)',   // Gold bright
-        'oklch(70% 0.12 85)',   // Gold medium
-        'oklch(85% 0.05 250)',  // Silver light
-        'oklch(75% 0.03 250)',  // Silver medium
-        'oklch(80% 0.12 230)',  // Ice blue light
-        'oklch(65% 0.15 230)',  // Ice blue medium (primary)
-        'oklch(90% 0.08 85)',   // Gold shimmer
-        'oklch(95% 0.02 250)',  // Silver shimmer
+        'oklch(80% 0.15 85)', // Gold bright
+        'oklch(70% 0.12 85)', // Gold medium
+        'oklch(85% 0.05 250)', // Silver light
+        'oklch(75% 0.03 250)', // Silver medium
+        'oklch(80% 0.12 230)', // Ice blue light
+        'oklch(65% 0.15 230)', // Ice blue medium (primary)
+        'oklch(90% 0.08 85)', // Gold shimmer
+        'oklch(95% 0.02 250)', // Silver shimmer
     ];
     return Array.from({ length: 100 }).map((_, i) => ({
         id: i,
@@ -171,7 +193,7 @@ function Confetti() {
             {confettiPieces.map((piece) => (
                 <div
                     key={piece.id}
-                    className="absolute animate-confetti"
+                    className="animate-confetti absolute"
                     style={{
                         left: `${piece.x}%`,
                         top: '-20px',

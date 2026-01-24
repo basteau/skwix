@@ -12,7 +12,10 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     y2="100%"
                 >
                     <stop offset="0%" stopColor="var(--color-primary)" />
-                    <stop offset="100%" stopColor="var(--color-primary-hover)" />
+                    <stop
+                        offset="100%"
+                        stopColor="var(--color-primary-hover)"
+                    />
                 </linearGradient>
                 <linearGradient
                     id="accentGradient"
@@ -22,10 +25,18 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     y2="0%"
                 >
                     <stop offset="0%" stopColor="var(--color-secondary)" />
-                    <stop offset="100%" stopColor="var(--color-primary-light)" />
+                    <stop
+                        offset="100%"
+                        stopColor="var(--color-primary-light)"
+                    />
                 </linearGradient>
             </defs>
-            <rect width="32" height="32" rx="6" fill="var(--color-background)" />
+            <rect
+                width="32"
+                height="32"
+                rx="6"
+                fill="var(--color-background)"
+            />
             <path
                 d="M22.5 10.5C22.5 10.5 21.2 8 16.5 8C11.8 8 9.5 10.8 9.5 13.2C9.5 15.6 11 17 13.5 18L18.5 20C20.5 20.8 21.5 21.5 21.5 23C21.5 24.5 20 25.5 17 25.5C13.5 25.5 11 23.5 11 23.5"
                 stroke="url(#logoGradient)"

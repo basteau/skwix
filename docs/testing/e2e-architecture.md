@@ -64,7 +64,11 @@ FORTUNE_DRIVER=fake
 E2E_FORTUNE_SEQUENCE=win,lose,win,lose
 
 # Freeze time (after 8:00 so wordle is available)
-E2E_NOW=2026-01-01 09:00:00
+# IMPORTANT: Must be FUTURE datetime to avoid session cookie expiration issues
+# Cookie Max-Age = (frozen_time + session_lifetime) - real_time
+# If frozen_time is in the past relative to real clock, cookies expire immediately (419 errors)
+# Set to tomorrow or leave empty to use real time
+E2E_NOW="2026-01-25 09:00:00"
 
 # Disable PWA caching
 PWA_ENABLED=false

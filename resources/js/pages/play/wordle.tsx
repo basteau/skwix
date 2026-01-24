@@ -1,8 +1,8 @@
-import { Head, router } from '@inertiajs/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PlayHeader } from '@/components/play-header';
 import PlayLayout from '@/layouts/play-layout';
 import { getCsrfToken } from '@/lib/utils';
+import { Head, router } from '@inertiajs/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface GuessResult {
     letter: string;
@@ -105,7 +105,9 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
 
                 if (data.completed) {
                     if (data.correct) {
-                        setMessage(`Gefeliciteerd! +${data.points_earned} punten`);
+                        setMessage(
+                            `Gefeliciteerd! +${data.points_earned} punten`,
+                        );
                     } else {
                         setMessage(`Helaas! +${data.points_earned} punten`);
                     }
@@ -139,7 +141,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                 setCurrentGuess((prev) => prev + key);
             }
         },
-        [currentGuess, isSubmitting, isCompleted, isAvailable, submitGuess]
+        [currentGuess, isSubmitting, isCompleted, isAvailable, submitGuess],
     );
 
     useEffect(() => {
@@ -166,7 +168,9 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
             <PlayLayout>
                 <Head title="Wordle" />
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <h1 className="text-2xl font-bold text-foreground">Geen actief spel</h1>
+                    <h1 className="text-2xl font-bold text-foreground">
+                        Geen actief spel
+                    </h1>
                     <p className="mt-2 text-muted-foreground">
                         Wacht tot de beheerder een spel start.
                     </p>
@@ -189,16 +193,23 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
 
                 {/* Message */}
                 {message && (
-                    <div data-testid="wordle-message" className="mx-4 mt-3 rounded-md bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
+                    <div
+                        data-testid="wordle-message"
+                        className="mx-4 mt-3 rounded-md bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary"
+                    >
                         {message}
                     </div>
                 )}
 
                 {/* Grid */}
-                <div data-testid="wordle-grid" className="flex flex-1 flex-col items-center justify-center gap-1.5 px-4 py-6">
+                <div
+                    data-testid="wordle-grid"
+                    className="flex flex-1 flex-col items-center justify-center gap-1.5 px-4 py-6"
+                >
                     {[...Array(6)].map((_, rowIdx) => {
                         const guess = guesses[rowIdx];
-                        const isCurrentRow = rowIdx === guesses.length && !isCompleted;
+                        const isCurrentRow =
+                            rowIdx === guesses.length && !isCompleted;
                         const isRevealing = revealingRow === rowIdx;
 
                         return (
@@ -207,26 +218,38 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                                 className={`flex gap-1.5 ${isCurrentRow && shakeRow ? 'animate-shake' : ''}`}
                             >
                                 {[...Array(5)].map((_, colIdx) => {
-                                let letter = '';
-                                let status: 'empty' | 'filled' | 'correct' | 'present' | 'absent' = 'empty';
+                                    let letter = '';
+                                    let status:
+                                        | 'empty'
+                                        | 'filled'
+                                        | 'correct'
+                                        | 'present'
+                                        | 'absent' = 'empty';
 
-                                if (guess) {
-                                    letter = guess.result[colIdx]?.letter ?? '';
-                                    status = guess.result[colIdx]?.status ?? 'absent';
-                                } else if (isCurrentRow) {
-                                    letter = currentGuess[colIdx] ?? '';
-                                    status = letter ? 'filled' : 'empty';
-                                }
+                                    if (guess) {
+                                        letter =
+                                            guess.result[colIdx]?.letter ?? '';
+                                        status =
+                                            guess.result[colIdx]?.status ??
+                                            'absent';
+                                    } else if (isCurrentRow) {
+                                        letter = currentGuess[colIdx] ?? '';
+                                        status = letter ? 'filled' : 'empty';
+                                    }
 
-                                return (
-                                    <Tile
-                                        key={colIdx}
-                                        letter={letter}
-                                        status={status}
-                                        delay={isRevealing ? colIdx * 150 : undefined}
-                                        testId={`wordle-tile-r${rowIdx}-c${colIdx}`}
-                                    />
-                                );
+                                    return (
+                                        <Tile
+                                            key={colIdx}
+                                            letter={letter}
+                                            status={status}
+                                            delay={
+                                                isRevealing
+                                                    ? colIdx * 150
+                                                    : undefined
+                                            }
+                                            testId={`wordle-tile-r${rowIdx}-c${colIdx}`}
+                                        />
+                                    );
                                 })}
                             </div>
                         );
@@ -239,23 +262,30 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                         <p className="text-lg font-semibold text-primary">
                             +{wordle?.points_earned} punten verdiend!
                         </p>
-                        <p className="text-sm text-muted-foreground">Morgen weer een nieuwe</p>
+                        <p className="text-sm text-muted-foreground">
+                            Morgen weer een nieuwe
+                        </p>
                     </div>
                 )}
 
                 {/* Not available state */}
                 {!isAvailable && !isCompleted && (
                     <div className="px-4 pb-4 text-center">
-                        <p className="text-muted-foreground">Wordle beschikbaar om 8:00</p>
+                        <p className="text-muted-foreground">
+                            Wordle beschikbaar om 8:00
+                        </p>
                     </div>
                 )}
 
                 {/* Keyboard */}
                 {isAvailable && !isCompleted && (
-                    <div className="mt-auto px-2 pb-4 pb-safe">
+                    <div className="pb-safe mt-auto px-2 pb-4">
                         <div className="flex flex-col gap-1.5">
                             {KEYBOARD_ROWS.map((row, rowIdx) => (
-                                <div key={rowIdx} className="flex justify-center gap-1">
+                                <div
+                                    key={rowIdx}
+                                    className="flex justify-center gap-1"
+                                >
                                     {row.map((key) => (
                                         <KeyboardKey
                                             key={key}
@@ -298,7 +328,8 @@ function Tile({
         absent: 'border-transparent bg-wordle-absent text-white',
     };
 
-    const style = delay !== undefined ? { animationDelay: `${delay}ms` } : undefined;
+    const style =
+        delay !== undefined ? { animationDelay: `${delay}ms` } : undefined;
 
     return (
         <div
@@ -326,7 +357,6 @@ function KeyboardKey({
 }) {
     const isEnter = keyVal === 'enter';
     const isBackspace = keyVal === 'backspace';
-    const isSpecial = isEnter || isBackspace;
 
     const stateClasses = {
         correct: 'bg-wordle-correct text-white',
@@ -336,8 +366,9 @@ function KeyboardKey({
     };
 
     const getKeyClasses = () => {
-        const base = 'flex min-h-12 items-center justify-center font-semibold uppercase transition-all active:scale-95 disabled:opacity-50';
-        
+        const base =
+            'flex min-h-12 items-center justify-center font-semibold uppercase transition-all active:scale-95 disabled:opacity-50';
+
         if (isEnter) {
             return `${base} min-w-[65px] rounded-md bg-primary px-3 text-sm text-primary-foreground shadow-sm hover:bg-primary-hover`;
         }

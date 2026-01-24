@@ -1,5 +1,3 @@
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -9,6 +7,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 const TUTORIAL_SEEN_KEY = 'skwix_tutorial_seen';
 
@@ -33,7 +33,9 @@ const steps: TutorialStep[] = [
             'Een spannend woordspel waar je elke dag puzzels oplost om punten te verdienen. Wie als eerste het mystery-woord raadt, wint!',
         example: (
             <div className="mt-6 border-l-2 border-primary pl-4">
-                <p className="text-sm text-foreground/80">Raad het geheime woord en win de prijs!</p>
+                <p className="text-sm text-foreground/80">
+                    Raad het geheime woord en win de prijs!
+                </p>
             </div>
         ),
     },
@@ -54,7 +56,11 @@ const steps: TutorialStep[] = [
                                 key={i}
                                 className={cn(
                                     'relative flex size-9 items-center justify-center rounded font-mono text-base font-bold text-white',
-                                    isCorrect ? 'bg-wordle-correct' : isPresent ? 'bg-wordle-present' : 'bg-wordle-absent'
+                                    isCorrect
+                                        ? 'bg-wordle-correct'
+                                        : isPresent
+                                          ? 'bg-wordle-present'
+                                          : 'bg-wordle-absent',
                                 )}
                             >
                                 {letter}
@@ -69,8 +75,10 @@ const steps: TutorialStep[] = [
                     })}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                    <span className="text-wordle-correct">■</span> correct &nbsp;
-                    <span className="text-wordle-present">■</span> verkeerde plek &nbsp;
+                    <span className="text-wordle-correct">■</span> correct
+                    &nbsp;
+                    <span className="text-wordle-present">■</span> verkeerde
+                    plek &nbsp;
                     <span className="text-wordle-absent">■</span> niet in woord
                 </p>
             </div>
@@ -85,12 +93,20 @@ const steps: TutorialStep[] = [
         example: (
             <div className="mt-6 space-y-2">
                 <div className="flex items-baseline justify-between border-b border-border pb-2">
-                    <p className="text-sm text-foreground">"Is het een dier?"</p>
-                    <span className="rounded bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">JA</span>
+                    <p className="text-sm text-foreground">
+                        "Is het een dier?"
+                    </p>
+                    <span className="rounded bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">
+                        JA
+                    </span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <p className="text-sm text-foreground">"Leeft het in water?"</p>
-                    <span className="rounded bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">NEE</span>
+                    <p className="text-sm text-foreground">
+                        "Leeft het in water?"
+                    </p>
+                    <span className="rounded bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">
+                        NEE
+                    </span>
                 </div>
             </div>
         ),
@@ -120,8 +136,12 @@ const steps: TutorialStep[] = [
             'Verzamel punten en raad het mystery-woord. De eerste die het woord raadt, wint de prijs!',
         example: (
             <div className="mt-6 rounded-lg border-2 border-success/30 bg-success/5 px-4 py-3">
-                <p className="font-display text-lg font-bold text-success">Jij bent de winnaar!</p>
-                <p className="mt-1 text-sm text-muted-foreground">Scan de QR-code om je prijs te claimen.</p>
+                <p className="font-display text-lg font-bold text-success">
+                    Jij bent de winnaar!
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Scan de QR-code om je prijs te claimen.
+                </p>
             </div>
         ),
     },
@@ -133,8 +153,13 @@ function getInitialOpenState(forceOpen: boolean): boolean {
     return !localStorage.getItem(TUTORIAL_SEEN_KEY);
 }
 
-export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps) {
-    const [internalOpen, setInternalOpen] = useState(() => getInitialOpenState(forceOpen));
+export function TutorialModal({
+    forceOpen = false,
+    onClose,
+}: TutorialModalProps) {
+    const [internalOpen, setInternalOpen] = useState(() =>
+        getInitialOpenState(forceOpen),
+    );
     const [currentStep, setCurrentStep] = useState(0);
 
     const isOpen = forceOpen || internalOpen;
@@ -152,7 +177,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                 handleClose();
             }
         },
-        [handleClose]
+        [handleClose],
     );
 
     const handleNext = useCallback(() => {
@@ -180,14 +205,14 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
             >
                 {/* Close button */}
                 <DialogClose
-                    className="absolute right-2 top-2 z-10 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    className="absolute top-2 right-2 z-10 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                     aria-label="Sluiten"
                 >
                     <X className="size-5" />
                 </DialogClose>
 
                 {/* Content - left aligned */}
-                <div className="bg-card px-5 pb-2 pt-8">
+                <div className="bg-card px-5 pt-8 pb-2">
                     {/* Step indicator - top left */}
                     <div className="mb-4 text-xs font-medium tracking-wide text-muted-foreground">
                         {currentStep + 1} / {steps.length}
@@ -219,7 +244,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                 </div>
 
                 {/* Navigation footer */}
-                <div className="flex items-center justify-between bg-card px-5 pb-5 pt-6">
+                <div className="flex items-center justify-between bg-card px-5 pt-6 pb-5">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -239,12 +264,16 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                                 onClick={() => setCurrentStep(i)}
                                 className="relative flex min-h-11 min-w-6 items-center justify-center"
                                 aria-label={`Stap ${i + 1} van ${steps.length}`}
-                                aria-current={i === currentStep ? 'step' : undefined}
+                                aria-current={
+                                    i === currentStep ? 'step' : undefined
+                                }
                             >
                                 <span
                                     className={cn(
                                         'h-1.5 w-1.5 rounded-full transition-all',
-                                        i === currentStep ? 'w-4 bg-primary' : 'bg-muted-foreground/40'
+                                        i === currentStep
+                                            ? 'w-4 bg-primary'
+                                            : 'bg-muted-foreground/40',
                                     )}
                                 />
                             </button>

@@ -51,7 +51,7 @@ class PlaywrightHelper
     /**
      * Wait for an element to be visible by data-testid.
      */
-    public function waitFor(string $testId, int $timeout = null): void
+    public function waitFor(string $testId, ?int $timeout = null): void
     {
         $selector = "[data-testid=\"{$testId}\"]";
         $timeout = $timeout ?? $this->timeout;
@@ -64,6 +64,7 @@ class PlaywrightHelper
     public function getText(string $testId): string
     {
         $selector = "[data-testid=\"{$testId}\"]";
+
         // Playwright MCP: browser_get_text(selector)
         return '';
     }
@@ -74,6 +75,7 @@ class PlaywrightHelper
     public function exists(string $testId): bool
     {
         $selector = "[data-testid=\"{$testId}\"]";
+
         // Playwright MCP: browser_element_exists(selector)
         return false;
     }

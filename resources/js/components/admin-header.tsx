@@ -1,7 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
 
 interface Breadcrumb {
     label: string;
@@ -26,22 +25,30 @@ export function AdminHeader({
     badge,
 }: AdminHeaderProps) {
     return (
-        <header className="border-b border-border bg-card px-6 py-4 pt-safe">
+        <header className="pt-safe border-b border-border bg-card px-6 py-4">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
                 <nav className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Link href="/admin" className="hover:text-foreground transition-colors">
+                    <Link
+                        href="/admin"
+                        className="transition-colors hover:text-foreground"
+                    >
                         Admin
                     </Link>
                     {breadcrumbs.map((crumb, i) => (
                         <span key={i} className="flex items-center gap-1.5">
                             <ChevronRight className="size-3.5" />
                             {crumb.href ? (
-                                <Link href={crumb.href} className="hover:text-foreground transition-colors">
+                                <Link
+                                    href={crumb.href}
+                                    className="transition-colors hover:text-foreground"
+                                >
                                     {crumb.label}
                                 </Link>
                             ) : (
-                                <span className="text-foreground">{crumb.label}</span>
+                                <span className="text-foreground">
+                                    {crumb.label}
+                                </span>
                             )}
                         </span>
                     ))}
@@ -68,13 +75,17 @@ export function AdminHeader({
                             {badge}
                         </div>
                         {subtitle && (
-                            <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
+                                {subtitle}
+                            </p>
                         )}
                     </div>
                 </div>
 
                 {/* Actions */}
-                {actions && <div className="flex items-center gap-2">{actions}</div>}
+                {actions && (
+                    <div className="flex items-center gap-2">{actions}</div>
+                )}
             </div>
         </header>
     );

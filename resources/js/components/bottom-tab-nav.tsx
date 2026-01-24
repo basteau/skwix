@@ -1,6 +1,6 @@
+import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Disc3, Grid3x3, HelpCircle, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface TabItem {
     label: string;
@@ -29,12 +29,14 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
         <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card pb-[var(--safe-bottom)]">
             <div className="flex h-16 items-center justify-around">
                 {tabs.map((tab) => {
-                    const isActive = tab.href ? url.startsWith(tab.href) : false;
+                    const isActive = tab.href
+                        ? url.startsWith(tab.href)
+                        : false;
                     const Icon = tab.icon;
 
                     const baseClasses = cn(
                         'flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-1.5',
-                        'transition-all duration-150 active:scale-95'
+                        'transition-all duration-150 active:scale-95',
                     );
 
                     const stateClasses = isActive
@@ -46,10 +48,13 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                             <button
                                 key={tab.label}
                                 onClick={tab.onClick}
-                                className={cn(baseClasses, 'text-muted-foreground hover:text-foreground hover:bg-muted/50')}
+                                className={cn(
+                                    baseClasses,
+                                    'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+                                )}
                             >
                                 <Icon className="size-5" />
-                                <span className="text-[10px] font-medium leading-tight">
+                                <span className="text-[10px] leading-tight font-medium">
                                     {tab.label}
                                 </span>
                             </button>
@@ -62,13 +67,20 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                             href={tab.href!}
                             className={cn(baseClasses, stateClasses)}
                         >
-                            <div className={cn('transition-transform', isActive && 'scale-110')}>
+                            <div
+                                className={cn(
+                                    'transition-transform',
+                                    isActive && 'scale-110',
+                                )}
+                            >
                                 <Icon className="size-5" />
                             </div>
-                            <span className={cn(
-                                'text-[10px] leading-tight',
-                                isActive ? 'font-semibold' : 'font-medium'
-                            )}>
+                            <span
+                                className={cn(
+                                    'text-[10px] leading-tight',
+                                    isActive ? 'font-semibold' : 'font-medium',
+                                )}
+                            >
                                 {tab.label}
                             </span>
                         </Link>

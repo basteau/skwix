@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WordleAttempt extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'game_id',
         'player_id',

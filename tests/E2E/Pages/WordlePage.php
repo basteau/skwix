@@ -99,6 +99,7 @@ class WordlePage
     public function assertMessage(string $expected): self
     {
         $actual = $this->playwright->getText(self::MESSAGE);
+
         // assert str_contains($actual, $expected)
         return $this;
     }

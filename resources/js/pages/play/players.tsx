@@ -1,8 +1,8 @@
-import { Head } from '@inertiajs/react';
 import { PlayHeader } from '@/components/play-header';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
+import { Head } from '@inertiajs/react';
 
 interface PlayerData {
     id: number;
@@ -30,13 +30,15 @@ interface Props {
     error?: string;
 }
 
-export default function PlayersPage({ player, game, players = [], error }: Props) {
+export default function PlayersPage({ player, players = [], error }: Props) {
     if (error === 'no_active_game') {
         return (
             <PlayLayout>
                 <Head title="Spelers" />
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <h1 className="text-2xl font-bold text-foreground">Geen actief spel</h1>
+                    <h1 className="text-2xl font-bold text-foreground">
+                        Geen actief spel
+                    </h1>
                     <p className="mt-2 text-muted-foreground">
                         Wacht tot de beheerder een spel start.
                     </p>
@@ -45,8 +47,8 @@ export default function PlayersPage({ player, game, players = [], error }: Props
         );
     }
 
-    const podium = players.filter(p => p.rank <= 3);
-    const others = players.filter(p => p.rank > 3);
+    const podium = players.filter((p) => p.rank <= 3);
+    const others = players.filter((p) => p.rank > 3);
 
     return (
         <PlayLayout>
@@ -55,7 +57,10 @@ export default function PlayersPage({ player, game, players = [], error }: Props
                 <PlayHeader title="Ranglijst" points={player?.points ?? 0} />
 
                 {/* Players List */}
-                <div data-testid="leaderboard" className="flex-1 overflow-y-auto px-4 py-4">
+                <div
+                    data-testid="leaderboard"
+                    className="flex-1 overflow-y-auto px-4 py-4"
+                >
                     {/* Podium Section */}
                     {podium.length > 0 && (
                         <div className="mb-6 space-y-2">
@@ -97,7 +102,7 @@ function PodiumCard({ player }: { player: PlayerData }) {
                 player.rank === 1 && 'bg-amber-50 dark:bg-amber-900/20',
                 player.rank === 2 && 'bg-zinc-50 dark:bg-zinc-800/30',
                 player.rank === 3 && 'bg-orange-50 dark:bg-orange-900/20',
-                player.is_current && 'ring-2 ring-primary ring-offset-2'
+                player.is_current && 'ring-2 ring-primary ring-offset-2',
             )}
         >
             {/* Medal */}
@@ -121,20 +126,28 @@ function PodiumCard({ player }: { player: PlayerData }) {
                 <span className="block truncate font-semibold text-foreground">
                     {player.name}
                     {player.is_current && (
-                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(jij)</span>
+                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                            (jij)
+                        </span>
                     )}
                 </span>
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="rounded bg-muted/70 px-1.5 py-0.5">{player.questions_count} vragen</span>
+                    <span className="rounded bg-muted/70 px-1.5 py-0.5">
+                        {player.questions_count} vragen
+                    </span>
                     {player.avg_wordle_guesses !== null && (
-                        <span className="rounded bg-muted/70 px-1.5 py-0.5">∅ {player.avg_wordle_guesses}</span>
+                        <span className="rounded bg-muted/70 px-1.5 py-0.5">
+                            ∅ {player.avg_wordle_guesses}
+                        </span>
                     )}
                 </div>
             </div>
 
             {/* Points */}
             <div className="shrink-0 text-right">
-                <span className="font-display text-xl font-bold text-foreground">{player.points}</span>
+                <span className="font-display text-xl font-bold text-foreground">
+                    {player.points}
+                </span>
                 <p className="text-xs text-muted-foreground">pts</p>
             </div>
         </div>
@@ -149,12 +162,12 @@ function PlayerRow({ player }: { player: PlayerData }) {
             data-testid={`player-row-${player.id}`}
             className={cn(
                 'relative flex items-center gap-3 py-3',
-                player.is_current && 'bg-primary/5'
+                player.is_current && 'bg-primary/5',
             )}
         >
             {/* Current player indicator */}
             {player.is_current && (
-                <span className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+                <span className="absolute top-1/2 left-0 h-6 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
             )}
 
             {/* Rank */}
@@ -180,13 +193,17 @@ function PlayerRow({ player }: { player: PlayerData }) {
                 <span className="block truncate text-sm font-medium text-foreground">
                     {player.name}
                     {player.is_current && (
-                        <span className="ml-1 text-xs text-muted-foreground">(jij)</span>
+                        <span className="ml-1 text-xs text-muted-foreground">
+                            (jij)
+                        </span>
                     )}
                 </span>
             </div>
 
             {/* Points */}
-            <span className="shrink-0 font-semibold text-foreground">{player.points}</span>
+            <span className="shrink-0 font-semibold text-foreground">
+                {player.points}
+            </span>
         </div>
     );
 }

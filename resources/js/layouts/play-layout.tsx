@@ -1,7 +1,7 @@
-import type { PropsWithChildren } from 'react';
-import { useCallback, useState } from 'react';
 import { BottomTabNav } from '@/components/bottom-tab-nav';
 import { TutorialModal } from '@/components/tutorial-modal';
+import type { PropsWithChildren } from 'react';
+import { useCallback, useState } from 'react';
 
 interface PlayLayoutProps extends PropsWithChildren {
     title?: string;
@@ -15,7 +15,7 @@ export default function PlayLayout({ children }: PlayLayoutProps) {
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
-            <main className="flex-1 pb-[calc(64px+var(--safe-bottom))] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
+            <main className="flex-1 pb-[calc(64px+var(--safe-bottom))] motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
                 {children}
             </main>
             <BottomTabNav onTutorialClick={openTutorial} />

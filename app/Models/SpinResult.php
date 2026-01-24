@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SpinResult extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'game_id',
         'player_id',

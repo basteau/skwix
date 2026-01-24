@@ -1,7 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
 import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Head, Link } from '@inertiajs/react';
 
 interface GameData {
     id: number;
@@ -31,20 +31,22 @@ export default function AdminDashboard({ games = [] }: Props) {
                     }
                 />
 
-                <main className="p-6 pb-safe">
+                <main className="pb-safe p-6">
                     {games.length === 0 ? (
                         <div className="mx-auto max-w-md py-12">
                             <div className="mb-8 flex justify-center">
                                 <div className="relative">
                                     <div className="flex gap-1">
-                                        {['S', 'T', 'A', 'R', 'T'].map((letter, i) => (
-                                            <div
-                                                key={i}
-                                                className="flex size-10 items-center justify-center rounded bg-primary/10 font-mono text-lg font-bold text-primary"
-                                            >
-                                                {letter}
-                                            </div>
-                                        ))}
+                                        {['S', 'T', 'A', 'R', 'T'].map(
+                                            (letter, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="flex size-10 items-center justify-center rounded bg-primary/10 font-mono text-lg font-bold text-primary"
+                                                >
+                                                    {letter}
+                                                </div>
+                                            ),
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -52,26 +54,41 @@ export default function AdminDashboard({ games = [] }: Props) {
                                 Begin je eerste spel
                             </h2>
                             <p className="mt-2 text-center text-sm leading-relaxed text-muted-foreground">
-                                Kies een geheim woord, nodig spelers uit, en plan wanneer het spel begint.
-                                Spelers raden het woord via Wordle-puzzels en ja/nee vragen.
+                                Kies een geheim woord, nodig spelers uit, en
+                                plan wanneer het spel begint. Spelers raden het
+                                woord via Wordle-puzzels en ja/nee vragen.
                             </p>
                             <div className="mt-6 space-y-2 text-sm">
                                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-2.5">
-                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">1</span>
-                                    <span className="text-foreground">Kies een 5-letter woord</span>
+                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                                        1
+                                    </span>
+                                    <span className="text-foreground">
+                                        Kies een 5-letter woord
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-2.5">
-                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">2</span>
-                                    <span className="text-foreground">Stel spelers + starttijd in</span>
+                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                                        2
+                                    </span>
+                                    <span className="text-foreground">
+                                        Stel spelers + starttijd in
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-2.5">
-                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">3</span>
-                                    <span className="text-foreground">Deel de uitnodigingscodes</span>
+                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                                        3
+                                    </span>
+                                    <span className="text-foreground">
+                                        Deel de uitnodigingscodes
+                                    </span>
                                 </div>
                             </div>
                             <div className="mt-8 text-center">
                                 <Link href="/admin/create">
-                                    <Button size="lg">Maak je eerste spel</Button>
+                                    <Button size="lg">
+                                        Maak je eerste spel
+                                    </Button>
                                 </Link>
                             </div>
                         </div>
@@ -111,13 +128,13 @@ function GameCard({ game }: { game: GameData }) {
             <div className="flex items-start justify-between">
                 <div>
                     <div className="flex items-center gap-2">
-                        <span className="font-mono text-lg font-semibold uppercase tracking-wider text-foreground">
+                        <span className="font-mono text-lg font-semibold tracking-wider text-foreground uppercase">
                             {game.secret_word}
                         </span>
                         <span
                             className={cn(
                                 'rounded-full px-2 py-0.5 text-xs font-medium',
-                                statusColors[game.status]
+                                statusColors[game.status],
                             )}
                         >
                             {statusLabels[game.status]}

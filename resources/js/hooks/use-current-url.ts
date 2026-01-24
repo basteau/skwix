@@ -1,6 +1,6 @@
+import { toUrl } from '@/lib/utils';
 import type { InertiaLinkProps } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { toUrl } from '@/lib/utils';
 
 export type IsCurrentUrlFn = (
     urlToCheck: NonNullable<InertiaLinkProps['href']>,
@@ -22,7 +22,9 @@ export type UseCurrentUrlReturn = {
 export function useCurrentUrl(): UseCurrentUrlReturn {
     const page = usePage();
     const origin =
-        typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+        typeof window !== 'undefined'
+            ? window.location.origin
+            : 'http://localhost';
     const currentUrlPath = new URL(page.url, origin).pathname;
 
     const isCurrentUrl: IsCurrentUrlFn = (

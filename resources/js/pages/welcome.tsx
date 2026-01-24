@@ -1,8 +1,8 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Head, useForm } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
 import { type FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 export default function Welcome() {
     const form = useForm({
@@ -31,24 +31,63 @@ export default function Welcome() {
                 />
 
                 {/* Snowflake decorations - 3 depth layers framing content */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+                <div
+                    className="pointer-events-none absolute inset-0 overflow-hidden"
+                    aria-hidden="true"
+                >
                     {/* Back layer - large, faint, edges */}
-                    <Snowflake className="absolute left-[5%] top-[8%] size-20 text-primary opacity-[0.03] motion-safe:animate-pulse" style={{ animationDuration: '6s' }} />
-                    <Snowflake className="absolute right-[3%] top-[15%] size-24 text-primary opacity-[0.03] motion-safe:animate-pulse" style={{ animationDuration: '8s' }} />
-                    <Snowflake className="absolute left-[8%] bottom-[12%] size-28 text-primary opacity-[0.03] motion-safe:animate-pulse" style={{ animationDuration: '7s' }} />
-                    <Snowflake className="absolute right-[5%] bottom-[8%] size-22 text-primary opacity-[0.03] motion-safe:animate-pulse" style={{ animationDuration: '9s' }} />
-                    
+                    <Snowflake
+                        className="absolute top-[8%] left-[5%] size-20 text-primary opacity-[0.03] motion-safe:animate-pulse"
+                        style={{ animationDuration: '6s' }}
+                    />
+                    <Snowflake
+                        className="absolute top-[15%] right-[3%] size-24 text-primary opacity-[0.03] motion-safe:animate-pulse"
+                        style={{ animationDuration: '8s' }}
+                    />
+                    <Snowflake
+                        className="absolute bottom-[12%] left-[8%] size-28 text-primary opacity-[0.03] motion-safe:animate-pulse"
+                        style={{ animationDuration: '7s' }}
+                    />
+                    <Snowflake
+                        className="absolute right-[5%] bottom-[8%] size-22 text-primary opacity-[0.03] motion-safe:animate-pulse"
+                        style={{ animationDuration: '9s' }}
+                    />
+
                     {/* Mid layer - medium, more visible */}
-                    <Snowflake className="absolute left-[12%] top-[25%] size-12 text-primary opacity-[0.06] motion-safe:animate-pulse" style={{ animationDuration: '5s' }} />
-                    <Snowflake className="absolute right-[10%] top-[35%] size-10 text-primary opacity-[0.06] motion-safe:animate-pulse" style={{ animationDuration: '6s' }} />
-                    <Snowflake className="absolute left-[15%] bottom-[30%] size-14 text-primary opacity-[0.06] motion-safe:animate-pulse" style={{ animationDuration: '7s' }} />
-                    <Snowflake className="absolute right-[12%] bottom-[25%] size-11 text-primary opacity-[0.06] motion-safe:animate-pulse" style={{ animationDuration: '5.5s' }} />
-                    
+                    <Snowflake
+                        className="absolute top-[25%] left-[12%] size-12 text-primary opacity-[0.06] motion-safe:animate-pulse"
+                        style={{ animationDuration: '5s' }}
+                    />
+                    <Snowflake
+                        className="absolute top-[35%] right-[10%] size-10 text-primary opacity-[0.06] motion-safe:animate-pulse"
+                        style={{ animationDuration: '6s' }}
+                    />
+                    <Snowflake
+                        className="absolute bottom-[30%] left-[15%] size-14 text-primary opacity-[0.06] motion-safe:animate-pulse"
+                        style={{ animationDuration: '7s' }}
+                    />
+                    <Snowflake
+                        className="absolute right-[12%] bottom-[25%] size-11 text-primary opacity-[0.06] motion-safe:animate-pulse"
+                        style={{ animationDuration: '5.5s' }}
+                    />
+
                     {/* Front layer - small, most visible, closer to center */}
-                    <Snowflake className="absolute left-[22%] top-[40%] size-6 text-primary opacity-[0.10] motion-safe:animate-pulse" style={{ animationDuration: '4s' }} />
-                    <Snowflake className="absolute right-[20%] top-[50%] size-5 text-primary opacity-[0.10] motion-safe:animate-pulse" style={{ animationDuration: '4.5s' }} />
-                    <Snowflake className="absolute left-[25%] bottom-[45%] size-7 text-primary opacity-[0.10] motion-safe:animate-pulse" style={{ animationDuration: '5s' }} />
-                    <Snowflake className="absolute right-[22%] bottom-[40%] size-6 text-primary opacity-[0.10] motion-safe:animate-pulse" style={{ animationDuration: '4.2s' }} />
+                    <Snowflake
+                        className="absolute top-[40%] left-[22%] size-6 text-primary opacity-[0.10] motion-safe:animate-pulse"
+                        style={{ animationDuration: '4s' }}
+                    />
+                    <Snowflake
+                        className="absolute top-[50%] right-[20%] size-5 text-primary opacity-[0.10] motion-safe:animate-pulse"
+                        style={{ animationDuration: '4.5s' }}
+                    />
+                    <Snowflake
+                        className="absolute bottom-[45%] left-[25%] size-7 text-primary opacity-[0.10] motion-safe:animate-pulse"
+                        style={{ animationDuration: '5s' }}
+                    />
+                    <Snowflake
+                        className="absolute right-[22%] bottom-[40%] size-6 text-primary opacity-[0.10] motion-safe:animate-pulse"
+                        style={{ animationDuration: '4.2s' }}
+                    />
                 </div>
 
                 {/* Main content */}
@@ -78,18 +117,27 @@ export default function Welcome() {
                                 type="text"
                                 value={form.data.code}
                                 onChange={(e) => {
-                                    form.setData('code', e.target.value.toUpperCase());
+                                    form.setData(
+                                        'code',
+                                        e.target.value.toUpperCase(),
+                                    );
                                     form.clearErrors('code');
                                 }}
                                 placeholder="Voer je code in"
-                                className="h-14 text-center font-mono text-lg tracking-[0.2em] uppercase placeholder:text-base placeholder:font-sans placeholder:tracking-normal placeholder:normal-case"
+                                className="h-14 text-center font-mono text-lg tracking-[0.2em] uppercase placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:normal-case"
                                 maxLength={16}
                                 autoComplete="off"
                                 aria-invalid={!!form.errors.code}
-                                aria-describedby={form.errors.code ? 'code-error' : undefined}
+                                aria-describedby={
+                                    form.errors.code ? 'code-error' : undefined
+                                }
                             />
                             {form.errors.code && (
-                                <p id="code-error" data-testid="code-error" className="text-sm text-destructive">
+                                <p
+                                    id="code-error"
+                                    data-testid="code-error"
+                                    className="text-sm text-destructive"
+                                >
                                     {form.errors.code}
                                 </p>
                             )}
@@ -99,7 +147,7 @@ export default function Welcome() {
                             type="submit"
                             size="lg"
                             data-testid="join-game-button"
-                            className="mt-3 w-full h-12 text-base font-semibold"
+                            className="mt-3 h-12 w-full text-base font-semibold"
                             disabled={!form.data.code.trim() || form.processing}
                         >
                             {form.processing ? 'Even kijken...' : 'Doe mee'}

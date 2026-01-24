@@ -11,7 +11,9 @@ interface UseClipboardReturn {
     reset: () => void;
 }
 
-export function useClipboard(options: UseClipboardOptions = {}): UseClipboardReturn {
+export function useClipboard(
+    options: UseClipboardOptions = {},
+): UseClipboardReturn {
     const { resetDelay = 2000 } = options;
     const [copiedText, setCopiedText] = useState<string | null>(null);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -51,7 +53,7 @@ export function useClipboard(options: UseClipboardOptions = {}): UseClipboardRet
                 return false;
             }
         },
-        [resetDelay, reset]
+        [resetDelay, reset],
     );
 
     useEffect(() => {

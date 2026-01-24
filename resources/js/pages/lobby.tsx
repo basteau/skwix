@@ -1,9 +1,9 @@
-import { Head, router } from '@inertiajs/react';
-import { Crown, Snowflake, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
+import { Head, router } from '@inertiajs/react';
+import { Crown, Snowflake, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Player {
     id: number;
@@ -26,7 +26,7 @@ interface LobbyProps {
 
 function formatCountdown(seconds: number): string {
     if (seconds <= 0) return 'Nu!';
-    
+
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -52,7 +52,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
     };
 
     const [countdown, setCountdown] = useState<number | null>(() =>
-        game?.starts_at ? calculateRemaining(game.starts_at) : null
+        game?.starts_at ? calculateRemaining(game.starts_at) : null,
     );
 
     useEffect(() => {
@@ -76,12 +76,15 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
             <Head title="Lobby - Skwix" />
             <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-6 py-12">
                 {/* Subtle snowflake decorations */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.06]" aria-hidden>
-                    <Snowflake className="absolute left-[8%] top-[12%] size-16 text-primary" />
-                    <Snowflake className="absolute right-[12%] top-[8%] size-10 text-primary" />
-                    <Snowflake className="absolute left-[15%] bottom-[15%] size-12 text-primary" />
+                <div
+                    className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.06]"
+                    aria-hidden
+                >
+                    <Snowflake className="absolute top-[12%] left-[8%] size-16 text-primary" />
+                    <Snowflake className="absolute top-[8%] right-[12%] size-10 text-primary" />
+                    <Snowflake className="absolute bottom-[15%] left-[15%] size-12 text-primary" />
                     <Snowflake className="absolute right-[8%] bottom-[25%] size-18 text-primary" />
-                    <Snowflake className="absolute left-[50%] top-[5%] size-8 text-primary" />
+                    <Snowflake className="absolute top-[5%] left-[50%] size-8 text-primary" />
                     <Snowflake className="absolute right-[30%] bottom-[10%] size-14 text-primary" />
                 </div>
 
@@ -90,22 +93,32 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     <div className="mb-8 flex flex-col items-center">
                         <div className="mb-4 flex items-center justify-center gap-3 text-primary">
                             <Users className="size-8" />
-                            <Snowflake className="size-6 animate-spin" style={{ animationDuration: '8s' }} />
+                            <Snowflake
+                                className="size-6 animate-spin"
+                                style={{ animationDuration: '8s' }}
+                            />
                         </div>
                         <h1 className="text-3xl font-bold text-foreground">
                             Wachten op spelers
                         </h1>
                         {player && (
                             <p className="mt-2 text-muted-foreground">
-                                Welkom, <span className="font-medium text-foreground">{player.name}</span>!
+                                Welkom,{' '}
+                                <span className="font-medium text-foreground">
+                                    {player.name}
+                                </span>
+                                !
                             </p>
                         )}
                     </div>
 
                     {/* Countdown */}
                     {countdown !== null && (
-                        <div data-testid="countdown" className="mb-10 rounded-xl bg-primary/5 px-6 py-4 border border-primary/10">
-                            <p className="text-sm text-muted-foreground mb-1">
+                        <div
+                            data-testid="countdown"
+                            className="mb-10 rounded-xl border border-primary/10 bg-primary/5 px-6 py-4"
+                        >
+                            <p className="mb-1 text-sm text-muted-foreground">
                                 Het spel begint over
                             </p>
                             <p className="text-3xl font-bold text-primary tabular-nums">
@@ -116,16 +129,19 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
 
                     {/* Players Grid */}
                     <div className="w-full">
-                        <h2 className="mb-4 text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                        <h2 className="mb-4 text-sm font-medium tracking-wide text-muted-foreground uppercase">
                             Aangemelde spelers ({players.length})
                         </h2>
-                        
+
                         {players.length > 0 ? (
-                            <div data-testid="player-list" className="grid grid-cols-2 gap-3">
+                            <div
+                                data-testid="player-list"
+                                className="grid grid-cols-2 gap-3"
+                            >
                                 {players.map((p, index) => {
                                     const isCurrentPlayer = p.id === player?.id;
                                     const isHost = index === 0;
-                                    
+
                                     return (
                                         <div
                                             key={p.id}
@@ -133,8 +149,11 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                             className={cn(
                                                 'relative flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm',
                                                 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
-                                                isCurrentPlayer && 'ring-2 ring-primary shadow-md',
-                                                isHost && !isCurrentPlayer && 'border-primary/30'
+                                                isCurrentPlayer &&
+                                                    'shadow-md ring-2 ring-primary',
+                                                isHost &&
+                                                    !isCurrentPlayer &&
+                                                    'border-primary/30',
                                             )}
                                             style={{
                                                 animationDelay: `${index * 100}ms`,
@@ -142,29 +161,45 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                             }}
                                         >
                                             {isHost && (
-                                                <Crown 
-                                                    className="absolute -top-2 -right-2 size-5 text-amber-500 drop-shadow-sm" 
+                                                <Crown
+                                                    className="absolute -top-2 -right-2 size-5 text-amber-500 drop-shadow-sm"
                                                     aria-label="Host"
                                                 />
                                             )}
-                                            <Avatar className={cn(
-                                                'size-10 border-2',
-                                                isCurrentPlayer ? 'border-primary' : 'border-border'
-                                            )}>
-                                                <AvatarImage src={p.avatar_url || undefined} alt={p.name} />
-                                                <AvatarFallback className={cn(
-                                                    'text-sm font-medium',
-                                                    isCurrentPlayer 
-                                                        ? 'bg-primary text-primary-foreground' 
-                                                        : 'bg-primary/10 text-primary'
-                                                )}>
+                                            <Avatar
+                                                className={cn(
+                                                    'size-10 border-2',
+                                                    isCurrentPlayer
+                                                        ? 'border-primary'
+                                                        : 'border-border',
+                                                )}
+                                            >
+                                                <AvatarImage
+                                                    src={
+                                                        p.avatar_url ||
+                                                        undefined
+                                                    }
+                                                    alt={p.name}
+                                                />
+                                                <AvatarFallback
+                                                    className={cn(
+                                                        'text-sm font-medium',
+                                                        isCurrentPlayer
+                                                            ? 'bg-primary text-primary-foreground'
+                                                            : 'bg-primary/10 text-primary',
+                                                    )}
+                                                >
                                                     {getInitials(p.name)}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <span className={cn(
-                                                'truncate text-sm font-medium',
-                                                isCurrentPlayer ? 'text-primary' : 'text-foreground'
-                                            )}>
+                                            <span
+                                                className={cn(
+                                                    'truncate text-sm font-medium',
+                                                    isCurrentPlayer
+                                                        ? 'text-primary'
+                                                        : 'text-foreground',
+                                                )}
+                                            >
                                                 {p.name}
                                             </span>
                                         </div>

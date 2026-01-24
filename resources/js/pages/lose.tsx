@@ -1,6 +1,6 @@
+import { Button } from '@/components/ui/button';
 import { Head, Link } from '@inertiajs/react';
 import { useMemo } from 'react';
-import { Button } from '@/components/ui/button';
 
 function seededRandom(seed: number) {
     const x = Math.sin(seed) * 10000;
@@ -35,7 +35,7 @@ export default function LosePage({ winner, player, game }: Props) {
                 fontSize: `${16 + seededRandom(i * 100 + 3) * 20}px`,
                 animationDelay: `${seededRandom(i * 100 + 4) * 2}s`,
             })),
-        []
+        [],
     );
 
     return (
@@ -47,7 +47,7 @@ export default function LosePage({ winner, player, game }: Props) {
                     {snowflakes.map((style, i) => (
                         <div
                             key={i}
-                            className="absolute text-muted-foreground/30 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-1000"
+                            className="absolute text-muted-foreground/30 motion-safe:animate-in motion-safe:duration-1000 motion-safe:fade-in"
                             style={style}
                         >
                             ❄
@@ -58,41 +58,61 @@ export default function LosePage({ winner, player, game }: Props) {
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center text-center">
                     {/* Heading - softer, encouraging */}
-                    <h1 data-testid="lose-title" className="text-3xl font-bold text-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-700">
+                    <h1
+                        data-testid="lose-title"
+                        className="text-3xl font-bold text-foreground motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
+                    >
                         Goed gespeeld!
                     </h1>
 
-                    <p className="mt-2 text-lg text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-safe:delay-100">
-                        Je eindigde op plek <span className="font-semibold text-foreground">{player.rank}</span> van {game.total_players} spelers
+                    <p className="mt-2 text-lg text-muted-foreground motion-safe:animate-in motion-safe:delay-100 motion-safe:duration-700 motion-safe:fade-in">
+                        Je eindigde op plek{' '}
+                        <span className="font-semibold text-foreground">
+                            {player.rank}
+                        </span>{' '}
+                        van {game.total_players} spelers
                     </p>
 
                     {/* Secret word reveal with winner inline */}
-                    <div data-testid="secret-word-reveal" className="mt-8 rounded-xl border border-border bg-card px-6 py-5 shadow-sm motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in motion-safe:duration-700 motion-safe:delay-200">
-                        <p className="text-sm text-muted-foreground">Het mystery woord was</p>
-                        <p className="mt-1 text-2xl font-bold uppercase tracking-widest text-foreground">
+                    <div
+                        data-testid="secret-word-reveal"
+                        className="mt-8 rounded-xl border border-border bg-card px-6 py-5 shadow-sm motion-safe:animate-in motion-safe:delay-200 motion-safe:duration-700 motion-safe:fade-in motion-safe:zoom-in"
+                    >
+                        <p className="text-sm text-muted-foreground">
+                            Het mystery woord was
+                        </p>
+                        <p className="mt-1 text-2xl font-bold tracking-widest text-foreground uppercase">
                             {game.secret_word}
                         </p>
                         <p className="mt-3 text-sm text-muted-foreground">
-                            Geraden door <span data-testid="winner-name" className="font-medium text-foreground">{winner.name}</span>
+                            Geraden door{' '}
+                            <span
+                                data-testid="winner-name"
+                                className="font-medium text-foreground"
+                            >
+                                {winner.name}
+                            </span>
                         </p>
                     </div>
 
                     {/* Player stats with context */}
-                    <div className="mt-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-safe:delay-300">
+                    <div className="mt-6 motion-safe:animate-in motion-safe:delay-300 motion-safe:duration-700 motion-safe:fade-in">
                         <p className="text-muted-foreground">Jouw eindscore</p>
-                        <p className="text-3xl font-bold text-foreground tabular-nums">{player.points}</p>
+                        <p className="text-3xl font-bold text-foreground tabular-nums">
+                            {player.points}
+                        </p>
                         <p className="text-sm text-muted-foreground">punten</p>
                     </div>
 
                     {/* CTA */}
-                    <div className="mt-10 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-safe:delay-400">
+                    <div className="mt-10 motion-safe:animate-in motion-safe:delay-400 motion-safe:duration-700 motion-safe:fade-in">
                         <Button asChild size="lg">
                             <Link href="/">Terug naar start</Link>
                         </Button>
                     </div>
 
                     {/* Encouragement */}
-                    <p className="mt-6 text-sm text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-safe:delay-500">
+                    <p className="mt-6 text-sm text-muted-foreground motion-safe:animate-in motion-safe:delay-500 motion-safe:duration-700 motion-safe:fade-in">
                         Bedankt voor het meespelen!
                     </p>
                 </div>

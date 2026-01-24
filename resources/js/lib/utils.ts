@@ -11,5 +11,8 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
 }
 
 export function getCsrfToken(): string {
-    return document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+    return (
+        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+            ?.content ?? ''
+    );
 }

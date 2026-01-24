@@ -1,5 +1,3 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useCallback, useState } from 'react';
 import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +9,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Head, router } from '@inertiajs/react';
+import { useCallback, useState } from 'react';
 
 interface PlayerData {
     id: number;
@@ -44,7 +44,9 @@ export default function AdminGameDetail({ game, players }: Props) {
     const [wordleWords, setWordleWords] = useState<string[]>(game.wordle_words);
     const [isUpdatingWords, setIsUpdatingWords] = useState(false);
     const [isEndingGame, setIsEndingGame] = useState(false);
-    const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(null);
+    const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(
+        null,
+    );
 
     const statusColors: Record<string, string> = {
         pending: 'bg-warning/15 text-[oklch(45%_0.15_85)]',
@@ -59,7 +61,9 @@ export default function AdminGameDetail({ game, players }: Props) {
     };
 
     const updateWordleWord = useCallback((index: number, value: string) => {
-        setWordleWords((prev) => prev.map((w, i) => (i === index ? value.toLowerCase() : w)));
+        setWordleWords((prev) =>
+            prev.map((w, i) => (i === index ? value.toLowerCase() : w)),
+        );
     }, []);
 
     const handleSaveWordleWords = useCallback(() => {
@@ -69,7 +73,7 @@ export default function AdminGameDetail({ game, players }: Props) {
             { wordle_words: wordleWords },
             {
                 onFinish: () => setIsUpdatingWords(false),
-            }
+            },
         );
     }, [game.id, wordleWords]);
 
@@ -81,7 +85,7 @@ export default function AdminGameDetail({ game, players }: Props) {
             { winner_id: selectedWinnerId },
             {
                 onFinish: () => setIsEndingGame(false),
-            }
+            },
         );
     }, [game.id, selectedWinnerId]);
 
@@ -95,12 +99,15 @@ export default function AdminGameDetail({ game, players }: Props) {
                 <AdminHeader
                     title={game.secret_word}
                     backHref="/admin"
-                    breadcrumbs={[{ label: 'Spellen', href: '/admin' }, { label: game.secret_word }]}
+                    breadcrumbs={[
+                        { label: 'Spellen', href: '/admin' },
+                        { label: game.secret_word },
+                    ]}
                     badge={
                         <span
                             className={cn(
                                 'rounded-full px-2.5 py-1 text-xs font-medium',
-                                statusColors[game.status]
+                                statusColors[game.status],
                             )}
                         >
                             {statusLabels[game.status]}
@@ -112,49 +119,69 @@ export default function AdminGameDetail({ game, players }: Props) {
                     <div className="space-y-8">
                         {/* Game Info */}
                         <section className="rounded-lg border border-border bg-card p-6">
-                            <h2 className="mb-4 text-lg font-semibold text-foreground">Spel Info</h2>
+                            <h2 className="mb-4 text-lg font-semibold text-foreground">
+                                Spel Info
+                            </h2>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <span className="text-sm text-muted-foreground">Geheim Woord</span>
+                                    <span className="text-sm text-muted-foreground">
+                                        Geheim Woord
+                                    </span>
                                     <p className="font-mono text-lg font-semibold uppercase">
                                         {game.secret_word}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-sm text-muted-foreground">Aantal Spelers</span>
-                                    <p className="text-lg font-semibold">{players.length}</p>
+                                    <span className="text-sm text-muted-foreground">
+                                        Aantal Spelers
+                                    </span>
+                                    <p className="text-lg font-semibold">
+                                        {players.length}
+                                    </p>
                                 </div>
                                 {startsAt && (
                                     <div>
-                                        <span className="text-sm text-muted-foreground">Start</span>
+                                        <span className="text-sm text-muted-foreground">
+                                            Start
+                                        </span>
                                         <p className="font-medium">
-                                            {startsAt.toLocaleDateString('nl-BE', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
+                                            {startsAt.toLocaleDateString(
+                                                'nl-BE',
+                                                {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                },
+                                            )}
                                         </p>
                                     </div>
                                 )}
                                 {endsAt && (
                                     <div>
-                                        <span className="text-sm text-muted-foreground">Einde</span>
+                                        <span className="text-sm text-muted-foreground">
+                                            Einde
+                                        </span>
                                         <p className="font-medium">
-                                            {endsAt.toLocaleDateString('nl-BE', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
+                                            {endsAt.toLocaleDateString(
+                                                'nl-BE',
+                                                {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                },
+                                            )}
                                         </p>
                                     </div>
                                 )}
                                 {game.winner && (
                                     <div className="sm:col-span-2">
-                                        <span className="text-sm text-muted-foreground">Winnaar</span>
+                                        <span className="text-sm text-muted-foreground">
+                                            Winnaar
+                                        </span>
                                         <p className="text-lg font-semibold text-green-600">
                                             🏆 {game.winner.name}
                                         </p>
@@ -176,10 +203,17 @@ export default function AdminGameDetail({ game, players }: Props) {
                                         </label>
                                         <Input
                                             value={word}
-                                            onChange={(e) => updateWordleWord(i, e.target.value)}
+                                            onChange={(e) =>
+                                                updateWordleWord(
+                                                    i,
+                                                    e.target.value,
+                                                )
+                                            }
                                             maxLength={5}
                                             className="font-mono uppercase"
-                                            disabled={game.status === 'completed'}
+                                            disabled={
+                                                game.status === 'completed'
+                                            }
                                         />
                                     </div>
                                 ))}
@@ -190,7 +224,9 @@ export default function AdminGameDetail({ game, players }: Props) {
                                     disabled={isUpdatingWords}
                                     className="mt-4"
                                 >
-                                    {isUpdatingWords ? 'Opslaan...' : 'Woorden Opslaan'}
+                                    {isUpdatingWords
+                                        ? 'Opslaan...'
+                                        : 'Woorden Opslaan'}
                                 </Button>
                             )}
                         </section>
@@ -206,10 +242,14 @@ export default function AdminGameDetail({ game, players }: Props) {
                                         key={player.id}
                                         className={cn(
                                             'rounded-lg border p-4',
-                                            index === 0 && 'border-amber-300/50 bg-amber-50 dark:border-amber-700/50 dark:bg-amber-900/20',
-                                            index === 1 && 'border-zinc-300/50 bg-zinc-50 dark:border-zinc-600/50 dark:bg-zinc-800/30',
-                                            index === 2 && 'border-orange-300/50 bg-orange-50 dark:border-orange-700/50 dark:bg-orange-900/20',
-                                            index > 2 && 'border-border bg-background'
+                                            index === 0 &&
+                                                'border-amber-300/50 bg-amber-50 dark:border-amber-700/50 dark:bg-amber-900/20',
+                                            index === 1 &&
+                                                'border-zinc-300/50 bg-zinc-50 dark:border-zinc-600/50 dark:bg-zinc-800/30',
+                                            index === 2 &&
+                                                'border-orange-300/50 bg-orange-50 dark:border-orange-700/50 dark:bg-orange-900/20',
+                                            index > 2 &&
+                                                'border-border bg-background',
                                         )}
                                     >
                                         {/* Player info row */}
@@ -240,25 +280,33 @@ export default function AdminGameDetail({ game, players }: Props) {
                                                 <p className="font-semibold text-foreground">
                                                     {player.points}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">Punten</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Punten
+                                                </p>
                                             </div>
                                             <div className="text-center">
                                                 <p className="font-semibold text-foreground">
                                                     {player.wordle_completed}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">Wordles</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Wordles
+                                                </p>
                                             </div>
                                             <div className="text-center">
                                                 <p className="font-semibold text-foreground">
                                                     {player.questions_asked}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">Vragen</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Vragen
+                                                </p>
                                             </div>
                                             <div className="text-center">
                                                 <p className="font-semibold text-foreground">
                                                     {player.spins_count}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">Spins</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Spins
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -273,26 +321,41 @@ export default function AdminGameDetail({ game, players }: Props) {
                                     Spel Beëindigen
                                 </h2>
                                 <p className="mb-4 text-sm text-muted-foreground">
-                                    Beëindig het spel handmatig. Selecteer optioneel een winnaar.
+                                    Beëindig het spel handmatig. Selecteer
+                                    optioneel een winnaar.
                                 </p>
                                 <div className="mb-4">
                                     <label className="mb-2 block text-sm font-medium">
                                         Winnaar selecteren (optioneel)
                                     </label>
                                     <Select
-                                        value={selectedWinnerId ? String(selectedWinnerId) : ''}
+                                        value={
+                                            selectedWinnerId
+                                                ? String(selectedWinnerId)
+                                                : ''
+                                        }
                                         onValueChange={(value) =>
-                                            setSelectedWinnerId(value ? parseInt(value, 10) : null)
+                                            setSelectedWinnerId(
+                                                value
+                                                    ? parseInt(value, 10)
+                                                    : null,
+                                            )
                                         }
                                     >
                                         <SelectTrigger className="max-w-xs">
                                             <SelectValue placeholder="Geen winnaar" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">Geen winnaar</SelectItem>
+                                            <SelectItem value="">
+                                                Geen winnaar
+                                            </SelectItem>
                                             {players.map((player) => (
-                                                <SelectItem key={player.id} value={String(player.id)}>
-                                                    {player.name} ({player.points} punten)
+                                                <SelectItem
+                                                    key={player.id}
+                                                    value={String(player.id)}
+                                                >
+                                                    {player.name} (
+                                                    {player.points} punten)
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -303,7 +366,9 @@ export default function AdminGameDetail({ game, players }: Props) {
                                     onClick={handleEndGame}
                                     disabled={isEndingGame}
                                 >
-                                    {isEndingGame ? 'Beëindigen...' : 'Spel Beëindigen'}
+                                    {isEndingGame
+                                        ? 'Beëindigen...'
+                                        : 'Spel Beëindigen'}
                                 </Button>
                             </section>
                         )}
