@@ -6,7 +6,7 @@
 - [x] **Guess Game** - `/play/guess` - Question asking flow, answer feedback (verified: FakeAIService returns yes/no, points deducted)
 - [x] **Fortune Wheel** - `/play/fortune` - Spin action, prize display, animation (verified: wheel spins, 2× win shows +97, points doubled)
 - [x] **Players View** - `/play/players` - Player list display, scores (verified: shows Test Player with 194 pts, 🥇 medal)
-- [ ] **Win/Lose Screens** - `/win`, `/lose` - Requires completed game with winner (skipped - no completed games in test data)
+- [x] **Win/Lose Screens** - `/win`, `/lose` - Requires completed game with winner (verified: win shows 🏆 GEWONNEN, winner name, secret word SNEEUW, points, QR code; lose shows Goed gespeeld!, rank 2/2, winner name, Terug naar start button)
 - [x] **Admin Dashboard** - `/admin` - Game overview, stats display, navigation (verified: shows games list with status badges)
 - [x] **Admin Game Creation** - `/admin/create` - Form with mystery word, date picker, wordle words with shuffle
 - [x] **Admin Game Management** - `/admin/game/{id}` - Wordle word editing, player stats, end game with winner selector
