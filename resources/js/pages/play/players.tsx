@@ -44,99 +44,152 @@ export default function PlayersPage({ player, game, players = [], error }: Props
         );
     }
 
+    const podium = players.filter(p => p.rank <= 3);
+    const others = players.filter(p => p.rank > 3);
+
     return (
         <PlayLayout>
             <Head title="Spelers" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-safe">
-                    <span className="text-sm font-medium text-foreground">Ranglijst</span>
-                    <span className="font-semibold text-foreground">{player?.points ?? 0} punten</span>
+                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
+                    <span className="font-display text-lg font-bold text-foreground">Ranglijst</span>
+                    <span className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                        {player?.points ?? 0} punten
+                    </span>
                 </header>
 
                 {/* Players List */}
                 <div className="flex-1 overflow-y-auto px-4 py-4">
-                    <div className="space-y-3">
-                        {players.map((p) => (
-                            <PlayerCard key={p.id} player={p} />
-                        ))}
-                    </div>
+                    {/* Podium Section */}
+                    {podium.length > 0 && (
+                        <div className="mb-6 space-y-2">
+                            {podium.map((p) => (
+                                <PodiumCard key={p.id} player={p} />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Separator */}
+                    {podium.length > 0 && others.length > 0 && (
+                        <div className="mb-4 border-t border-border" />
+                    )}
+
+                    {/* Others */}
+                    {others.length > 0 && (
+                        <div className="divide-y divide-border">
+                            {others.map((p) => (
+                                <PlayerRow key={p.id} player={p} />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </PlayLayout>
     );
 }
 
-function PlayerCard({ player }: { player: PlayerData }) {
+function PodiumCard({ player }: { player: PlayerData }) {
     const initials = getInitials(player.name);
+    const medals = ['🥇', '🥈', '🥉'];
+    const medal = medals[player.rank - 1];
 
     return (
         <div
             className={cn(
-                'flex items-center gap-3 rounded-lg border border-border bg-card p-3',
-                player.is_current && 'border-primary bg-primary/5'
+                'relative flex items-center gap-4 rounded-xl px-4 py-3',
+                player.rank === 1 && 'bg-amber-50 dark:bg-amber-900/20',
+                player.rank === 2 && 'bg-zinc-50 dark:bg-zinc-800/30',
+                player.rank === 3 && 'bg-orange-50 dark:bg-orange-900/20',
+                player.is_current && 'ring-2 ring-primary ring-offset-2'
             )}
         >
-            {/* Rank Badge */}
-            <RankBadge rank={player.rank} />
+            {/* Medal */}
+            <span className="text-2xl">{medal}</span>
 
             {/* Avatar */}
             {player.avatar_url ? (
                 <img
                     src={player.avatar_url}
                     alt={player.name}
-                    className="size-12 shrink-0 rounded-full border-2 border-border object-cover"
+                    className="size-11 shrink-0 rounded-full border-2 border-background object-cover shadow-sm"
                 />
             ) : (
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-border bg-primary-light text-sm font-semibold text-primary">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-background bg-primary-light text-sm font-semibold text-primary shadow-sm">
                     {initials}
                 </div>
             )}
 
             {/* Info */}
             <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                    <span className="truncate font-medium text-foreground">
-                        {player.name}
-                        {player.is_current && (
-                            <span className="ml-1 text-xs text-muted-foreground">(jij)</span>
-                        )}
-                    </span>
-                </div>
-                <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{player.questions_count} vragen</span>
+                <span className="block truncate font-semibold text-foreground">
+                    {player.name}
+                    {player.is_current && (
+                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(jij)</span>
+                    )}
+                </span>
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="rounded bg-muted/70 px-1.5 py-0.5">{player.questions_count} vragen</span>
                     {player.avg_wordle_guesses !== null && (
-                        <span>∅ {player.avg_wordle_guesses} wordle</span>
+                        <span className="rounded bg-muted/70 px-1.5 py-0.5">∅ {player.avg_wordle_guesses}</span>
                     )}
                 </div>
             </div>
 
             {/* Points */}
             <div className="shrink-0 text-right">
-                <span className="text-lg font-bold text-foreground">{player.points}</span>
-                <p className="text-xs text-muted-foreground">punten</p>
+                <span className="font-display text-xl font-bold text-foreground">{player.points}</span>
+                <p className="text-xs text-muted-foreground">pts</p>
             </div>
         </div>
     );
 }
 
-function RankBadge({ rank }: { rank: number }) {
-    const colors: Record<number, string> = {
-        1: 'bg-amber-400 text-amber-950',
-        2: 'bg-gray-300 text-gray-800',
-        3: 'bg-amber-600 text-amber-50',
-    };
-
-    const bgColor = colors[rank] ?? 'bg-muted text-muted-foreground';
+function PlayerRow({ player }: { player: PlayerData }) {
+    const initials = getInitials(player.name);
 
     return (
         <div
             className={cn(
-                'flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold',
-                bgColor
+                'relative flex items-center gap-3 py-3',
+                player.is_current && 'bg-primary/5'
             )}
         >
-            {rank}
+            {/* Current player indicator */}
+            {player.is_current && (
+                <span className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+            )}
+
+            {/* Rank */}
+            <span className="w-6 shrink-0 text-center text-sm font-medium text-muted-foreground">
+                {player.rank}
+            </span>
+
+            {/* Avatar */}
+            {player.avatar_url ? (
+                <img
+                    src={player.avatar_url}
+                    alt={player.name}
+                    className="size-9 shrink-0 rounded-full object-cover"
+                />
+            ) : (
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-semibold text-primary">
+                    {initials}
+                </div>
+            )}
+
+            {/* Info */}
+            <div className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-foreground">
+                    {player.name}
+                    {player.is_current && (
+                        <span className="ml-1 text-xs text-muted-foreground">(jij)</span>
+                    )}
+                </span>
+            </div>
+
+            {/* Points */}
+            <span className="shrink-0 font-semibold text-foreground">{player.points}</span>
         </div>
     );
 }
