@@ -284,6 +284,8 @@ export default function GuessPage({
 
     const questionsRemaining = Math.floor(points / QUESTION_COST);
 
+    const inputAreaHeight = points < QUESTION_COST ? '9rem' : '7rem';
+
     return (
         <PlayLayout>
             <Head title="Vraag" />
@@ -332,8 +334,12 @@ export default function GuessPage({
                     </div>
                 )}
 
-                {/* Question History */}
-                <div ref={listRef} className="relative flex-1 overflow-y-auto">
+                {/* Question History - scrollable area with padding for fixed input */}
+                <div
+                    ref={listRef}
+                    className="relative flex-1 overflow-y-auto"
+                    style={{ paddingBottom: inputAreaHeight }}
+                >
                     {questions.length === 0 && !pendingQuestion ? (
                         <EmptyState questionsRemaining={questionsRemaining} />
                     ) : (
@@ -359,8 +365,11 @@ export default function GuessPage({
                     )}
                 </div>
 
-                {/* Input Area */}
-                <div className="relative z-10 border-t border-border/80 bg-gradient-to-b from-card to-background px-4 pt-4 pb-[calc(var(--safe-bottom)+1rem)]">
+                {/* Fixed Input Area - positioned above bottom nav */}
+                <div
+                    className="fixed inset-x-0 z-20 border-t border-border/80 bg-gradient-to-b from-card to-background px-4 pt-4 pb-4"
+                    style={{ bottom: 'calc(64px + var(--safe-bottom))' }}
+                >
                     {/* Question cost indicator */}
                     <div className="mb-3 flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
