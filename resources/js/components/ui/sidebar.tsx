@@ -38,7 +38,7 @@ type SidebarContext = {
   setOpen: (open: boolean) => void
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
-  isMobile: boolean
+  isMobile: boolean | undefined
   toggleSidebar: () => void
 }
 
@@ -90,7 +90,7 @@ function SidebarProvider({
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
+    return isMobile === true ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
   // Adds a keyboard shortcut to toggle the sidebar.
@@ -180,7 +180,7 @@ function Sidebar({
     )
   }
 
-  if (isMobile) {
+  if (isMobile === true) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetHeader className="sr-only">
@@ -270,7 +270,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      {isMobile || state === "collapsed" ? <PanelLeftOpenIcon /> : <PanelLeftCloseIcon />}
+      {isMobile === true || state === "collapsed" ? <PanelLeftOpenIcon /> : <PanelLeftCloseIcon />}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
