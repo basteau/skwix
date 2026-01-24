@@ -8,9 +8,11 @@ use Carbon\Carbon;
 
 class GameService
 {
+    private const TIMEZONE = 'Europe/Brussels';
+
     public function isWordleAvailable(Game $game): bool
     {
-        $now = Carbon::now('Europe/Amsterdam');
+        $now = Carbon::now(self::TIMEZONE);
         $unlockTime = $now->copy()->setTime(8, 0, 0);
 
         if ($now->lt($unlockTime)) {
@@ -26,8 +28,8 @@ class GameService
             return 0;
         }
 
-        $startDate = $game->starts_at->copy()->setTimezone('Europe/Amsterdam')->startOfDay();
-        $today = Carbon::now('Europe/Amsterdam')->startOfDay();
+        $startDate = $game->starts_at->copy()->setTimezone(self::TIMEZONE)->startOfDay();
+        $today = Carbon::now(self::TIMEZONE)->startOfDay();
 
         return (int) $startDate->diffInDays($today) + 1;
     }

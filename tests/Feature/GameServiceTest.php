@@ -14,10 +14,10 @@ beforeEach(function () {
 
 describe('getDayNumber', function () {
     it('returns 1 on the first day of the game', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Amsterdam'));
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create([
-            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Amsterdam'),
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
             'status' => 'active',
         ]);
 
@@ -25,10 +25,10 @@ describe('getDayNumber', function () {
     });
 
     it('returns 3 on the third day of the game', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 26, 10, 0, 0, 'Europe/Amsterdam'));
+        Carbon::setTestNow(Carbon::create(2026, 1, 26, 10, 0, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create([
-            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Amsterdam'),
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
             'status' => 'active',
         ]);
 
@@ -37,16 +37,16 @@ describe('getDayNumber', function () {
 });
 
 describe('isWordleAvailable', function () {
-    it('returns false before 8:00 AM CET', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 24, 7, 59, 0, 'Europe/Amsterdam'));
+    it('returns false before 8:00 AM Brussels time', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 7, 59, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create(['status' => 'active']);
 
         expect($this->gameService->isWordleAvailable($game))->toBeFalse();
     });
 
-    it('returns true after 8:00 AM CET for active game', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 24, 8, 1, 0, 'Europe/Amsterdam'));
+    it('returns true after 8:00 AM Brussels time for active game', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 8, 1, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create(['status' => 'active']);
 
@@ -54,7 +54,7 @@ describe('isWordleAvailable', function () {
     });
 
     it('returns false for non-active game', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Amsterdam'));
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create(['status' => 'pending']);
 
@@ -64,10 +64,10 @@ describe('isWordleAvailable', function () {
 
 describe('getCurrentWordleWord', function () {
     it('returns the correct word for the current day', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Amsterdam'));
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create([
-            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Amsterdam'),
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['woord', 'appel', 'tafel'],
         ]);
 
@@ -75,10 +75,10 @@ describe('getCurrentWordleWord', function () {
     });
 
     it('returns second word on day 2', function () {
-        Carbon::setTestNow(Carbon::create(2026, 1, 25, 10, 0, 0, 'Europe/Amsterdam'));
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 10, 0, 0, 'Europe/Brussels'));
 
         $game = Game::factory()->create([
-            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Amsterdam'),
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['woord', 'appel', 'tafel'],
         ]);
 

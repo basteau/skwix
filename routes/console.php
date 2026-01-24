@@ -14,5 +14,5 @@ Schedule::command('game:activate-pending')
 
 Schedule::command('game:notify-wordle')
     ->dailyAt('08:00')
-    ->timezone('Europe/Amsterdam')
-    ->description('Daily Wordle notification at 8:00 AM CET');
+    ->timezone('Europe/Brussels')
+    ->description('Daily Wordle notification at 8:00 AM Brussels time');
