@@ -3,6 +3,7 @@
 use App\Http\Controllers\FortuneController;
 use App\Http\Controllers\GuessController;
 use App\Http\Controllers\LobbyController;
+use App\Http\Controllers\PlayersController;
 use App\Http\Controllers\WordleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,7 +27,7 @@ Route::middleware('auth')->prefix('play')->name('play.')->group(function () {
     Route::post('guess/ask', [GuessController::class, 'ask'])->name('guess.ask');
     Route::get('fortune', [FortuneController::class, 'show'])->name('fortune');
     Route::post('fortune/spin', [FortuneController::class, 'spin'])->name('fortune.spin');
-    Route::get('players', fn () => Inertia::render('play/players'))->name('players');
+    Route::get('players', [PlayersController::class, 'show'])->name('players');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
