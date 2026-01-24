@@ -2,8 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { Crown, Snowflake, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertCircle, Crown, Snowflake, Users } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Player {
     id: number;
@@ -54,6 +54,37 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
     const [countdown, setCountdown] = useState<number | null>(() =>
         game?.starts_at ? calculateRemaining(game.starts_at) : null,
     );
+    const [statusMessage, setStatusMessage] = useState<string | null>(null);
+    const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    useEffect(() => {
+        if (!game) return;
+
+        if (game.status === 'active') {
+            router.visit('/play/wordle');
+            return;
+        }
+
+        if (game.status === 'completed') {
+            setStatusMessage('Dit spel is al afgelopen.');
+            return;
+        }
+
+        if (game.status === 'draft' || game.status === 'cancelled') {
+            setStatusMessage('Dit spel is geannuleerd.');
+            return;
+        }
+
+        pollIntervalRef.current = setInterval(() => {
+            router.reload({ only: ['game', 'players'] });
+        }, 7000);
+
+        return () => {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+            }
+        };
+    }, [game?.status]);
 
     useEffect(() => {
         if (!game?.starts_at) return;
@@ -112,8 +143,21 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                         )}
                     </div>
 
+                    {/* Status message for cancelled/completed games */}
+                    {statusMessage && (
+                        <div
+                            data-testid="status-message"
+                            className="mb-10 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/10 px-6 py-4"
+                        >
+                            <AlertCircle className="size-5 text-destructive" />
+                            <p className="text-sm font-medium text-destructive">
+                                {statusMessage}
+                            </p>
+                        </div>
+                    )}
+
                     {/* Countdown */}
-                    {countdown !== null && (
+                    {countdown !== null && !statusMessage && (
                         <div
                             data-testid="countdown"
                             className="mb-10 rounded-xl border border-primary/10 bg-primary/5 px-6 py-4"
@@ -216,9 +260,11 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     </div>
 
                     {/* Footer hint */}
-                    <p className="mt-10 text-sm text-muted-foreground">
-                        Blijf hier wachten — je wordt automatisch doorgestuurd.
-                    </p>
+                    {!statusMessage && (
+                        <p className="mt-10 text-sm text-muted-foreground">
+                            Blijf hier wachten — je wordt automatisch doorgestuurd.
+                        </p>
+                    )}
                 </main>
             </div>
         </>
