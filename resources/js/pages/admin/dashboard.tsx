@@ -72,7 +72,10 @@ function GameCard({ game }: { game: GameData }) {
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
 
     return (
-        <div className="rounded-lg border border-border bg-card p-4">
+        <Link
+            href={`/admin/game/${game.id}`}
+            className="block rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-card/80"
+        >
             <div className="flex items-start justify-between">
                 <div>
                     <div className="flex items-center gap-2">
@@ -104,6 +107,6 @@ function GameCard({ game }: { game: GameData }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }

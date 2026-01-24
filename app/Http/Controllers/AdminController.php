@@ -110,4 +110,80 @@ class AdminController extends Controller
 
         return response()->json(['words' => $words]);
     }
+
+    public function showGame(Game $game): Response
+    {
+        $game->load(['players', 'winner', 'wordleAttempts', 'spinResults', 'questions']);
+
+        $players = $game->players
+            ->sortByDesc('points')
+            ->values()
+            ->map(fn ($player) => [
+                'id' => $player->id,
+                'name' => $player->name,
+                'email' => $player->email,
+                'avatar_url' => $player->avatar_url,
+                'points' => $player->points,
+                'invite_code' => $player->invite_code,
+                'joined_at' => $player->joined_at?->toISOString(),
+                'wordle_completed' => $game->wordleAttempts->where('player_id', $player->id)->where('completed', true)->count(),
+                'questions_asked' => $game->questions->where('player_id', $player->id)->count(),
+                'spins_count' => $game->spinResults->where('player_id', $player->id)->count(),
+            ]);
+
+        return Inertia::render('admin/game', [
+            'game' => [
+                'id' => $game->id,
+                'secret_word' => $game->secret_word,
+                'status' => $game->status,
+                'starts_at' => $game->starts_at?->toISOString(),
+                'ends_at' => $game->ends_at?->toISOString(),
+                'wordle_words' => $game->wordle_words ?? [],
+                'winner' => $game->winner ? [
+                    'id' => $game->winner->id,
+                    'name' => $game->winner->name,
+                ] : null,
+            ],
+            'players' => $players,
+        ]);
+    }
+
+    public function updateWordleWords(Request $request, Game $game): RedirectResponse
+    {
+        $request->validate([
+            'wordle_words' => 'required|array|min:4|max:6',
+            'wordle_words.*' => 'string|size:5',
+        ]);
+
+        $game->update([
+            'wordle_words' => array_map('strtolower', $request->wordle_words),
+        ]);
+
+        return redirect()
+            ->route('admin.game', $game)
+            ->with('success', 'Wordle woorden bijgewerkt');
+    }
+
+    public function endGame(Request $request, Game $game): RedirectResponse
+    {
+        if ($game->status === 'completed') {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Spel is al beëindigd');
+        }
+
+        $request->validate([
+            'winner_id' => 'nullable|exists:players,id',
+        ]);
+
+        $game->update([
+            'status' => 'completed',
+            'winner_id' => $request->winner_id,
+            'ends_at' => Carbon::now(),
+        ]);
+
+        return redirect()
+            ->route('admin.game', $game)
+            ->with('success', 'Spel beëindigd');
+    }
 }
