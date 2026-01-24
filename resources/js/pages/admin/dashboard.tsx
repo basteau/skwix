@@ -1,12 +1,16 @@
 import { AdminHeader } from '@/components/admin-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/react';
+import { Clock, Mail, Play, Trophy, Users } from 'lucide-react';
+
+type GameStatus = 'draft' | 'pending' | 'active' | 'completed';
 
 interface GameData {
     id: number;
     secret_word: string;
-    status: 'pending' | 'active' | 'completed';
+    status: GameStatus;
     player_count: number;
     starts_at: string | null;
     created_at: string;
@@ -105,19 +109,44 @@ export default function AdminDashboard({ games = [] }: Props) {
     );
 }
 
+const statusConfig: Record<
+    GameStatus,
+    {
+        label: string;
+        className: string;
+        icon: typeof Mail;
+        hint: string;
+    }
+> = {
+    draft: {
+        label: 'Concept',
+        className: 'bg-warning/15 text-[oklch(45%_0.15_85)] border-warning/30',
+        icon: Mail,
+        hint: 'Nodig spelers uit',
+    },
+    pending: {
+        label: 'Uitgenodigd',
+        className: 'bg-primary/15 text-primary border-primary/30',
+        icon: Clock,
+        hint: 'Wacht op starttijd',
+    },
+    active: {
+        label: 'Actief',
+        className: 'bg-success/15 text-[oklch(40%_0.15_145)] border-success/30',
+        icon: Play,
+        hint: 'Spel is bezig',
+    },
+    completed: {
+        label: 'Voltooid',
+        className: 'bg-muted text-muted-foreground border-border',
+        icon: Trophy,
+        hint: 'Spel afgelopen',
+    },
+};
+
 function GameCard({ game }: { game: GameData }) {
-    const statusColors: Record<string, string> = {
-        pending: 'bg-warning/15 text-[oklch(45%_0.15_85)]',
-        active: 'bg-success/15 text-[oklch(40%_0.15_145)]',
-        completed: 'bg-muted text-muted-foreground',
-    };
-
-    const statusLabels: Record<string, string> = {
-        pending: 'Wachtend',
-        active: 'Actief',
-        completed: 'Voltooid',
-    };
-
+    const config = statusConfig[game.status];
+    const StatusIcon = config.icon;
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
 
     return (
@@ -125,26 +154,28 @@ function GameCard({ game }: { game: GameData }) {
             href={`/admin/game/${game.id}`}
             className="block rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-card/80"
         >
-            <div className="flex items-start justify-between">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-mono text-lg font-semibold tracking-wider text-foreground uppercase">
+            <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-lg font-semibold uppercase tracking-wider text-foreground">
                             {game.secret_word}
                         </span>
-                        <span
-                            className={cn(
-                                'rounded-full px-2 py-0.5 text-xs font-medium',
-                                statusColors[game.status],
-                            )}
+                        <Badge
+                            variant="outline"
+                            className={cn('gap-1', config.className)}
                         >
-                            {statusLabels[game.status]}
-                        </span>
+                            <StatusIcon className="size-3" />
+                            {config.label}
+                        </Badge>
                     </div>
-                    <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{game.player_count} spelers</span>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                            <Users className="size-3.5" />
+                            {game.player_count} spelers
+                        </span>
                         {startsAt && (
-                            <span>
-                                Start:{' '}
+                            <span className="inline-flex items-center gap-1">
+                                <Clock className="size-3.5" />
                                 {startsAt.toLocaleDateString('nl-BE', {
                                     day: 'numeric',
                                     month: 'short',
@@ -154,6 +185,11 @@ function GameCard({ game }: { game: GameData }) {
                             </span>
                         )}
                     </div>
+                </div>
+                <div className="shrink-0 text-right">
+                    <span className="text-xs font-medium text-muted-foreground">
+                        {config.hint}
+                    </span>
                 </div>
             </div>
         </Link>
