@@ -66,8 +66,10 @@ class GuessController extends Controller
             'game' => [
                 'id' => $game->id,
                 'status' => $game->status,
+                'winner_id' => $game->winner_id,
             ],
             'questions' => $questions,
+            'isAdmin' => $user->is_admin,
         ]);
     }
 

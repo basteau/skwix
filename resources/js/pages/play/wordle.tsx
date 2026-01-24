@@ -4,7 +4,7 @@ import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import { Snowflake, Sparkles } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface GuessResult {
     letter: string;
@@ -29,6 +29,7 @@ interface Props {
     game?: {
         id: number;
         day_number: number;
+        status: string;
     };
     wordle?: {
         available: boolean;
@@ -38,6 +39,8 @@ interface Props {
     };
     error?: string;
 }
+
+const POLL_INTERVAL = 10_000; // 10 seconds
 
 const KEYBOARD_ROWS = [
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -72,9 +75,32 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
     const [popTile, setPopTile] = useState<number | null>(null);
     const [showCelebration, setShowCelebration] = useState(false);
     const [displayPoints, setDisplayPoints] = useState(player?.points ?? 0);
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const isCompleted = wordle?.completed ?? false;
     const isAvailable = wordle?.available ?? false;
+
+    // Poll for game updates (game completion detection)
+    useEffect(() => {
+        if (testMode?.active || error || isSubmitting) return;
+        if (game?.status === 'completed') {
+            router.visit('/game/end');
+            return;
+        }
+
+        pollRef.current = setInterval(() => {
+            router.reload({ only: ['game', 'player', 'wordle'] });
+        }, POLL_INTERVAL);
+
+        return () => {
+            if (pollRef.current) clearInterval(pollRef.current);
+        };
+    }, [testMode?.active, error, game?.status, isSubmitting]);
+
+    // Sync points from props (for polling updates)
+    useEffect(() => {
+        if (player?.points !== undefined) setDisplayPoints(player.points);
+    }, [player?.points]);
 
     const letterStates = useMemo(() => {
         const states: Record<string, 'correct' | 'present' | 'absent'> = {};

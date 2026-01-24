@@ -14,6 +14,28 @@ class GameEndController extends Controller
         private TestGameService $testGameService,
     ) {}
 
+    public function end(Request $request): RedirectResponse
+    {
+        // Test mode - always go to win screen for testing
+        if ($this->testGameService->isTestMode()) {
+            return redirect()->route('win');
+        }
+
+        $player = $request->user()->players()
+            ->whereHas('game', fn ($q) => $q->where('status', 'completed'))
+            ->with(['game.winner'])
+            ->latest()
+            ->first();
+
+        if (! $player || ! $player->game->winner) {
+            return redirect()->route('play.wordle');
+        }
+
+        return $player->game->winner->id === $player->id
+            ? redirect()->route('win')
+            : redirect()->route('lose');
+    }
+
     public function win(Request $request): Response|RedirectResponse
     {
         // Test mode support

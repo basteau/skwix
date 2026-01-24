@@ -3,9 +3,9 @@ import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const CONFETTI_DATA = Array.from({ length: 30 }).map((_, i) => ({
     left: (i * 3.5 + ((i * 11) % 7)) % 100,
@@ -52,12 +52,14 @@ interface Props {
 const SEGMENTS = 8;
 const SEGMENT_ANGLE = 360 / SEGMENTS;
 const LIGHTS_COUNT = 32;
+const POLL_INTERVAL = 10_000; // 10 seconds
 
 const WAGER_PRESETS = [10, 25, 50, 100];
 
 export default function FortunePage({
     testMode,
     player,
+    game,
     recentSpins: initialSpins = [],
     error,
 }: Props) {
@@ -73,8 +75,31 @@ export default function FortunePage({
     const [showCelebration, setShowCelebration] = useState(false);
     const [lightPhase, setLightPhase] = useState(0);
     const [showFrostOverlay, setShowFrostOverlay] = useState(false);
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const canSpin = points > 0 && wager >= 1 && wager <= points && !isSpinning;
+
+    // Poll for game updates (game completion detection)
+    useEffect(() => {
+        if (testMode?.active || error || isSpinning) return;
+        if (game?.status === 'completed') {
+            router.visit('/game/end');
+            return;
+        }
+
+        pollRef.current = setInterval(() => {
+            router.reload({ only: ['game', 'player'] });
+        }, POLL_INTERVAL);
+
+        return () => {
+            if (pollRef.current) clearInterval(pollRef.current);
+        };
+    }, [testMode?.active, error, game?.status, isSpinning]);
+
+    // Sync points from props (for polling updates)
+    useEffect(() => {
+        if (player?.points !== undefined) setPoints(player.points);
+    }, [player?.points]);
 
     useEffect(() => {
         if (!isSpinning) return;

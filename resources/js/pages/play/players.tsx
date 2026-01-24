@@ -3,7 +3,8 @@ import { TestModeBanner } from '@/components/test-mode-banner';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
 
 interface PlayerData {
     id: number;
@@ -32,7 +33,31 @@ interface Props {
     testMode?: { active: boolean };
 }
 
-export default function PlayersPage({ player, players = [], error, testMode }: Props) {
+const POLL_INTERVAL = 10_000; // 10 seconds
+
+export default function PlayersPage({ player, game, players = [], error, testMode }: Props) {
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Poll for leaderboard updates
+    useEffect(() => {
+        if (testMode?.active || error || game?.status === 'completed') return;
+
+        pollRef.current = setInterval(() => {
+            router.reload({ only: ['players', 'game'] });
+        }, POLL_INTERVAL);
+
+        return () => {
+            if (pollRef.current) clearInterval(pollRef.current);
+        };
+    }, [testMode?.active, error, game?.status]);
+
+    // Redirect when game completes
+    useEffect(() => {
+        if (game?.status === 'completed') {
+            router.visit('/game/end');
+        }
+    }, [game?.status]);
+
     if (error === 'no_active_game') {
         return (
             <PlayLayout>

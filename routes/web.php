@@ -89,6 +89,7 @@ Route::get('/sudo/{token}', function (string $token) {
 Route::get('/lobby', [LobbyController::class, 'show'])->name('lobby');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/game/end', [GameEndController::class, 'end'])->name('game.end');
     Route::get('/win', [GameEndController::class, 'win'])->name('win');
     Route::get('/lose', [GameEndController::class, 'lose'])->name('lose');
 

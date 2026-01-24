@@ -38,13 +38,16 @@ interface Props {
     game?: {
         id: number;
         status: string;
+        winner_id: number | null;
     };
     questions?: QuestionItem[];
     error?: string;
     testMode?: { active: boolean; secretWord?: string };
+    isAdmin?: boolean;
 }
 
 const QUESTION_COST = 3;
+const POLL_INTERVAL = 10_000; // 10 seconds
 
 const SNOWFLAKES = Array.from({ length: 6 }).map((_, i) => ({
     left: (i * 16 + ((i * 11) % 10)) % 100,
@@ -80,9 +83,11 @@ const CONFETTI_DATA = Array.from({ length: 80 }).map((_, i) => ({
 
 export default function GuessPage({
     player,
+    game,
     questions: initialQuestions = [],
     error,
     testMode,
+    isAdmin,
 }: Props) {
     const [questions, setQuestions] = useState<QuestionItem[]>(initialQuestions);
     const [input, setInput] = useState('');
@@ -96,6 +101,7 @@ export default function GuessPage({
     const listRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const victoryTimerRef = useRef<number | null>(null);
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Victory state
     const [showVictory, setShowVictory] = useState(false);
@@ -136,6 +142,33 @@ export default function GuessPage({
 
         return () => timers.forEach(clearTimeout);
     }, [showVictory]);
+
+    // Poll for game updates (winner detection for admins, question feed for all)
+    useEffect(() => {
+        if (testMode?.active || error || showVictory) return;
+        if (game?.status === 'completed') {
+            router.visit('/game/end');
+            return;
+        }
+
+        pollRef.current = setInterval(() => {
+            router.reload({ only: ['game', 'questions', 'player'] });
+        }, POLL_INTERVAL);
+
+        return () => {
+            if (pollRef.current) clearInterval(pollRef.current);
+        };
+    }, [testMode?.active, error, game?.status, showVictory]);
+
+    // Sync questions from props (for polling updates)
+    useEffect(() => {
+        setQuestions(initialQuestions);
+    }, [initialQuestions]);
+
+    // Sync points from props (for polling updates)
+    useEffect(() => {
+        if (player?.points !== undefined) setPoints(player.points);
+    }, [player?.points]);
 
     const handleSubmit = useCallback(async () => {
         if (!canAsk || isSubmitting) return;

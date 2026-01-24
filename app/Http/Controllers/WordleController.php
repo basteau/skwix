@@ -53,6 +53,7 @@ class WordleController extends Controller
             'game' => [
                 'id' => $game->id,
                 'day_number' => $dayNumber,
+                'status' => $game->status,
             ],
             'wordle' => [
                 'available' => $this->gameService->isWordleAvailable($game),
@@ -78,6 +79,7 @@ class WordleController extends Controller
             'game' => [
                 'id' => $testGame['id'],
                 'day_number' => $dayNumber,
+                'status' => 'active',
             ],
             'wordle' => [
                 'available' => true,
