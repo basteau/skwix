@@ -37,5 +37,8 @@ Route::middleware('auth')->prefix('play')->name('play.')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', fn () => Inertia::render('admin/dashboard'))->name('dashboard');
+    Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/create', [App\Http\Controllers\AdminController::class, 'createForm'])->name('create');
+    Route::post('/create', [App\Http\Controllers\AdminController::class, 'store'])->name('store');
+    Route::get('/random-words', [App\Http\Controllers\AdminController::class, 'getRandomWords'])->name('random-words');
 });
