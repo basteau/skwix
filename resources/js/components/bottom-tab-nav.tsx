@@ -36,19 +36,24 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                     const isActive = tab.href ? url.startsWith(tab.href) : false;
                     const Icon = tab.icon;
 
+                    const baseClasses = cn(
+                        'flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-1.5',
+                        'transition-all duration-150 active:scale-95'
+                    );
+
+                    const stateClasses = isActive
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50';
+
                     if (tab.onClick) {
                         return (
                             <button
                                 key={tab.label}
                                 onClick={tab.onClick}
-                                className={cn(
-                                    'flex min-w-[48px] flex-col items-center justify-center gap-0.5 px-3 py-2',
-                                    'transition-colors duration-150',
-                                    'text-foreground/60 hover:text-foreground'
-                                )}
+                                className={cn(baseClasses, 'text-muted-foreground hover:text-foreground hover:bg-muted/50')}
                             >
-                                <Icon className="size-6" />
-                                <span className="text-[11px] font-medium leading-tight">
+                                <Icon className="size-5" />
+                                <span className="text-[10px] font-medium leading-tight">
                                     {tab.label}
                                 </span>
                             </button>
@@ -59,16 +64,15 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                         <Link
                             key={tab.href}
                             href={tab.href!}
-                            className={cn(
-                                'flex min-w-[48px] flex-col items-center justify-center gap-0.5 px-3 py-2',
-                                'transition-colors duration-150',
-                                isActive
-                                    ? 'text-primary'
-                                    : 'text-foreground/60 hover:text-foreground'
-                            )}
+                            className={cn(baseClasses, stateClasses)}
                         >
-                            <Icon className="size-6" />
-                            <span className="text-[11px] font-medium leading-tight">
+                            <div className={cn('transition-transform', isActive && 'scale-110')}>
+                                <Icon className="size-5" />
+                            </div>
+                            <span className={cn(
+                                'text-[10px] leading-tight',
+                                isActive ? 'font-semibold' : 'font-medium'
+                            )}>
                                 {tab.label}
                             </span>
                         </Link>
