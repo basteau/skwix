@@ -1,0 +1,10 @@
+{
+  "playwriter": {
+    "command": "npx",
+    "args": ["-y", "playwriter@latest"],
+    "includeTools": [
+      "execute",
+      "getLatestLogs"
+    ]
+  }
+}

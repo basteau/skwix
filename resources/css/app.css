@@ -1,0 +1,127 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    /* Typography */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* shadcn/ui compatibility */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    /* Game-specific colors */
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-wordle-correct: var(--wordle-correct);
+    --color-wordle-present: var(--wordle-present);
+    --color-wordle-absent: var(--wordle-absent);
+    --color-wheel-win: var(--wheel-win);
+    --color-wheel-lose: var(--wheel-lose);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
+    --shadow-md: 0 4px 8px oklch(0% 0 0 / 0.06);
+    --shadow-lg: 0 8px 16px oklch(0% 0 0 / 0.08);
+    --shadow-xl: 0 16px 32px oklch(0% 0 0 / 0.12);
+    --shadow-glow: 0 0 24px oklch(55% 0.15 230 / 0.3);
+}
+
+:root {
+    /* Winter Blue Theme - Light Mode Only */
+    
+    /* Core Colors */
+    --background: oklch(100% 0 0);
+    --background-subtle: oklch(97% 0.01 230);
+    --foreground: oklch(20% 0.02 250);
+    
+    /* Primary - Winter Blue */
+    --primary: oklch(55% 0.15 230);
+    --primary-hover: oklch(48% 0.15 230);
+    --primary-light: oklch(92% 0.04 230);
+    --primary-foreground: oklch(100% 0 0);
+    
+    /* Secondary - Ice Blue */
+    --secondary: oklch(70% 0.12 220);
+    --secondary-foreground: oklch(20% 0.02 250);
+    
+    /* Surface & Cards */
+    --card: oklch(99% 0.005 230);
+    --card-foreground: oklch(20% 0.02 250);
+    --popover: oklch(100% 0 0);
+    --popover-foreground: oklch(20% 0.02 250);
+    
+    /* Muted */
+    --muted: oklch(97% 0.01 230);
+    --muted-foreground: oklch(45% 0.02 250);
+    
+    /* Accent */
+    --accent: oklch(92% 0.04 230);
+    --accent-foreground: oklch(20% 0.02 250);
+    
+    /* Borders */
+    --border: oklch(90% 0.02 230);
+    --border-strong: oklch(80% 0.03 230);
+    --input: oklch(90% 0.02 230);
+    --ring: oklch(55% 0.15 230);
+    
+    /* Destructive */
+    --destructive: oklch(55% 0.22 25);
+    --destructive-foreground: oklch(100% 0 0);
+    
+    /* Status Colors */
+    --success: oklch(55% 0.18 145);
+    --warning: oklch(65% 0.18 85);
+    
+    /* Wordle Colors */
+    --wordle-correct: oklch(55% 0.18 145);
+    --wordle-present: oklch(65% 0.18 85);
+    --wordle-absent: oklch(55% 0.02 250);
+    
+    /* Wheel of Fortune */
+    --wheel-win: oklch(55% 0.15 230);
+    --wheel-lose: oklch(65% 0.02 250);
+    
+    /* Legacy radius for shadcn compatibility */
+    --radius: 10px;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: 'rlig' 1, 'calt' 1;
+    }
+}

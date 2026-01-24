@@ -1,0 +1,111 @@
+{
+  "version": "1.0",
+  "frameSize": 64,
+  "columns": 4,
+  "rows": 4,
+  "directions": ["down", "left", "right", "up"],
+  "framesPerDirection": 4,
+  "characters": [
+    {
+      "name": "player03",
+      "file": "player03.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player09",
+      "file": "player09.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player02",
+      "file": "player02.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player08",
+      "file": "player08.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player07",
+      "file": "player07.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player06",
+      "file": "player06.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player04",
+      "file": "player04.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player01",
+      "file": "player01.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "name": "player05",
+      "file": "player05.png",
+      "width": 256,
+      "height": 256
+    }
+  ],
+  "animations": {
+    "walk_down": {
+      "row": 0,
+      "frames": [0, 1, 2, 3],
+      "fps": 8
+    },
+    "walk_left": {
+      "row": 1,
+      "frames": [0, 1, 2, 3],
+      "fps": 8
+    },
+    "walk_right": {
+      "row": 2,
+      "frames": [0, 1, 2, 3],
+      "fps": 8
+    },
+    "walk_up": {
+      "row": 3,
+      "frames": [0, 1, 2, 3],
+      "fps": 8
+    },
+    "idle_down": {
+      "row": 0,
+      "frames": [0],
+      "fps": 1
+    },
+    "idle_left": {
+      "row": 1,
+      "frames": [0],
+      "fps": 1
+    },
+    "idle_right": {
+      "row": 2,
+      "frames": [0],
+      "fps": 1
+    },
+    "idle_up": {
+      "row": 3,
+      "frames": [0],
+      "fps": 1
+    }
+  },
+  "usage": {
+    "phaser": "// Phaser 3 example\nthis.load.spritesheet('player', 'spritesheets/player07.png', {\n  frameWidth: 64,\n  frameHeight: 64\n});\n\n// Create animations\nthis.anims.create({\n  key: 'walk_down',\n  frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),\n  frameRate: 8,\n  repeat: -1\n});",
+    "css": "/* CSS Sprite Animation */\n.character {\n  width: 64px;\n  height: 64px;\n  background: url('player07.png') 0 0;\n  animation: walk-down 0.5s steps(4) infinite;\n}\n\n@keyframes walk-down {\n  from { background-position: 0 0; }\n  to { background-position: -256px 0; }\n}",
+    "canvas": "// Canvas example\nconst frameX = currentFrame * 64;\nconst frameY = directionRow * 64;\nctx.drawImage(spritesheet, frameX, frameY, 64, 64, x, y, 64, 64);"
+  }
+}
