@@ -67,6 +67,10 @@ class GameEndController extends Controller
             return redirect()->route('win');
         }
 
+        $allPlayers = $game->players()->orderByDesc('points')->get();
+        $totalPlayers = $allPlayers->count();
+        $rank = $allPlayers->search(fn ($p) => $p->id === $player->id) + 1;
+
         return Inertia::render('lose', [
             'winner' => [
                 'id' => $winner->id,
@@ -77,10 +81,12 @@ class GameEndController extends Controller
                 'id' => $player->id,
                 'name' => $player->name,
                 'points' => $player->points,
+                'rank' => $rank,
             ],
             'game' => [
                 'id' => $game->id,
                 'secret_word' => $game->secret_word,
+                'total_players' => $totalPlayers,
             ],
         ]);
     }
