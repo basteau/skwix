@@ -69,6 +69,12 @@
             "@test:lint",
             "@php artisan test"
         ],
+        "test:e2e": [
+            "@php artisan config:clear --ansi",
+            "@php -r \"file_exists('storage/e2e.sqlite') || touch('storage/e2e.sqlite');\"",
+            "@php artisan migrate:fresh --env=e2e --force",
+            "@php artisan test --group=e2e --env=e2e"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

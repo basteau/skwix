@@ -66,7 +66,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center text-center">
                     {/* Celebration heading - primary visual hierarchy */}
-                    <h1 className="text-5xl font-bold tracking-tight text-primary animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <h1 data-testid="win-title" className="text-5xl font-bold tracking-tight text-primary animate-in fade-in slide-in-from-bottom-4 duration-700">
                         🏆 GEWONNEN! 🏆
                     </h1>
 
@@ -94,7 +94,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     </div>
 
                     {/* Winner name - secondary hierarchy */}
-                    <p className="mt-4 text-2xl font-bold text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                    <p data-testid="winner-name" className="mt-4 text-2xl font-bold text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
                         {winner.name}
                     </p>
 
@@ -103,7 +103,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     </p>
 
                     {/* Secret word reveal - tertiary hierarchy */}
-                    <div className="mt-6 rounded-xl bg-primary/10 px-8 py-4 animate-in fade-in zoom-in duration-700 delay-300">
+                    <div data-testid="secret-word-reveal" className="mt-6 rounded-xl bg-primary/10 px-8 py-4 animate-in fade-in zoom-in duration-700 delay-300">
                         <p className="text-xs uppercase tracking-widest text-muted-foreground">Het woord was</p>
                         <p className="mt-1 text-3xl font-bold uppercase tracking-[0.2em] text-primary">
                             {game.secret_word}
@@ -116,7 +116,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     </p>
 
                     {/* QR Code Prize with themed container */}
-                    <div className="mt-8 animate-in fade-in zoom-in duration-700 delay-500">
+                    <div data-testid="prize-qr-code" className="mt-8 animate-in fade-in zoom-in duration-700 delay-500">
                         <div
                             className="rounded-2xl border-2 border-primary/30 bg-white p-1"
                             style={{

@@ -58,7 +58,7 @@ export default function LosePage({ winner, player, game }: Props) {
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center text-center">
                     {/* Heading - softer, encouraging */}
-                    <h1 className="text-3xl font-bold text-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-700">
+                    <h1 data-testid="lose-title" className="text-3xl font-bold text-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-700">
                         Goed gespeeld!
                     </h1>
 
@@ -67,13 +67,13 @@ export default function LosePage({ winner, player, game }: Props) {
                     </p>
 
                     {/* Secret word reveal with winner inline */}
-                    <div className="mt-8 rounded-xl border border-border bg-card px-6 py-5 shadow-sm motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in motion-safe:duration-700 motion-safe:delay-200">
+                    <div data-testid="secret-word-reveal" className="mt-8 rounded-xl border border-border bg-card px-6 py-5 shadow-sm motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in motion-safe:duration-700 motion-safe:delay-200">
                         <p className="text-sm text-muted-foreground">Het mystery woord was</p>
                         <p className="mt-1 text-2xl font-bold uppercase tracking-widest text-foreground">
                             {game.secret_word}
                         </p>
                         <p className="mt-3 text-sm text-muted-foreground">
-                            Geraden door <span className="font-medium text-foreground">{winner.name}</span>
+                            Geraden door <span data-testid="winner-name" className="font-medium text-foreground">{winner.name}</span>
                         </p>
                     </div>
 

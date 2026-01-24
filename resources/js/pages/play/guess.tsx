@@ -123,7 +123,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                 {/* Header */}
                 <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
                     <span className="font-display text-lg font-bold text-foreground">Mystery Woord</span>
-                    <span className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                    <span data-testid="guess-points-display" className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
                         {points} punten
                     </span>
                 </header>
@@ -162,7 +162,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div data-testid="guess-history" className="space-y-4">
                             {questions.map((q, idx) => (
                                 <QuestionBubble
                                     key={q.id}
@@ -181,6 +181,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                         <input
                             ref={inputRef}
                             type="text"
+                            data-testid="guess-input"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -189,6 +190,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                             className="h-11 flex-1 rounded-md border border-border-strong bg-card px-3 text-base outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         />
                         <Button
+                            data-testid="guess-submit-button"
                             onClick={handleSubmit}
                             disabled={!canAsk || isSubmitting}
                             className="shrink-0"
@@ -245,6 +247,7 @@ function QuestionBubble({
 
     return (
         <div
+            data-testid={`guess-item-${question.id}`}
             className={cn(
                 'motion-safe:transition-all',
                 isNew && 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300'

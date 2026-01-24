@@ -183,18 +183,18 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                 {/* Header */}
                 <header className="flex items-center justify-between px-4 py-3 pt-safe border-b border-border">
                     <span className="text-sm text-muted-foreground">Dag {game?.day_number ?? 1}</span>
-                    <span className="font-semibold text-foreground">{player?.points ?? 0} punten</span>
+                    <span data-testid="points-header" className="font-semibold text-foreground">{player?.points ?? 0} punten</span>
                 </header>
 
                 {/* Message */}
                 {message && (
-                    <div className="mx-4 mt-3 rounded-md bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
+                    <div data-testid="wordle-message" className="mx-4 mt-3 rounded-md bg-primary/10 px-4 py-2 text-center text-sm font-medium text-primary">
                         {message}
                     </div>
                 )}
 
                 {/* Grid */}
-                <div className="flex flex-1 flex-col items-center justify-center gap-1.5 px-4 py-6">
+                <div data-testid="wordle-grid" className="flex flex-1 flex-col items-center justify-center gap-1.5 px-4 py-6">
                     {[...Array(6)].map((_, rowIdx) => {
                         const guess = guesses[rowIdx];
                         const isCurrentRow = rowIdx === guesses.length && !isCompleted;
@@ -206,25 +206,26 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                                 className={`flex gap-1.5 ${isCurrentRow && shakeRow ? 'animate-shake' : ''}`}
                             >
                                 {[...Array(5)].map((_, colIdx) => {
-                                    let letter = '';
-                                    let status: 'empty' | 'filled' | 'correct' | 'present' | 'absent' = 'empty';
+                                let letter = '';
+                                let status: 'empty' | 'filled' | 'correct' | 'present' | 'absent' = 'empty';
 
-                                    if (guess) {
-                                        letter = guess.result[colIdx]?.letter ?? '';
-                                        status = guess.result[colIdx]?.status ?? 'absent';
-                                    } else if (isCurrentRow) {
-                                        letter = currentGuess[colIdx] ?? '';
-                                        status = letter ? 'filled' : 'empty';
-                                    }
+                                if (guess) {
+                                    letter = guess.result[colIdx]?.letter ?? '';
+                                    status = guess.result[colIdx]?.status ?? 'absent';
+                                } else if (isCurrentRow) {
+                                    letter = currentGuess[colIdx] ?? '';
+                                    status = letter ? 'filled' : 'empty';
+                                }
 
-                                    return (
-                                        <Tile
-                                            key={colIdx}
-                                            letter={letter}
-                                            status={status}
-                                            delay={isRevealing ? colIdx * 150 : undefined}
-                                        />
-                                    );
+                                return (
+                                    <Tile
+                                        key={colIdx}
+                                        letter={letter}
+                                        status={status}
+                                        delay={isRevealing ? colIdx * 150 : undefined}
+                                        testId={`wordle-tile-r${rowIdx}-c${colIdx}`}
+                                    />
+                                );
                                 })}
                             </div>
                         );
@@ -261,6 +262,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                                             state={states[key]}
                                             onPress={handleKey}
                                             disabled={isSubmitting}
+                                            testId={`wordle-key-${key}`}
                                         />
                                     ))}
                                 </div>
@@ -277,10 +279,12 @@ function Tile({
     letter,
     status,
     delay,
+    testId,
 }: {
     letter: string;
     status: 'empty' | 'filled' | 'correct' | 'present' | 'absent';
     delay?: number;
+    testId?: string;
 }) {
     const baseClasses =
         'flex size-[58px] items-center justify-center rounded-sm border-2 text-2xl font-bold uppercase transition-colors';
@@ -297,6 +301,7 @@ function Tile({
 
     return (
         <div
+            data-testid={testId}
             className={`${baseClasses} ${statusClasses[status]} ${delay !== undefined ? 'animate-flip' : ''}`}
             style={style}
         >
@@ -310,11 +315,13 @@ function KeyboardKey({
     state,
     onPress,
     disabled,
+    testId,
 }: {
     keyVal: string;
     state?: 'correct' | 'present' | 'absent';
     onPress: (key: string) => void;
     disabled: boolean;
+    testId?: string;
 }) {
     const isEnter = keyVal === 'enter';
     const isBackspace = keyVal === 'backspace';
@@ -342,6 +349,7 @@ function KeyboardKey({
     return (
         <button
             type="button"
+            data-testid={testId}
             onClick={() => onPress(keyVal)}
             disabled={disabled}
             className={getKeyClasses()}

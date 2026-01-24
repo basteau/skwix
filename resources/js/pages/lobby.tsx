@@ -106,7 +106,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
 
                     {/* Countdown */}
                     {countdown !== null && (
-                        <div className="mb-10 rounded-xl bg-primary/5 px-6 py-4 border border-primary/10">
+                        <div data-testid="countdown" className="mb-10 rounded-xl bg-primary/5 px-6 py-4 border border-primary/10">
                             <p className="text-sm text-muted-foreground mb-1">
                                 Het spel begint over
                             </p>
@@ -123,7 +123,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                         </h2>
                         
                         {players.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-3">
+                            <div data-testid="player-list" className="grid grid-cols-2 gap-3">
                                 {players.map((p, index) => {
                                     const isCurrentPlayer = p.id === player?.id;
                                     const isHost = index === 0;
@@ -131,6 +131,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                     return (
                                         <div
                                             key={p.id}
+                                            data-testid={`player-card-${p.id}`}
                                             className={cn(
                                                 'relative flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm',
                                                 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2',

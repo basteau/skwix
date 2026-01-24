@@ -74,6 +74,7 @@ export default function Welcome() {
                             </label>
                             <Input
                                 id="invite-code"
+                                data-testid="invite-code-input"
                                 type="text"
                                 value={form.data.code}
                                 onChange={(e) => {
@@ -88,7 +89,7 @@ export default function Welcome() {
                                 aria-describedby={form.errors.code ? 'code-error' : undefined}
                             />
                             {form.errors.code && (
-                                <p id="code-error" className="text-sm text-destructive">
+                                <p id="code-error" data-testid="code-error" className="text-sm text-destructive">
                                     {form.errors.code}
                                 </p>
                             )}
@@ -97,6 +98,7 @@ export default function Welcome() {
                         <Button
                             type="submit"
                             size="lg"
+                            data-testid="join-game-button"
                             className="mt-3 w-full h-12 text-base font-semibold"
                             disabled={!form.data.code.trim() || form.processing}
                         >

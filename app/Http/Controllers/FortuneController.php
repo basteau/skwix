@@ -116,6 +116,11 @@ class FortuneController extends Controller
 
     private function spinWheel(): bool
     {
+        // Use fake fortune service for deterministic E2E tests
+        if (config('e2e.fortune_driver') === 'fake') {
+            return app(\App\Services\FakeFortuneService::class)->spin();
+        }
+
         return (bool) random_int(0, 1);
     }
 

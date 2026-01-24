@@ -54,13 +54,13 @@ export default function PlayersPage({ player, game, players = [], error }: Props
                 {/* Header */}
                 <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
                     <span className="font-display text-lg font-bold text-foreground">Ranglijst</span>
-                    <span className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                    <span data-testid="points-header" className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
                         {player?.points ?? 0} punten
                     </span>
                 </header>
 
                 {/* Players List */}
-                <div className="flex-1 overflow-y-auto px-4 py-4">
+                <div data-testid="leaderboard" className="flex-1 overflow-y-auto px-4 py-4">
                     {/* Podium Section */}
                     {podium.length > 0 && (
                         <div className="mb-6 space-y-2">
@@ -96,6 +96,7 @@ function PodiumCard({ player }: { player: PlayerData }) {
 
     return (
         <div
+            data-testid={`player-row-${player.id}`}
             className={cn(
                 'relative flex items-center gap-4 rounded-xl px-4 py-3',
                 player.rank === 1 && 'bg-amber-50 dark:bg-amber-900/20',
@@ -150,6 +151,7 @@ function PlayerRow({ player }: { player: PlayerData }) {
 
     return (
         <div
+            data-testid={`player-row-${player.id}`}
             className={cn(
                 'relative flex items-center gap-3 py-3',
                 player.is_current && 'bg-primary/5'

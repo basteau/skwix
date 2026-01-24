@@ -106,7 +106,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                 {/* Header */}
                 <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
                     <span className="font-display text-lg font-bold text-foreground">Rad van Fortuin</span>
-                    <span className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                    <span data-testid="fortune-points-display" className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
                         {points} punten
                     </span>
                 </header>
@@ -184,6 +184,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
 
                         {/* Wheel */}
                         <div
+                            data-testid="fortune-wheel"
                             className={cn(
                                 'relative size-[260px] rounded-full shadow-xl transition-transform',
                                 result?.won && 'motion-safe:animate-pulse'
@@ -269,6 +270,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                     {/* Result */}
                     {result && (
                         <div
+                            data-testid="fortune-result"
                             className={cn(
                                 'mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300',
                                 result.won && 'motion-safe:animate-pulse'
@@ -298,6 +300,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                         <div className="flex gap-2">
                             <input
                                 type="number"
+                                data-testid="fortune-wager-input"
                                 value={wager}
                                 onChange={(e) => setWager(e.target.value)}
                                 placeholder="0"
@@ -307,6 +310,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                 className="h-11 flex-1 rounded-md border border-border-strong bg-card px-3 text-center text-base font-semibold outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                             />
                             <Button
+                                data-testid="fortune-half-button"
                                 variant="outline"
                                 onClick={() => setWager(Math.floor(points / 2).toString())}
                                 disabled={isSpinning || points === 0}
@@ -315,6 +319,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                 50%
                             </Button>
                             <Button
+                                data-testid="fortune-max-button"
                                 variant="outline"
                                 onClick={() => setWager(points.toString())}
                                 disabled={isSpinning || points === 0}
@@ -326,6 +331,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                     </div>
 
                     <Button
+                        data-testid="fortune-spin-button"
                         onClick={handleSpin}
                         disabled={!canSpin}
                         className="w-full"
