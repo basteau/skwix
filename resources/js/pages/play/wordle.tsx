@@ -295,8 +295,8 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                     points={displayPoints}
                 />
 
-                {/* Message toast */}
-                {message && (
+                {/* Message toast - only show when not in completed state (avoids duplicate with completion section) */}
+                {message && !isCompleted && (
                     <div
                         data-testid="wordle-message"
                         className={cn(
