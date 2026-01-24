@@ -53,18 +53,21 @@ export default function Welcome() {
 
                 {/* Main content */}
                 <main className="relative z-10 flex w-full max-w-sm flex-col items-center text-center">
-                    {/* Logo/Title */}
-                    <div className="mb-8">
+                    {/* Logo/Title - generous spacing below */}
+                    <div className="mb-12">
                         <h1 className="font-display text-5xl font-extrabold tracking-tight text-foreground">
                             Skwix
                         </h1>
-                        <p className="mt-3 text-lg font-medium text-foreground/70">
+                        <p className="mt-2 text-lg font-medium text-foreground/70">
                             Raad het woord, versla je vrienden
                         </p>
                     </div>
 
-                    {/* Invite form */}
-                    <form onSubmit={handleSubmit} className="w-full space-y-4">
+                    {/* Invite form - grouped in subtle container */}
+                    <form
+                        onSubmit={handleSubmit}
+                        className="w-full rounded-xl bg-card/50 p-6 shadow-sm ring-1 ring-border"
+                    >
                         <div className="space-y-2">
                             <label htmlFor="invite-code" className="sr-only">
                                 Uitnodigingscode
@@ -94,7 +97,7 @@ export default function Welcome() {
                         <Button
                             type="submit"
                             size="lg"
-                            className="w-full h-12 text-base font-semibold"
+                            className="mt-3 w-full h-12 text-base font-semibold"
                             disabled={!form.data.code.trim() || form.processing}
                         >
                             {form.processing ? 'Even kijken...' : 'Doe mee'}
