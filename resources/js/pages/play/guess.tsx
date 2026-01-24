@@ -12,7 +12,7 @@ import QRCode from 'react-qr-code';
 interface QuestionItem {
     id: number;
     question: string;
-    answer: 'yes' | 'no' | 'winner';
+    answer: 'yes' | 'no' | 'winner' | 'unclear';
     player: {
         id: number;
         name: string;
@@ -809,6 +809,8 @@ function QuestionBubble({
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
+    const isNo = question.answer === 'no';
+    const isUnclear = question.answer === 'unclear';
     const isWinner = question.answer === 'winner';
     const playerColor = PLAYER_COLORS[playerColorIdx];
 
@@ -882,7 +884,9 @@ function QuestionBubble({
                             ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600 dark:text-amber-400'
                             : isYes
                               ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
-                              : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
+                              : isUnclear
+                                ? 'bg-gradient-to-r from-muted/60 to-muted/40 text-muted-foreground'
+                                : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
                     )}
                 >
                     {isWinner ? (
@@ -894,6 +898,11 @@ function QuestionBubble({
                         <>
                             <Check className="size-4" />
                             <span>Ja</span>
+                        </>
+                    ) : isUnclear ? (
+                        <>
+                            <Snowflake className="size-4" />
+                            <span>Onduidelijk</span>
                         </>
                     ) : (
                         <>
