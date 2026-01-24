@@ -181,7 +181,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
             <Head title="Wordle" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <header className="flex items-center justify-between px-4 py-3 pt-safe border-b border-border">
                     <span className="text-sm text-muted-foreground">Dag {game?.day_number ?? 1}</span>
                     <span className="font-semibold text-foreground">{player?.points ?? 0} punten</span>
                 </header>

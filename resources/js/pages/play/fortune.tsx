@@ -97,7 +97,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
             <Head title="Rad" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3">
+                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-safe">
                     <span className="text-sm font-medium text-foreground">Rad van Fortuin</span>
                     <span className="font-semibold text-foreground">{points} punten</span>
                 </header>

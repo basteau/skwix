@@ -49,7 +49,7 @@ export default function PlayersPage({ player, game, players = [], error }: Props
             <Head title="Spelers" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3">
+                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-safe">
                     <span className="text-sm font-medium text-foreground">Ranglijst</span>
                     <span className="font-semibold text-foreground">{player?.points ?? 0} punten</span>
                 </header>

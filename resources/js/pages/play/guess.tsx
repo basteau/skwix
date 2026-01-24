@@ -119,7 +119,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
             <Head title="Vraag" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3">
+                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-safe">
                     <span className="text-sm font-medium text-foreground">Mystery Woord</span>
                     <span className="font-semibold text-foreground">{points} punten</span>
                 </header>
