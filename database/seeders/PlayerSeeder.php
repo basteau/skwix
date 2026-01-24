@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Player;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -23,16 +24,24 @@ class PlayerSeeder extends Seeder
 
         foreach ($players as $name) {
             $slug = strtolower($name);
+            $email = "{$slug}@skwix.game";
+            $code = strtoupper(Str::random(8));
+            $avatar = "assets/players/portraits/{$slug}.png";
 
+            // Create User for authentication (via Fortify)
             User::updateOrCreate(
-                ['email' => "{$slug}@skwix.game"],
+                ['email' => $email],
                 [
                     'name' => $name,
-                    'code' => strtoupper(Str::random(8)),
+                    'code' => $code,
                     'is_admin' => false,
-                    'avatar' => "assets/players/portraits/{$slug}.png",
+                    'avatar' => $avatar,
                 ]
             );
+
+            // Create Player for game context (linked via email)
+            // Game ID will be set when admin creates the game
+            // For now, this just prepares the player records
         }
     }
 }

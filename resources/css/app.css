@@ -125,3 +125,39 @@
         font-feature-settings: 'rlig' 1, 'calt' 1;
     }
 }
+
+/* Wordle Animations */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes flip {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); }
+    100% { transform: rotateX(0deg); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.animate-pop {
+    animation: pop 100ms ease-out;
+}
+
+.animate-flip {
+    animation: flip 500ms ease-in-out both;
+}
+
+.animate-shake {
+    animation: shake 400ms ease-out;
+}
+
+/* Safe area padding */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}

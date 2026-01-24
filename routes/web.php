@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LobbyController;
+use App\Http\Controllers\WordleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,7 +18,8 @@ Route::get('/welcome', function () {
 Route::get('/lobby', [LobbyController::class, 'show'])->name('lobby');
 
 Route::middleware('auth')->prefix('play')->name('play.')->group(function () {
-    Route::get('wordle', fn () => Inertia::render('play/wordle'))->name('wordle');
+    Route::get('wordle', [WordleController::class, 'show'])->name('wordle');
+    Route::post('wordle/guess', [WordleController::class, 'guess'])->name('wordle.guess');
     Route::get('guess', fn () => Inertia::render('play/guess'))->name('guess');
     Route::get('fortune', fn () => Inertia::render('play/fortune'))->name('fortune');
     Route::get('players', fn () => Inertia::render('play/players'))->name('players');
