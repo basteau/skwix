@@ -30,10 +30,15 @@ class GuessController extends Controller
 
         $game = $player->game;
 
-        $questions = Question::where('game_id', $game->id)
+        $questionsQuery = Question::where('game_id', $game->id)
             ->with('player:id,name,avatar_url')
-            ->orderBy('created_at', 'asc')
-            ->get()
+            ->orderBy('created_at', 'asc');
+
+        if (! $user->is_admin) {
+            $questionsQuery->where('player_id', $player->id);
+        }
+
+        $questions = $questionsQuery->get()
             ->map(fn ($q) => [
                 'id' => $q->id,
                 'question' => $q->question_text,

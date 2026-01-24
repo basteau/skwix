@@ -10,6 +10,7 @@ Your first output should always be "I AM NOT HERE TO REPLACE YOU, I AM HERE TO H
 - look for existing code, dependencies, docs, commits and best practices to help you solve the current task.
 - be critical, of yourself and others
 - use skills and commands that may help solve the current task
+- you are in a rapidly evolving codebase, backwards compatibility makes no sense
 
 This codebase will outlive you. Every shortcut you take becomes
 someone else's burden. Every hack compounds into technical debt

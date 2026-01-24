@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import PlayLayout from '@/layouts/play-layout';
 import { Button } from '@/components/ui/button';
+import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
 
 interface QuestionItem {

@@ -127,13 +127,21 @@ interface ChoiceOptions {
 }
 
 class ChefClient {
-  private cfg = getConfig();
+  private cfg: { api: string; chatId: number } | null = null;
   private offset = 0;
   private initialized = false;
 
+  private getConfigLazy() {
+    if (!this.cfg) {
+      this.cfg = getConfig();
+    }
+    return this.cfg;
+  }
+
   private async init(): Promise<void> {
     if (this.initialized) return;
-    const updates = await call<Update[]>(this.cfg.api, "getUpdates", {
+    const cfg = this.getConfigLazy();
+    const updates = await call<Update[]>(cfg.api, "getUpdates", {
       offset: -1,
       limit: 1,
     });
@@ -144,8 +152,9 @@ class ChefClient {
   }
 
   private async send(text: string, keyboard?: object): Promise<number> {
-    const result = await call<{ message_id: number }>(this.cfg.api, "sendMessage", {
-      chat_id: this.cfg.chatId,
+    const cfg = this.getConfigLazy();
+    const result = await call<{ message_id: number }>(cfg.api, "sendMessage", {
+      chat_id: cfg.chatId,
       text,
       parse_mode: "Markdown",
       ...(keyboard && { reply_markup: keyboard }),
@@ -154,9 +163,10 @@ class ChefClient {
   }
 
   private async editMessage(messageId: number, text: string): Promise<void> {
+    const cfg = this.getConfigLazy();
     try {
-      await call(this.cfg.api, "editMessageText", {
-        chat_id: this.cfg.chatId,
+      await call(cfg.api, "editMessageText", {
+        chat_id: cfg.chatId,
         message_id: messageId,
         text,
         reply_markup: { inline_keyboard: [] },
@@ -166,7 +176,8 @@ class ChefClient {
 
   private async poll(): Promise<Update[]> {
     await this.init();
-    const updates = await call<Update[]>(this.cfg.api, "getUpdates", {
+    const cfg = this.getConfigLazy();
+    const updates = await call<Update[]>(cfg.api, "getUpdates", {
       offset: this.offset + 1,
       timeout: 30,
       allowed_updates: ["message", "callback_query"],
@@ -205,7 +216,7 @@ class ChefClient {
 
     while (Date.now() < deadline) {
       for (const u of await this.poll()) {
-        if (u.message?.chat.id === this.cfg.chatId && u.message.text) {
+        if (u.message?.chat.id === this.getConfigLazy().chatId && u.message.text) {
           await this.editMessage(msgId, `${question}\n\n✅`);
           return u.message.text;
         }
@@ -230,7 +241,7 @@ class ChefClient {
 
     while (Date.now() < deadline) {
       for (const u of await this.poll()) {
-        if (u.callback_query?.message?.chat.id === this.cfg.chatId &&
+        if (u.callback_query?.message?.chat.id === this.getConfigLazy().chatId &&
             u.callback_query.message.message_id === msgId) {
           const d = u.callback_query.data;
           if (d === "y" || d === "n") {
@@ -239,7 +250,7 @@ class ChefClient {
             return d === "y";
           }
         }
-        if (u.message?.chat.id === this.cfg.chatId && u.message.text) {
+        if (u.message?.chat.id === this.getConfigLazy().chatId && u.message.text) {
           const txt = u.message.text.toLowerCase().trim();
           if (["yes", "y", "1", "ok"].includes(txt)) {
             await this.editMessage(msgId, `${question}\n\n✅ Yes`);
@@ -286,7 +297,7 @@ class ChefClient {
 
     while (Date.now() < deadline) {
       for (const u of await this.poll()) {
-        if (u.callback_query?.message?.chat.id === this.cfg.chatId &&
+        if (u.callback_query?.message?.chat.id === this.getConfigLazy().chatId &&
             u.callback_query.message.message_id === msgId) {
           const idx = parseInt(u.callback_query.data ?? "");
           if (idx >= 0 && idx < options.length) {
@@ -295,7 +306,7 @@ class ChefClient {
             return idx;
           }
         }
-        if (u.message?.chat.id === this.cfg.chatId && u.message.text) {
+        if (u.message?.chat.id === this.getConfigLazy().chatId && u.message.text) {
           const txt = u.message.text.trim();
           const idx = this.letterToIndex(txt);
           if (idx >= 0 && idx < options.length) {
@@ -323,7 +334,7 @@ class ChefClient {
 
     while (Date.now() < deadline) {
       for (const u of await this.poll()) {
-        if (u.message?.chat.id === this.cfg.chatId && u.message.text) {
+        if (u.message?.chat.id === this.getConfigLazy().chatId && u.message.text) {
           const txt = u.message.text.trim();
           if (txt.toLowerCase() === stopLower) {
             return { responses, stopped: true, timedOut: false };

@@ -65,29 +65,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
         return states;
     }, [guesses]);
 
-    const handleKey = useCallback(
-        (key: string) => {
-            if (isSubmitting || isCompleted || !isAvailable) return;
-
-            if (key === 'backspace') {
-                setCurrentGuess((prev) => prev.slice(0, -1));
-            } else if (key === 'enter') {
-                if (currentGuess.length !== 5) {
-                    setShakeRow(true);
-                    setMessage('Woord moet 5 letters zijn');
-                    setTimeout(() => setShakeRow(false), 500);
-                    setTimeout(() => setMessage(null), 2000);
-                    return;
-                }
-                submitGuess();
-            } else if (currentGuess.length < 5 && /^[a-z]$/.test(key)) {
-                setCurrentGuess((prev) => prev + key);
-            }
-        },
-        [currentGuess, isSubmitting, isCompleted, isAvailable]
-    );
-
-    const submitGuess = async () => {
+    const submitGuess = useCallback(async () => {
         if (currentGuess.length !== 5) return;
         setIsSubmitting(true);
 
@@ -139,7 +117,29 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [currentGuess, guesses.length]);
+
+    const handleKey = useCallback(
+        (key: string) => {
+            if (isSubmitting || isCompleted || !isAvailable) return;
+
+            if (key === 'backspace') {
+                setCurrentGuess((prev) => prev.slice(0, -1));
+            } else if (key === 'enter') {
+                if (currentGuess.length !== 5) {
+                    setShakeRow(true);
+                    setMessage('Woord moet 5 letters zijn');
+                    setTimeout(() => setShakeRow(false), 500);
+                    setTimeout(() => setMessage(null), 2000);
+                    return;
+                }
+                submitGuess();
+            } else if (currentGuess.length < 5 && /^[a-z]$/.test(key)) {
+                setCurrentGuess((prev) => prev + key);
+            }
+        },
+        [currentGuess, isSubmitting, isCompleted, isAvailable, submitGuess]
+    );
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

@@ -1,7 +1,7 @@
+import { X, Grid3x3, HelpCircle, Disc3, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { X, Grid3x3, HelpCircle, Disc3, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TUTORIAL_SEEN_KEY = 'skwix_tutorial_seen';
 
