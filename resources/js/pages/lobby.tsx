@@ -1,8 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getAvatarUrl } from '@/components/avatar-picker';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { AlertCircle, Crown, Snowflake, Users } from 'lucide-react';
+import { AlertCircle, Crown, Snowflake } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface Player {
@@ -105,40 +106,56 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
     return (
         <>
             <Head title="Lobby - Skwix" />
-            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-6 py-12">
-                {/* Subtle snowflake decorations */}
+            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-primary/[0.02] to-background px-6 py-12">
+                {/* Animated snowflake decorations */}
                 <div
-                    className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.06]"
+                    className="pointer-events-none absolute inset-0 overflow-hidden"
                     aria-hidden
                 >
-                    <Snowflake className="absolute top-[12%] left-[8%] size-16 text-primary" />
-                    <Snowflake className="absolute top-[8%] right-[12%] size-10 text-primary" />
-                    <Snowflake className="absolute bottom-[15%] left-[15%] size-12 text-primary" />
-                    <Snowflake className="absolute right-[8%] bottom-[25%] size-18 text-primary" />
-                    <Snowflake className="absolute top-[5%] left-[50%] size-8 text-primary" />
-                    <Snowflake className="absolute right-[30%] bottom-[10%] size-14 text-primary" />
+                    <Snowflake
+                        className="absolute top-[12%] left-[8%] size-16 text-primary opacity-[0.05] motion-safe:animate-pulse"
+                        style={{ animationDuration: '4s' }}
+                    />
+                    <Snowflake
+                        className="absolute top-[8%] right-[12%] size-10 text-primary opacity-[0.06] motion-safe:animate-pulse"
+                        style={{ animationDuration: '5s', animationDelay: '1s' }}
+                    />
+                    <Snowflake
+                        className="absolute bottom-[15%] left-[15%] size-12 text-primary opacity-[0.05] motion-safe:animate-pulse"
+                        style={{ animationDuration: '6s', animationDelay: '2s' }}
+                    />
+                    <Snowflake
+                        className="absolute right-[8%] bottom-[25%] size-18 text-primary opacity-[0.04] motion-safe:animate-pulse"
+                        style={{ animationDuration: '5s', animationDelay: '0.5s' }}
+                    />
+                    <Snowflake
+                        className="absolute top-[5%] left-[50%] size-8 text-primary opacity-[0.07] motion-safe:animate-pulse"
+                        style={{ animationDuration: '4.5s', animationDelay: '1.5s' }}
+                    />
+                    <Snowflake
+                        className="absolute right-[30%] bottom-[10%] size-14 text-primary opacity-[0.05] motion-safe:animate-pulse"
+                        style={{ animationDuration: '5.5s', animationDelay: '2.5s' }}
+                    />
                 </div>
 
                 <main className="relative z-10 flex w-full max-w-md flex-col items-center text-center">
-                    {/* Header */}
-                    <div className="mb-8 flex flex-col items-center">
-                        <div className="mb-4 flex items-center justify-center gap-3 text-primary">
-                            <Users className="size-8" />
+                    {/* Header with spinning snowflake */}
+                    <div className="mb-8 flex flex-col items-center motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700">
+                        <div className="mb-4">
                             <Snowflake
-                                className="size-6 animate-spin"
-                                style={{ animationDuration: '8s' }}
+                                className="size-10 text-primary motion-safe:animate-spin"
+                                style={{ animationDuration: '12s' }}
                             />
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Wachten op spelers
+                        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+                            Wachtkamer
                         </h1>
                         {player && (
                             <p className="mt-2 text-muted-foreground">
                                 Welkom,{' '}
-                                <span className="font-medium text-foreground">
+                                <span className="font-medium text-primary">
                                     {player.name}
                                 </span>
-                                !
                             </p>
                         )}
                     </div>
@@ -147,9 +164,9 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     {statusMessage && (
                         <div
                             data-testid="status-message"
-                            className="mb-10 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/10 px-6 py-4"
+                            className="mb-10 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-4 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
                         >
-                            <AlertCircle className="size-5 text-destructive" />
+                            <AlertCircle className="size-5 shrink-0 text-destructive" />
                             <p className="text-sm font-medium text-destructive">
                                 {statusMessage}
                             </p>
@@ -160,21 +177,21 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     {countdown !== null && !statusMessage && (
                         <div
                             data-testid="countdown"
-                            className="mb-10 rounded-xl border border-primary/10 bg-primary/5 px-6 py-4"
+                            className="mb-10 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 to-primary/10 px-8 py-5 shadow-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
                         >
-                            <p className="mb-1 text-sm text-muted-foreground">
-                                Het spel begint over
+                            <p className="mb-1.5 text-xs font-medium tracking-widest text-muted-foreground uppercase">
+                                Start over
                             </p>
-                            <p className="text-3xl font-bold text-primary tabular-nums">
+                            <p className="font-display text-4xl font-bold text-primary tabular-nums tracking-tight">
                                 {formatCountdown(countdown)}
                             </p>
                         </div>
                     )}
 
                     {/* Players Grid */}
-                    <div className="w-full">
-                        <h2 className="mb-4 text-sm font-medium tracking-wide text-muted-foreground uppercase">
-                            Aangemelde spelers ({players.length})
+                    <div className="w-full motion-safe:animate-in motion-safe:fade-in motion-safe:delay-100 motion-safe:duration-700">
+                        <h2 className="mb-4 text-xs font-medium tracking-widest text-muted-foreground uppercase">
+                            Spelers ({players.length})
                         </h2>
 
                         {players.length > 0 ? (
@@ -191,43 +208,45 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                             key={p.id}
                                             data-testid={`player-card-${p.id}`}
                                             className={cn(
-                                                'relative flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm',
+                                                'relative flex items-center gap-3 rounded-xl border bg-card/80 p-3 transition-all',
                                                 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
                                                 isCurrentPlayer &&
-                                                    'shadow-md ring-2 ring-primary',
+                                                    'border-primary/40 bg-primary/5 shadow-md ring-1 ring-primary/20',
                                                 isHost &&
                                                     !isCurrentPlayer &&
-                                                    'border-primary/30',
+                                                    'border-amber-400/30 bg-amber-50/30 dark:bg-amber-950/10',
+                                                !isCurrentPlayer &&
+                                                    !isHost &&
+                                                    'border-border/60',
                                             )}
                                             style={{
-                                                animationDelay: `${index * 100}ms`,
+                                                animationDelay: `${index * 80}ms`,
                                                 animationFillMode: 'backwards',
                                             }}
                                         >
                                             {isHost && (
                                                 <Crown
-                                                    className="absolute -top-2 -right-2 size-5 text-amber-500 drop-shadow-sm"
+                                                    className="absolute -top-2 -right-2 size-5 text-amber-500 drop-shadow"
                                                     aria-label="Host"
                                                 />
                                             )}
                                             <Avatar
                                                 className={cn(
-                                                    'size-10 border-2',
+                                                    'size-11 border-2 shadow-sm',
                                                     isCurrentPlayer
                                                         ? 'border-primary'
-                                                        : 'border-border',
+                                                        : isHost
+                                                          ? 'border-amber-400/60'
+                                                          : 'border-border',
                                                 )}
                                             >
                                                 <AvatarImage
-                                                    src={
-                                                        p.avatar_url ||
-                                                        undefined
-                                                    }
+                                                    src={getAvatarUrl(p.avatar_url) || undefined}
                                                     alt={p.name}
                                                 />
                                                 <AvatarFallback
                                                     className={cn(
-                                                        'text-sm font-medium',
+                                                        'text-sm font-semibold',
                                                         isCurrentPlayer
                                                             ? 'bg-primary text-primary-foreground'
                                                             : 'bg-primary/10 text-primary',
@@ -251,9 +270,10 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                 })}
                             </div>
                         ) : (
-                            <div className="rounded-lg border border-dashed bg-muted/30 p-6">
+                            <div className="flex flex-col items-center rounded-xl border border-dashed border-primary/20 bg-primary/[0.02] px-6 py-8">
+                                <Snowflake className="mb-3 size-8 text-primary/30" />
                                 <p className="text-sm text-muted-foreground">
-                                    Nog geen spelers aangemeld...
+                                    Nog niemand aangemeld
                                 </p>
                             </div>
                         )}
@@ -261,8 +281,9 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
 
                     {/* Footer hint */}
                     {!statusMessage && (
-                        <p className="mt-10 text-sm text-muted-foreground">
-                            Blijf hier wachten — je wordt automatisch doorgestuurd.
+                        <p className="mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:delay-200 motion-safe:duration-700">
+                            <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary/50" />
+                            Je wordt automatisch doorgestuurd
                         </p>
                     )}
                 </main>
