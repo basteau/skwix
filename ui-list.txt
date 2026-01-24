@@ -10,4 +10,4 @@
 - [x] Shell components: App shell, app content, app logo, breadcrumbs, user info
 - [x] Form components: Inputs, buttons, selects, checkboxes, labels, input errors, alerts
 - [x] Overlay components: Dialogs, sheets, dropdowns, tooltips, tutorial modal
-- [ ] Utilities: Hooks (appearance, mobile, initials, clipboard), theme system, PWA assets
+- [x] Utilities: Hooks (appearance, mobile, initials, clipboard), theme system, PWA assets
