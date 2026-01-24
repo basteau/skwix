@@ -197,19 +197,23 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                     {step.example}
                 </div>
 
-                {/* Progress dots */}
-                <div className="flex justify-center gap-1.5 bg-card pb-4">
+                {/* Progress dots - expanded touch targets */}
+                <div className="flex justify-center gap-0 bg-card pb-2">
                     {steps.map((_, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrentStep(i)}
-                            className={cn(
-                                'h-2 w-2 rounded-full transition-colors',
-                                i === currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
-                            )}
+                            className="relative min-h-11 min-w-11 flex items-center justify-center"
                             aria-label={`Stap ${i + 1} van ${steps.length}`}
                             aria-current={i === currentStep ? 'step' : undefined}
-                        />
+                        >
+                            <span
+                                className={cn(
+                                    'h-2.5 w-2.5 rounded-full transition-colors',
+                                    i === currentStep ? 'bg-primary' : 'bg-muted-foreground/40'
+                                )}
+                            />
+                        </button>
                     ))}
                 </div>
 
