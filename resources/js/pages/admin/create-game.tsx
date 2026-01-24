@@ -90,7 +90,7 @@ export default function CreateGame({ sampleWords }: Props) {
         <>
             <Head title="Nieuw Spel - Admin" />
             <div className="min-h-svh bg-background">
-                <header className="border-b border-border bg-card px-6 py-4">
+                <header className="border-b border-border bg-card px-6 py-4 pt-safe">
                     <h1 className="text-2xl font-bold text-foreground">Nieuw Spel Aanmaken</h1>
                 </header>
 

@@ -84,7 +84,7 @@ export default function AdminGameDetail({ game, players }: Props) {
         <>
             <Head title={`Spel: ${game.secret_word} - Admin`} />
             <div className="min-h-svh bg-background">
-                <header className="border-b border-border bg-card px-6 py-4">
+                <header className="border-b border-border bg-card px-6 py-4 pt-safe">
                     <div className="flex items-center gap-4">
                         <Link href="/admin" className="text-muted-foreground hover:text-foreground">
                             ← Terug
