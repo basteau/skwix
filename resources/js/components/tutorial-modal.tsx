@@ -210,7 +210,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                             <span
                                 className={cn(
                                     'h-2.5 w-2.5 rounded-full transition-colors',
-                                    i === currentStep ? 'bg-primary' : 'bg-muted-foreground/40'
+                                    i === currentStep ? 'bg-primary' : 'bg-muted-foreground/50'
                                 )}
                             />
                         </button>
