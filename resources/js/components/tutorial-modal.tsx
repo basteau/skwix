@@ -147,10 +147,10 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <div className="relative w-full max-w-md rounded-2xl bg-card shadow-2xl">
-                {/* Close button */}
+                {/* Close button - 44px touch target */}
                 <button
                     onClick={handleSkip}
-                    className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    className="absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     aria-label="Sluiten"
                 >
                     <X className="size-5" />
