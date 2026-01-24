@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { Gamepad2, Home } from 'lucide-react';
+import Gamepad2 from 'lucide-react/icons/gamepad-2';
+import Home from 'lucide-react/icons/home';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
