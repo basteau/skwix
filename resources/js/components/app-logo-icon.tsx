@@ -2,11 +2,58 @@ import type { SVGAttributes } from 'react';
 
 export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
     return (
-        <svg {...props} viewBox="0 0 40 42" xmlns="http://www.w3.org/2000/svg">
+        <svg {...props} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient
+                    id="iceGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                >
+                    <stop offset="0%" stopColor="#5BA3D9" />
+                    <stop offset="50%" stopColor="#3B8BC9" />
+                    <stop offset="100%" stopColor="#2E7AB8" />
+                </linearGradient>
+                <linearGradient
+                    id="frostGradient"
+                    x1="0%"
+                    y1="100%"
+                    x2="100%"
+                    y2="0%"
+                >
+                    <stop offset="0%" stopColor="#A8D4F0" />
+                    <stop offset="100%" stopColor="#7BBFE5" />
+                </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="6" fill="white" />
             <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M17.2 5.63325L8.6 0.855469L0 5.63325V32.1434L16.2 41.1434L32.4 32.1434V23.699L40 19.4767V9.85547L31.4 5.07769L22.8 9.85547V18.2999L17.2 21.411V5.63325ZM38 18.2999L32.4 21.411V15.2545L38 12.1434V18.2999ZM36.9409 10.4439L31.4 13.5221L25.8591 10.4439L31.4 7.36561L36.9409 10.4439ZM24.8 18.2999V12.1434L30.4 15.2545V21.411L24.8 18.2999ZM23.8 20.0323L29.3409 23.1105L16.2 30.411L10.6591 27.3328L23.8 20.0323ZM7.6 27.9212L15.2 32.1434V38.2999L2 30.9666V7.92116L7.6 11.0323V27.9212ZM8.6 9.29991L3.05913 6.22165L8.6 3.14339L14.1409 6.22165L8.6 9.29991ZM30.4 24.8101L17.2 32.1434V38.2999L30.4 30.9666V24.8101ZM9.6 11.0323L15.2 7.92117V22.5221L9.6 25.6333V11.0323Z"
+                d="M22.5 10.5C22.5 10.5 21.2 8 16.5 8C11.8 8 9.5 10.8 9.5 13.2C9.5 15.6 11 17 13.5 18L18.5 20C20.5 20.8 21.5 21.5 21.5 23C21.5 24.5 20 25.5 17 25.5C13.5 25.5 11 23.5 11 23.5"
+                stroke="url(#iceGradient)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <circle
+                cx="23"
+                cy="9"
+                r="1.5"
+                fill="url(#frostGradient)"
+                opacity="0.8"
+            />
+            <circle
+                cx="10"
+                cy="24"
+                r="1"
+                fill="url(#frostGradient)"
+                opacity="0.6"
+            />
+            <path
+                d="M8 8L9 9M24 23L25 24M7 13L8 13.5M25 19L24 19.5"
+                stroke="url(#frostGradient)"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                opacity="0.5"
             />
         </svg>
     );
