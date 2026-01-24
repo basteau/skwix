@@ -118,3 +118,62 @@ it('rejects words that are not 5 letters', function () {
         'message' => 'Woord moet 5 letters zijn',
     ]);
 });
+
+it('rejects invalid wordle words when updating draft game', function () {
+    $game = Game::factory()->create([
+        'status' => 'draft',
+        'wordle_words' => $this->wordlist,
+    ]);
+
+    $invalidWords = ['xxxxx', 'yyyyy', 'zzzzz', 'qqqqq', 'wwwww', 'jjjjj'];
+
+    $response = $this->actingAs($this->admin)
+        ->put("/admin/game/{$game->id}/wordle-words", [
+            'wordle_words' => $invalidWords,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasErrors('wordle_words');
+
+    $game->refresh();
+    expect($game->wordle_words)->toBe($this->wordlist);
+});
+
+it('rejects game creation with invalid wordle words', function () {
+    $response = $this->actingAs($this->admin)
+        ->post('/admin/create', [
+            'secret_word' => 'geheim',
+            'starts_at' => now()->addDay()->toDateTimeString(),
+            'duration_days' => 6,
+            'wordle_words' => ['xxxxx', 'yyyyy', 'zzzzz', 'qqqqq', 'wwwww', 'jjjjj'],
+            'players' => [
+                ['name' => 'John', 'email' => 'john@example.com'],
+                ['name' => 'Jane', 'email' => 'jane@example.com'],
+            ],
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasErrors('wordle_words');
+});
+
+it('shows invalid words in error message', function () {
+    $validWords = DutchWordlistSeeder::getRandomWords(4);
+    $mixedWords = array_merge($validWords, ['xxxxx', 'yyyyy']);
+
+    $response = $this->actingAs($this->admin)
+        ->post('/admin/create', [
+            'secret_word' => 'geheim',
+            'starts_at' => now()->addDay()->toDateTimeString(),
+            'duration_days' => 6,
+            'wordle_words' => $mixedWords,
+            'players' => [
+                ['name' => 'John', 'email' => 'john@example.com'],
+                ['name' => 'Jane', 'email' => 'jane@example.com'],
+            ],
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasErrors('wordle_words');
+    expect(session('errors')->get('wordle_words')[0])->toContain('xxxxx');
+    expect(session('errors')->get('wordle_words')[0])->toContain('yyyyy');
+});
