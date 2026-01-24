@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\GameInvitation;
 use App\Models\Game;
 use App\Models\Player;
 use App\Models\User;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Database\Seeders\DutchWordlistSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -98,9 +100,14 @@ class AdminController extends Controller
             return $game;
         });
 
+        $game->load('players');
+        foreach ($game->players as $player) {
+            Mail::to($player->email)->queue(new GameInvitation($player, $game));
+        }
+
         return redirect()
             ->route('admin.dashboard')
-            ->with('success', 'Spel aangemaakt met '.$game->players()->count().' spelers');
+            ->with('success', 'Spel aangemaakt met '.$game->players()->count().' spelers. Uitnodigingen worden verzonden.');
     }
 
     public function getRandomWords(Request $request)
