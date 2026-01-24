@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TestGameService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -9,8 +10,17 @@ use Inertia\Response;
 
 class GameEndController extends Controller
 {
+    public function __construct(
+        private TestGameService $testGameService,
+    ) {}
+
     public function win(Request $request): Response|RedirectResponse
     {
+        // Test mode support
+        if ($this->testGameService->isTestMode()) {
+            return $this->winTestMode();
+        }
+
         [$player, $game, $winner] = $this->getCompletedGameContext($request);
 
         if (! $player || ! $winner) {
@@ -36,8 +46,34 @@ class GameEndController extends Controller
         ]);
     }
 
+    private function winTestMode(): Response
+    {
+        $testGame = $this->testGameService->getTestGame();
+        $player = $testGame['player'];
+
+        return Inertia::render('win', [
+            'winner' => [
+                'id' => $player['id'],
+                'name' => $player['name'],
+                'avatar_url' => $player['avatar_url'] ?? null,
+                'points' => $player['points'],
+            ],
+            'game' => [
+                'id' => $testGame['id'],
+                'secret_word' => $testGame['secret_word'],
+            ],
+            'prizeUrl' => config('app.prize_url', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'),
+            'testMode' => ['active' => true],
+        ]);
+    }
+
     public function lose(Request $request): Response|RedirectResponse
     {
+        // Test mode support
+        if ($this->testGameService->isTestMode()) {
+            return $this->loseTestMode();
+        }
+
         [$player, $game, $winner] = $this->getCompletedGameContext($request);
 
         if (! $player || ! $winner) {
@@ -67,6 +103,46 @@ class GameEndController extends Controller
                 'secret_word' => $game->secret_word,
                 'total_players' => $allPlayers->count(),
             ],
+        ]);
+    }
+
+    private function loseTestMode(): Response
+    {
+        $testGame = $this->testGameService->getTestGame();
+        $player = $testGame['player'];
+        $allPlayers = $this->testGameService->getAllPlayers();
+
+        // Find a fake winner (first fake player with highest points)
+        $fakePlayers = $testGame['fake_players'] ?? [];
+        $winner = ! empty($fakePlayers) ? $fakePlayers[0] : $player;
+
+        // Calculate rank
+        $rank = 1;
+        foreach ($allPlayers as $index => $p) {
+            if ($p['id'] === $player['id']) {
+                $rank = $index + 1;
+                break;
+            }
+        }
+
+        return Inertia::render('lose', [
+            'winner' => [
+                'id' => $winner['id'],
+                'name' => $winner['name'],
+                'avatar_url' => $winner['avatar_url'] ?? null,
+            ],
+            'player' => [
+                'id' => $player['id'],
+                'name' => $player['name'],
+                'points' => $player['points'],
+                'rank' => $rank,
+            ],
+            'game' => [
+                'id' => $testGame['id'],
+                'secret_word' => $testGame['secret_word'],
+                'total_players' => count($allPlayers),
+            ],
+            'testMode' => ['active' => true],
         ]);
     }
 

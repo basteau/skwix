@@ -6,7 +6,7 @@ import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import { Check, Crown, Search, Snowflake, Sparkles, Star, Trophy, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import QRCode from 'react-qr-code';
 
 interface QuestionItem {
@@ -645,7 +645,7 @@ function VictoryCelebration({
     );
 }
 
-function Confetti() {
+const Confetti = memo(function Confetti() {
     const colors = [
         'oklch(80% 0.15 85)',   // Gold
         'oklch(85% 0.05 250)',  // Silver
@@ -655,7 +655,7 @@ function Confetti() {
     ];
 
     return (
-        <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden motion-reduce:hidden">
             {CONFETTI_DATA.map((piece) => (
                 <div
                     key={piece.id}
@@ -679,7 +679,7 @@ function Confetti() {
             ))}
         </div>
     );
-}
+});
 
 // =============================================================================
 // HELPER COMPONENTS

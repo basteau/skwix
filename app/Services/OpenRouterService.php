@@ -11,7 +11,7 @@ class OpenRouterService
 {
     private const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-    private const DEFAULT_MODEL = 'openai/gpt-5-mini';
+    private const DEFAULT_MODEL = 'google/gemini-3-flash-preview';
 
     private const MAX_REQUESTS_PER_MINUTE = 20;
 
@@ -164,7 +164,8 @@ PROMPT;
             ];
         }
 
-        $rateLimitKey = 'openrouter-api';
+        // Use separate rate limit key for classification to avoid double-counting with ask()
+        $rateLimitKey = 'openrouter-classify';
         if (RateLimiter::tooManyAttempts($rateLimitKey, self::MAX_REQUESTS_PER_MINUTE)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
 
@@ -290,11 +291,13 @@ PROMPT;
             $type = strtolower($parsed['type']);
 
             if ($type === 'direct_guess' && isset($parsed['word'])) {
-                $word = strtolower(trim($parsed['word']));
-                // Clean common punctuation and quotes
-                $word = preg_replace('/["\'\?\.\!]/', '', $word);
+                $word = mb_strtolower(trim($parsed['word']));
+                // Remove all non-letter/non-number characters (keeps unicode letters like ë, ï, etc.)
+                $word = preg_replace('/[^\p{L}\p{N}]/u', '', $word);
+                $word = trim($word);
 
-                if (strlen($word) >= 2 && strlen($word) <= 50) {
+                // Use mb_strlen for proper unicode character counting
+                if (mb_strlen($word) >= 2 && mb_strlen($word) <= 50) {
                     return [
                         'success' => true,
                         'type' => 'direct_guess',

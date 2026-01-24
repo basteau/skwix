@@ -25,7 +25,7 @@ export function AdminHeader({
     badge,
 }: AdminHeaderProps) {
     return (
-        <header className="pt-safe border-b border-border bg-card px-6 py-4">
+        <header className="border-b border-border bg-card px-6 py-4 pt-[calc(var(--safe-top)+1rem)]">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
                 <nav className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground">

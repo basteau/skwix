@@ -210,12 +210,13 @@
 }
 
 /* Safe area padding utilities - use --safe-* variables defined in :root */
+/* Uses max() to ensure minimum padding even when safe-area is 0px (desktop) */
 .pb-safe {
-    padding-bottom: var(--safe-bottom);
+    padding-bottom: max(0.5rem, var(--safe-bottom));
 }
 
 .pt-safe {
-    padding-top: var(--safe-top);
+    padding-top: max(1rem, var(--safe-top));
 }
 
 /* Confetti animation */
