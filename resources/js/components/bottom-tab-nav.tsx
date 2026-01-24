@@ -47,7 +47,7 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                                 className={cn(
                                     'flex min-w-[48px] flex-col items-center justify-center gap-0.5 px-3 py-2',
                                     'transition-colors duration-150',
-                                    'text-muted-foreground hover:text-foreground'
+                                    'text-foreground/60 hover:text-foreground'
                                 )}
                             >
                                 <Icon className="size-6" />
@@ -67,7 +67,7 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                                 'transition-colors duration-150',
                                 isActive
                                     ? 'text-primary'
-                                    : 'text-muted-foreground hover:text-foreground'
+                                    : 'text-foreground/60 hover:text-foreground'
                             )}
                         >
                             <Icon className="size-6" />
