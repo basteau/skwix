@@ -7,6 +7,13 @@ import Trophy from 'lucide-react/icons/trophy';
 import X from 'lucide-react/icons/x';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 const TUTORIAL_SEEN_KEY = 'skwix_tutorial_seen';
@@ -121,6 +128,15 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
         onClose?.();
     }, [onClose]);
 
+    const handleOpenChange = useCallback(
+        (open: boolean) => {
+            if (!open) {
+                handleClose();
+            }
+        },
+        [handleClose]
+    );
+
     const handleNext = useCallback(() => {
         if (currentStep < steps.length - 1) {
             setCurrentStep((s) => s + 1);
@@ -135,37 +151,40 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
         }
     }, [currentStep]);
 
-    const handleSkip = useCallback(() => {
-        handleClose();
-    }, [handleClose]);
-
-    if (!isOpen) return null;
-
     const step = steps[currentStep];
     const isLastStep = currentStep === steps.length - 1;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <div className="relative w-full max-w-md rounded-2xl bg-card shadow-2xl">
-                {/* Close button - 44px touch target */}
-                <button
-                    onClick={handleSkip}
-                    className="absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+            <DialogContent
+                className="max-w-md gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-2xl [&>button:last-child]:hidden"
+                aria-describedby="tutorial-step-description"
+            >
+                {/* Custom close button with 44px touch target */}
+                <DialogClose
+                    className="absolute right-3 top-3 z-10 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     aria-label="Sluiten"
                 >
                     <X className="size-5" />
-                </button>
+                </DialogClose>
 
                 {/* Content */}
-                <div className="p-6 pt-10 text-center">
+                <div className="bg-card p-6 pt-10 text-center">
                     {/* Icon */}
                     <div className="mb-4 flex justify-center">{step.icon}</div>
 
                     {/* Title */}
-                    <h2 className="mb-3 text-xl font-bold text-foreground">{step.title}</h2>
+                    <DialogTitle className="mb-3 text-xl font-bold text-foreground">
+                        {step.title}
+                    </DialogTitle>
 
                     {/* Description */}
-                    <p className="text-sm leading-relaxed text-muted-foreground">{step.description}</p>
+                    <DialogDescription
+                        id="tutorial-step-description"
+                        className="text-sm leading-relaxed text-muted-foreground"
+                    >
+                        {step.description}
+                    </DialogDescription>
 
                     {/* Points badge */}
                     {step.points && (
@@ -179,7 +198,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                 </div>
 
                 {/* Progress dots */}
-                <div className="flex justify-center gap-1.5 pb-4">
+                <div className="flex justify-center gap-1.5 bg-card pb-4">
                     {steps.map((_, i) => (
                         <button
                             key={i}
@@ -188,12 +207,14 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                                 'h-2 w-2 rounded-full transition-colors',
                                 i === currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
                             )}
+                            aria-label={`Stap ${i + 1} van ${steps.length}`}
+                            aria-current={i === currentStep ? 'step' : undefined}
                         />
                     ))}
                 </div>
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                <div className="flex items-center justify-between border-t border-border bg-card px-6 py-4">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -205,21 +226,18 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                         Vorige
                     </Button>
 
-                    <button
-                        onClick={handleSkip}
-                        className="text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        Overslaan
-                    </button>
+                    <DialogClose asChild>
+                        <button className="px-2 py-1 text-sm text-muted-foreground hover:text-foreground">
+                            Overslaan
+                        </button>
+                    </DialogClose>
 
                     <Button size="sm" onClick={handleNext} className="gap-1">
                         {isLastStep ? 'Starten!' : 'Volgende'}
                         {!isLastStep && <ChevronRight className="size-4" />}
                     </Button>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }
-
-
