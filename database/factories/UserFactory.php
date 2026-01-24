@@ -17,6 +17,7 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'code' => strtoupper(Str::random(8)),
             'is_admin' => false,
+            'avatar' => null,
             'remember_token' => Str::random(10),
         ];
     }
