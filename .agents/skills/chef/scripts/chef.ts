@@ -71,8 +71,8 @@ class ChefError extends Error {
 }
 
 function getConfig() {
-  const token = Bun.env.TELEGRAM_BOT_TOKEN ?? process.env.TELEGRAM_BOT_TOKEN;
-  const chatIdStr = Bun.env.TELEGRAM_CHAT_ID ?? process.env.TELEGRAM_CHAT_ID;
+  const token = (typeof Bun !== 'undefined' ? Bun.env.TELEGRAM_BOT_TOKEN : undefined) ?? process.env.TELEGRAM_BOT_TOKEN;
+  const chatIdStr = (typeof Bun !== 'undefined' ? Bun.env.TELEGRAM_CHAT_ID : undefined) ?? process.env.TELEGRAM_CHAT_ID;
 
   if (!token || token.trim() === "") {
     throw new ChefError("TELEGRAM_BOT_TOKEN not found or empty. Set in .env", "MISSING_TOKEN");
