@@ -13,6 +13,19 @@ use Inertia\Inertia;
 
 Route::get('/', fn () => redirect()->route('welcome'));
 
+// Mail preview routes for local development
+if (app()->environment('local')) {
+    Route::get('/mail-preview/game-invitation', function () {
+        $game = \App\Models\Game::factory()->create(['starts_at' => now()->addDays(2)->setTime(14, 0)]);
+        $player = \App\Models\Player::factory()->for($game)->create([
+            'name' => 'Test Speler',
+            'invite_code' => 'PRVIEW',
+        ]);
+
+        return new \App\Mail\GameInvitation($player, $game);
+    });
+}
+
 // Debug endpoint for E2E testing
 if (app()->environment('e2e')) {
     Route::get('/debug-env', function () {
