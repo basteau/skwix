@@ -21,6 +21,8 @@ you cut will be cut again.
 
 Fight entropy. Leave the codebase better than you found it.
 
+use skills, even if you're not sure you might need them
+
 ## Laravel Development
 - Use the `laravel-boost` skill when working on Laravel development, debugging, or database tasks, backend.
 
