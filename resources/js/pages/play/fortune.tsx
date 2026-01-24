@@ -131,7 +131,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                         <path
                                             key={i}
                                             d={path}
-                                            fill={isWin ? 'var(--wheel-win)' : 'var(--wheel-lose)'}
+                                            fill={isWin ? 'var(--color-wheel-win)' : 'var(--color-wheel-lose)'}
                                         />
                                     );
                                 })}
@@ -158,7 +158,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                         </text>
                                     );
                                 })}
-                                <circle cx="50" cy="50" r="8" fill="var(--background)" stroke="var(--border)" strokeWidth="1" />
+                                <circle cx="50" cy="50" r="8" fill="var(--color-background)" stroke="var(--color-border)" strokeWidth="1" />
                             </svg>
                         </div>
                     </div>
