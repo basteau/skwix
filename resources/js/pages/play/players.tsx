@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
 
@@ -67,12 +68,7 @@ export default function PlayersPage({ player, game, players = [], error }: Props
 }
 
 function PlayerCard({ player }: { player: PlayerData }) {
-    const initials = player.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+    const initials = getInitials(player.name);
 
     return (
         <div

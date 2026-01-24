@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
 
@@ -247,12 +248,7 @@ function QuestionCard({
     isOwn: boolean;
     isNew: boolean;
 }) {
-    const initials = question.player.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+    const initials = getInitials(question.player.name);
 
     return (
         <div
