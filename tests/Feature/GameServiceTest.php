@@ -34,6 +34,50 @@ describe('getDayNumber', function () {
 
         expect($this->gameService->getDayNumber($game))->toBe(3);
     });
+
+    it('stays on day 1 before 8am on day 2', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 7, 59, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
+            'status' => 'active',
+        ]);
+
+        expect($this->gameService->getDayNumber($game))->toBe(1);
+    });
+
+    it('moves to day 2 at exactly 8am', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 8, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
+            'status' => 'active',
+        ]);
+
+        expect($this->gameService->getDayNumber($game))->toBe(2);
+    });
+
+    it('starts day 1 at next 8am if game created after 8am', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 10, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 25, 10, 0, 0, 'Europe/Brussels'),
+            'status' => 'active',
+        ]);
+
+        expect($this->gameService->getDayNumber($game))->toBe(1);
+    });
+
+    it('returns 1 if game starts before 8am on same day', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 6, 0, 0, 'Europe/Brussels'),
+            'status' => 'active',
+        ]);
+
+        expect($this->gameService->getDayNumber($game))->toBe(1);
+    });
 });
 
 describe('isWordleAvailable', function () {

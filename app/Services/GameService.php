@@ -28,10 +28,22 @@ class GameService
             return 0;
         }
 
-        $startDate = $game->starts_at->copy()->setTimezone(self::TIMEZONE)->startOfDay();
-        $today = Carbon::now(self::TIMEZONE)->startOfDay();
+        $now = Carbon::now(self::TIMEZONE);
+        $gameStart = $game->starts_at->copy()->setTimezone(self::TIMEZONE);
 
-        return (int) $startDate->diffInDays($today) + 1;
+        $startDay8am = $gameStart->copy()->setTime(8, 0, 0);
+        if ($gameStart->gt($startDay8am)) {
+            $startDay8am->addDay();
+        }
+
+        $today8am = $now->copy()->setTime(8, 0, 0);
+        if ($now->lt($today8am)) {
+            $today8am->subDay();
+        }
+
+        $daysDiff = (int) $startDay8am->startOfDay()->diffInDays($today8am->startOfDay());
+
+        return max(1, $daysDiff + 1);
     }
 
     public function getCurrentWordleWord(Game $game): ?string
