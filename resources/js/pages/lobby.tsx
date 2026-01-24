@@ -1,8 +1,10 @@
 import { Head, router } from '@inertiajs/react';
+import Crown from 'lucide-react/icons/crown';
 import Snowflake from 'lucide-react/icons/snowflake';
 import Users from 'lucide-react/icons/users';
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 import { getInitials } from '@/hooks/use-initials';
 
 interface Player {
@@ -122,22 +124,53 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                         
                         {players.length > 0 ? (
                             <div className="grid grid-cols-2 gap-3">
-                                {players.map((p) => (
-                                    <div
-                                        key={p.id}
-                                        className="flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm"
-                                    >
-                                        <Avatar className="size-10 border-2 border-border">
-                                            <AvatarImage src={p.avatar_url || undefined} alt={p.name} />
-                                            <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                                                {getInitials(p.name)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <span className="truncate text-sm font-medium text-foreground">
-                                            {p.name}
-                                        </span>
-                                    </div>
-                                ))}
+                                {players.map((p, index) => {
+                                    const isCurrentPlayer = p.id === player?.id;
+                                    const isHost = index === 0;
+                                    
+                                    return (
+                                        <div
+                                            key={p.id}
+                                            className={cn(
+                                                'relative flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm',
+                                                'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
+                                                isCurrentPlayer && 'ring-2 ring-primary shadow-md',
+                                                isHost && !isCurrentPlayer && 'border-primary/30'
+                                            )}
+                                            style={{
+                                                animationDelay: `${index * 100}ms`,
+                                                animationFillMode: 'backwards',
+                                            }}
+                                        >
+                                            {isHost && (
+                                                <Crown 
+                                                    className="absolute -top-2 -right-2 size-5 text-amber-500 drop-shadow-sm" 
+                                                    aria-label="Host"
+                                                />
+                                            )}
+                                            <Avatar className={cn(
+                                                'size-10 border-2',
+                                                isCurrentPlayer ? 'border-primary' : 'border-border'
+                                            )}>
+                                                <AvatarImage src={p.avatar_url || undefined} alt={p.name} />
+                                                <AvatarFallback className={cn(
+                                                    'text-sm font-medium',
+                                                    isCurrentPlayer 
+                                                        ? 'bg-primary text-primary-foreground' 
+                                                        : 'bg-primary/10 text-primary'
+                                                )}>
+                                                    {getInitials(p.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className={cn(
+                                                'truncate text-sm font-medium',
+                                                isCurrentPlayer ? 'text-primary' : 'text-foreground'
+                                            )}>
+                                                {p.name}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className="rounded-lg border border-dashed bg-muted/30 p-6">
