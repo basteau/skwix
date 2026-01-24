@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->string('secret_word', 100);
-            $table->enum('status', ['pending', 'active', 'completed'])->default('pending');
+            $table->enum('status', ['draft', 'pending', 'active', 'completed'])->default('draft');
             $table->unsignedBigInteger('winner_id')->nullable();
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();

@@ -45,6 +45,20 @@ describe('POST /join', function () {
         $this->assertAuthenticated();
     });
 
+    it('returns 422 for draft game', function () {
+        $game = Game::factory()->create(['status' => 'draft']);
+        $user = User::factory()->create(['email' => 'player@test.com']);
+        $player = Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'player@test.com',
+            'invite_code' => 'ABC123',
+        ]);
+
+        $response = $this->postJson('/join', ['code' => 'ABC123']);
+
+        $response->assertStatus(422);
+    });
+
     it('returns 422 for invalid invite code', function () {
         $response = $this->postJson('/join', ['code' => 'INVALID']);
 
