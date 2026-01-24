@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import PlayLayout from '@/layouts/play-layout';
-import { cn } from '@/lib/utils';
+import { cn, getCsrfToken } from '@/lib/utils';
 
 interface SpinRecord {
     id: number;
@@ -51,8 +51,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN':
-                        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     Accept: 'application/json',
                 },
                 body: JSON.stringify({ wager: wagerAmount }),

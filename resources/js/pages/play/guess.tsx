@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
-import { cn } from '@/lib/utils';
+import { cn, getCsrfToken } from '@/lib/utils';
 
 interface QuestionItem {
     id: number;
@@ -61,8 +61,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN':
-                        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     Accept: 'application/json',
                 },
                 body: JSON.stringify({ question: input.trim() }),

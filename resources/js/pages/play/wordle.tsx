@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PlayLayout from '@/layouts/play-layout';
+import { getCsrfToken } from '@/lib/utils';
 
 interface GuessResult {
     letter: string;
@@ -74,8 +75,7 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN':
-                        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     Accept: 'application/json',
                 },
                 body: JSON.stringify({ guess: currentGuess }),
