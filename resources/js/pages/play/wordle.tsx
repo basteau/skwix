@@ -1,5 +1,8 @@
+import { getAvatarUrl } from '@/components/avatar-picker';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -25,6 +28,7 @@ interface Props {
         id: number;
         name: string;
         points: number;
+        avatar_url: string | null;
     };
     game?: {
         id: number;
@@ -340,6 +344,30 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     title="Wordle"
                     subtitle={testMode?.active ? `Test Dag ${game?.day_number ?? 1}` : `Dag ${game?.day_number ?? 1}`}
                     points={displayPoints}
+                    leftContent={
+                        <div className="flex items-center gap-2.5">
+                            <Avatar
+                                className="size-9 border-2 border-primary/20 shadow-sm"
+                                data-testid="wordle-player-avatar"
+                            >
+                                <AvatarImage
+                                    src={getAvatarUrl(player?.avatar_url)}
+                                    alt={player?.name ?? 'Speler'}
+                                />
+                                <AvatarFallback className="bg-primary-light text-xs font-semibold text-primary">
+                                    {getInitials(player?.name ?? '')}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                                <span className="font-display text-xl font-bold tracking-tight text-foreground">
+                                    Wordle
+                                </span>
+                                <span className="text-xs font-medium text-muted-foreground">
+                                    {testMode?.active ? `Test Dag ${game?.day_number ?? 1}` : `Dag ${game?.day_number ?? 1}`}
+                                </span>
+                            </div>
+                        </div>
+                    }
                 />
 
                 {/* Message toast - only show when not in completed state (avoids duplicate with completion section) */}

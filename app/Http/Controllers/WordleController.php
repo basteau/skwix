@@ -49,6 +49,7 @@ class WordleController extends Controller
                 'id' => $player->id,
                 'name' => $player->name,
                 'points' => $player->points,
+                'avatar_url' => $player->avatar_url,
             ],
             'game' => [
                 'id' => $game->id,
