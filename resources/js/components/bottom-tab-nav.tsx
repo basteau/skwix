@@ -50,7 +50,7 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                                     'text-muted-foreground hover:text-foreground'
                                 )}
                             >
-                                <Icon className="h-6 w-6" />
+                                <Icon className="size-6" />
                                 <span className="text-[11px] font-medium leading-tight">
                                     {tab.label}
                                 </span>
@@ -70,7 +70,7 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                                     : 'text-muted-foreground hover:text-foreground'
                             )}
                         >
-                            <Icon className="h-6 w-6" />
+                            <Icon className="size-6" />
                             <span className="text-[11px] font-medium leading-tight">
                                 {tab.label}
                             </span>

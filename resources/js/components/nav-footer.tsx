@@ -36,12 +36,12 @@ export function NavFooter({
                             <SidebarMenuItem key={item.title}>
                                 <SidebarMenuButton
                                     asChild
-                                    className="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
+                                    className="text-muted-foreground hover:text-foreground"
                                 >
                                     {isInternal ? (
                                         <Link href={url} prefetch>
                                             {item.icon && (
-                                                <item.icon className="h-5 w-5" />
+                                                <item.icon className="size-5" />
                                             )}
                                             <span>{item.title}</span>
                                         </Link>
@@ -52,7 +52,7 @@ export function NavFooter({
                                             rel="noopener noreferrer"
                                         >
                                             {item.icon && (
-                                                <item.icon className="h-5 w-5" />
+                                                <item.icon className="size-5" />
                                             )}
                                             <span>{item.title}</span>
                                         </a>
