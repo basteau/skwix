@@ -242,7 +242,7 @@ export function TutorialModal({ forceOpen = false, onClose }: TutorialModalProps
                     </Button>
 
                     <DialogClose asChild>
-                        <button className="px-2 py-1 text-sm text-muted-foreground hover:text-foreground">
+                        <button className="min-h-11 rounded-md px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground">
                             Overslaan
                         </button>
                     </DialogClose>
