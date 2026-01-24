@@ -3,77 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>Je bent uitgenodigd voor Skwix!</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f0f7ff;">
-    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f7fa; -webkit-font-smoothing: antialiased;">
+    <!-- Dark mode styles -->
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .email-bg { background-color: #1a1d23 !important; }
+            .card-bg { background-color: #252830 !important; }
+            .text-primary { color: #f1f5f9 !important; }
+            .text-secondary { color: #94a3b8 !important; }
+            .text-muted { color: #64748b !important; }
+            .footer-bg { background-color: #1e2128 !important; }
+            .date-box { background-color: #2d323c !important; }
+        }
+    </style>
+
+    <table role="presentation" class="email-bg" style="width: 100%; border-collapse: collapse; background-color: #f5f7fa;">
         <tr>
-            <td align="center" style="padding: 40px 20px;">
-                <table role="presentation" style="max-width: 480px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(51, 124, 191, 0.1);">
-                    <!-- Header with snowflakes -->
+            <td align="center" style="padding: 32px 16px;">
+                <!-- Main Card -->
+                <table role="presentation" class="card-bg" style="max-width: 440px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04), 0 10px 40px rgba(51, 100, 170, 0.08);">
+                    
+                    <!-- Header - Playful Winter Banner -->
                     <tr>
-                        <td style="padding: 40px 32px 24px; text-align: center; background: linear-gradient(180deg, #e8f4ff 0%, #ffffff 100%); border-radius: 16px 16px 0 0;">
-                            <div style="font-size: 48px; margin-bottom: 16px;">❄️</div>
-                            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1a365d; letter-spacing: -0.5px;">
-                                Je bent uitgenodigd!
-                            </h1>
+                        <td style="padding: 0;">
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #3b6eb5 0%, #2a5298 50%, #1e3a6e 100%);">
+                                <tr>
+                                    <td style="padding: 36px 24px 30px; text-align: center;">
+                                        <!-- Snowflake cluster -->
+                                        <table role="presentation" style="margin: 0 auto 20px;">
+                                            <tr>
+                                                <td style="font-size: 20px; opacity: 0.5; padding: 0 4px;">❄</td>
+                                                <td style="font-size: 36px; padding: 0 6px;">❄️</td>
+                                                <td style="font-size: 20px; opacity: 0.5; padding: 0 4px;">❄</td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Title -->
+                                        <h1 style="margin: 0 0 6px; font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                                            Skwix
+                                        </h1>
+                                        <p style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.85); font-weight: 500;">
+                                            Het winterse woordspel
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
 
                     <!-- Content -->
                     <tr>
-                        <td style="padding: 32px;">
-                            <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #334155;">
-                                Hallo <strong style="color: #1a365d;">{{ $playerName }}</strong>,
+                        <td style="padding: 32px 28px;">
+                            <!-- Greeting -->
+                            <p class="text-primary" style="margin: 0 0 20px; font-size: 17px; line-height: 1.5; color: #1e293b;">
+                                Hoi <strong>{{ $playerName }}</strong>! 👋
                             </p>
-                            <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #334155;">
-                                Je bent uitgenodigd om mee te doen aan <strong style="color: #337cbf;">Skwix</strong> – een spannend woordspel waar je elke dag puzzels oplost, vragen stelt en het rad van fortuin draait om punten te verdienen!
+                            
+                            <p class="text-secondary" style="margin: 0 0 28px; font-size: 15px; line-height: 1.65; color: #475569;">
+                                Je bent uitgenodigd voor een potje Skwix – los puzzels op, stel vragen en draai aan het rad. Wie aan het eind de meeste punten heeft, wint!
                             </p>
 
                             @if($startsAt)
-                            <div style="margin: 24px 0; padding: 16px; background-color: #f0f7ff; border-radius: 10px; border-left: 4px solid #337cbf;">
-                                <p style="margin: 0; font-size: 14px; color: #64748b;">
-                                    🗓️ Het spel start op:
-                                </p>
-                                <p style="margin: 4px 0 0; font-size: 18px; font-weight: 600; color: #1a365d;">
-                                    {{ $startsAt }}
-                                </p>
-                            </div>
+                            <!-- Start Date Box -->
+                            <table role="presentation" class="date-box" style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 16px 20px; background-color: #f8fafc; border-radius: 12px;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="width: 40px; vertical-align: middle;">
+                                                    <span style="font-size: 24px;">📅</span>
+                                                </td>
+                                                <td style="vertical-align: middle;">
+                                                    <p class="text-muted" style="margin: 0 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">
+                                                        Het spel start op:
+                                                    </p>
+                                                    <p class="text-primary" style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b;">
+                                                        {{ $startsAt }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
                             @endif
 
-                            <!-- Invite Code Box -->
-                            <div style="margin: 32px 0; padding: 24px; background: linear-gradient(135deg, #337cbf 0%, #2563eb 100%); border-radius: 12px; text-align: center;">
-                                <p style="margin: 0 0 8px; font-size: 14px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 1px;">
-                                    Jouw uitnodigingscode
-                                </p>
-                                <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ffffff; font-family: 'SF Mono', Monaco, Consolas, monospace; letter-spacing: 4px;">
-                                    {{ $inviteCode }}
-                                </p>
-                            </div>
+                            <!-- Invite Code - Focal Point -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 28px 20px; background: linear-gradient(145deg, #3b6eb5 0%, #2a5298 100%); border-radius: 16px; text-align: center;">
+                                        <p style="margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.7); font-weight: 600;">
+                                            Jouw code
+                                        </p>
+                                        <p style="margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', monospace; letter-spacing: 6px;">
+                                            {{ $inviteCode }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
 
                             <!-- CTA Button -->
                             <table role="presentation" style="width: 100%; border-collapse: collapse;">
                                 <tr>
-                                    <td align="center" style="padding: 8px 0 24px;">
-                                        <a href="{{ $loginUrl }}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #337cbf 0%, #2563eb 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 10px; box-shadow: 0 4px 14px rgba(51, 124, 191, 0.4);">
+                                    <td align="center" style="padding: 0 0 20px;">
+                                        <a href="{{ $loginUrl }}" style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #3b6eb5 0%, #2a5298 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 12px rgba(59, 110, 181, 0.35); letter-spacing: 0.3px;">
                                             Spelen! ❄️
                                         </a>
                                     </td>
                                 </tr>
                             </table>
 
-                            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b; text-align: center;">
-                                Of ga naar <a href="{{ $loginUrl }}" style="color: #337cbf; text-decoration: none;">{{ $loginUrl }}</a><br>
-                                en voer je code in.
+                            <p class="text-muted" style="margin: 0; font-size: 13px; line-height: 1.6; color: #94a3b8; text-align: center;">
+                                Ga naar skwix.be en voer je code in
                             </p>
                         </td>
                     </tr>
 
                     <!-- Footer -->
                     <tr>
-                        <td style="padding: 24px 32px; background-color: #f8fafc; border-radius: 0 0 16px 16px; text-align: center;">
-                            <p style="margin: 0; font-size: 13px; color: #94a3b8;">
-                                ❄️ Skwix – Het winterse woordspel ❄️
+                        <td class="footer-bg" style="padding: 20px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
+                            <p class="text-muted" style="margin: 0; font-size: 12px; color: #94a3b8; text-align: center;">
+                                ❄️ Skwix • Raad het woord, versla je vrienden ❄️
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Unsubscribe / Footer text outside card -->
+                <table role="presentation" style="max-width: 440px; width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 24px 16px; text-align: center;">
+                            <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+                                Je ontvangt deze mail omdat je bent uitgenodigd voor een spel.
                             </p>
                         </td>
                     </tr>
