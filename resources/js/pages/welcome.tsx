@@ -1,7 +1,12 @@
 import { ResendCodeModal } from '@/components/resend-code-modal';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import {
+    InputOTP,
+    InputOTPGroup,
+    InputOTPSlot,
+} from '@/components/ui/input-otp';
 import { Head, router } from '@inertiajs/react';
+import { REGEXP_ONLY_CHARS } from 'input-otp';
 import { Snowflake } from 'lucide-react';
 import { type FormEvent, useCallback, useState } from 'react';
 
@@ -136,26 +141,54 @@ export default function Welcome() {
                         onSubmit={handleSubmit}
                         className="w-full rounded-xl bg-card/50 p-6 shadow-sm ring-1 ring-border"
                     >
-                        <div className="space-y-2">
+                        <div className="flex flex-col items-center space-y-3">
                             <label htmlFor="invite-code" className="sr-only">
                                 Uitnodigingscode
                             </label>
-                            <Input
+                            <InputOTP
                                 id="invite-code"
                                 data-testid="invite-code-input"
-                                type="text"
+                                maxLength={6}
                                 value={code}
-                                onChange={(e) => {
-                                    setCode(e.target.value.toUpperCase());
+                                onChange={(value) => {
+                                    setCode(value.toUpperCase());
                                     setError(null);
                                 }}
-                                placeholder="Voer je code in"
-                                className="h-14 text-center font-mono text-lg tracking-[0.2em] uppercase placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:normal-case"
-                                maxLength={6}
-                                autoComplete="off"
+                                pattern={REGEXP_ONLY_CHARS.source}
                                 aria-invalid={!!error}
-                                aria-describedby={error ? 'code-error' : undefined}
-                            />
+                                aria-describedby={
+                                    error ? 'code-error' : undefined
+                                }
+                                textTransform="uppercase"
+                                inputMode="text"
+                            >
+                                <InputOTPGroup>
+                                    <InputOTPSlot
+                                        index={0}
+                                        className="size-12 text-lg font-mono font-semibold"
+                                    />
+                                    <InputOTPSlot
+                                        index={1}
+                                        className="size-12 text-lg font-mono font-semibold"
+                                    />
+                                    <InputOTPSlot
+                                        index={2}
+                                        className="size-12 text-lg font-mono font-semibold"
+                                    />
+                                    <InputOTPSlot
+                                        index={3}
+                                        className="size-12 text-lg font-mono font-semibold"
+                                    />
+                                    <InputOTPSlot
+                                        index={4}
+                                        className="size-12 text-lg font-mono font-semibold"
+                                    />
+                                    <InputOTPSlot
+                                        index={5}
+                                        className="size-12 text-lg font-mono font-semibold"
+                                    />
+                                </InputOTPGroup>
+                            </InputOTP>
                             {error && (
                                 <p
                                     id="code-error"
@@ -171,8 +204,8 @@ export default function Welcome() {
                             type="submit"
                             size="lg"
                             data-testid="join-game-button"
-                            className="mt-3 h-12 w-full text-base font-semibold"
-                            disabled={!code.trim() || isSubmitting}
+                            className="mt-4 h-12 w-full text-base font-semibold"
+                            disabled={code.length < 6 || isSubmitting}
                         >
                             {isSubmitting ? 'Even kijken...' : 'Doe mee'}
                         </Button>
