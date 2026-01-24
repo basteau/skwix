@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import Check from 'lucide-react/icons/check';
 import X from 'lucide-react/icons/x';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { PlayHeader } from '@/components/play-header';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
@@ -120,13 +121,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
         <PlayLayout>
             <Head title="Vraag" />
             <div className="flex h-full flex-col">
-                {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
-                    <span className="font-display text-lg font-bold text-foreground">Mystery Woord</span>
-                    <span data-testid="guess-points-display" className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
-                        {points} punten
-                    </span>
-                </header>
+                <PlayHeader title="Mystery Woord" points={points} testId="guess-points-display" />
 
                 {/* Message */}
                 {message && (

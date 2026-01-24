@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { PlayHeader } from '@/components/play-header';
 import PlayLayout from '@/layouts/play-layout';
 import { getCsrfToken } from '@/lib/utils';
 
@@ -180,11 +181,11 @@ export default function WordlePage({ player, game, wordle, error }: Props) {
         <PlayLayout>
             <Head title="Wordle" />
             <div className="flex h-full flex-col">
-                {/* Header */}
-                <header className="flex items-center justify-between px-4 py-3 pt-safe border-b border-border">
-                    <span className="text-sm text-muted-foreground">Dag {game?.day_number ?? 1}</span>
-                    <span data-testid="points-header" className="font-semibold text-foreground">{player?.points ?? 0} punten</span>
-                </header>
+                <PlayHeader
+                    title="Wordle"
+                    subtitle={`Dag ${game?.day_number ?? 1}`}
+                    points={player?.points ?? 0}
+                />
 
                 {/* Message */}
                 {message && (

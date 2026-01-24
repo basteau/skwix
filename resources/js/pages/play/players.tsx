@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { PlayHeader } from '@/components/play-header';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
@@ -51,13 +52,7 @@ export default function PlayersPage({ player, game, players = [], error }: Props
         <PlayLayout>
             <Head title="Spelers" />
             <div className="flex h-full flex-col">
-                {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
-                    <span className="font-display text-lg font-bold text-foreground">Ranglijst</span>
-                    <span data-testid="points-header" className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
-                        {player?.points ?? 0} punten
-                    </span>
-                </header>
+                <PlayHeader title="Ranglijst" points={player?.points ?? 0} />
 
                 {/* Players List */}
                 <div data-testid="leaderboard" className="flex-1 overflow-y-auto px-4 py-4">

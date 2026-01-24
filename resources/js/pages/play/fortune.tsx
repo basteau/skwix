@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
+import { PlayHeader } from '@/components/play-header';
 import { Button } from '@/components/ui/button';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
@@ -103,13 +104,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
         <PlayLayout>
             <Head title="Rad" />
             <div className="flex h-full flex-col">
-                {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
-                    <span className="font-display text-lg font-bold text-foreground">Rad van Fortuin</span>
-                    <span data-testid="fortune-points-display" className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
-                        {points} punten
-                    </span>
-                </header>
+                <PlayHeader title="Rad van Fortuin" points={points} testId="fortune-points-display" />
 
                 {/* Wheel Area */}
                 <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-6">
