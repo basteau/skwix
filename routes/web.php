@@ -1,14 +1,16 @@
 <?php
 
+use App\Http\Controllers\InviteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
+Route::get('/', fn () => Inertia::render('welcome'))->name('home');
+
+// API routes for game
+Route::post('/api/validate-invite', [InviteController::class, 'validate']);
+
+// Lobby route
+Route::get('/lobby', fn () => Inertia::render('lobby'))->name('lobby');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
