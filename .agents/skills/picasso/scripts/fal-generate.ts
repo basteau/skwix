@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-import { file, argv, env } from "bun";
 import { resolve } from "path";
+import { file, argv, env } from "bun";
 
 interface Options {
   prompt: string;
