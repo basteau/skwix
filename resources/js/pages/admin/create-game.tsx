@@ -189,14 +189,14 @@ export default function CreateGame({ sampleWords }: Props) {
                                     + Speler
                                 </Button>
                             </div>
-                            <div className="space-y-3">
+                            <div className="divide-y divide-border">
                                 {players.map((player, i) => (
                                     <div
                                         key={player.id}
-                                        className="rounded-lg border border-border bg-card p-4"
+                                        className="py-4 first:pt-0 last:pb-0"
                                     >
                                         <div className="mb-2 flex items-center justify-between">
-                                            <span className="text-sm font-medium text-muted-foreground">
+                                            <span className="text-sm font-medium text-foreground">
                                                 Speler {i + 1}
                                             </span>
                                             {players.length > 2 && (
