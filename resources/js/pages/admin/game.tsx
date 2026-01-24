@@ -1,5 +1,15 @@
 import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -10,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
+import { Mail } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 interface PlayerData {
@@ -28,7 +39,7 @@ interface PlayerData {
 interface GameData {
     id: number;
     secret_word: string;
-    status: 'pending' | 'active' | 'completed';
+    status: 'draft' | 'pending' | 'active' | 'completed';
     starts_at: string | null;
     ends_at: string | null;
     wordle_words: string[];
@@ -44,18 +55,22 @@ export default function AdminGameDetail({ game, players }: Props) {
     const [wordleWords, setWordleWords] = useState<string[]>(game.wordle_words);
     const [isUpdatingWords, setIsUpdatingWords] = useState(false);
     const [isEndingGame, setIsEndingGame] = useState(false);
+    const [isInviting, setIsInviting] = useState(false);
+    const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(
         null,
     );
 
     const statusColors: Record<string, string> = {
-        pending: 'bg-warning/15 text-[oklch(45%_0.15_85)]',
+        draft: 'bg-warning/15 text-[oklch(45%_0.15_85)]',
+        pending: 'bg-primary/15 text-primary',
         active: 'bg-success/15 text-[oklch(40%_0.15_145)]',
         completed: 'bg-muted text-muted-foreground',
     };
 
     const statusLabels: Record<string, string> = {
-        pending: 'Wachtend',
+        draft: 'Concept',
+        pending: 'Uitgenodigd',
         active: 'Actief',
         completed: 'Voltooid',
     };
@@ -89,6 +104,16 @@ export default function AdminGameDetail({ game, players }: Props) {
         );
     }, [game.id, selectedWinnerId]);
 
+    const handleInvitePlayers = useCallback(() => {
+        setIsInviting(true);
+        router.post(`/admin/game/${game.id}/invite`, {}, {
+            onFinish: () => {
+                setIsInviting(false);
+                setInviteDialogOpen(false);
+            },
+        });
+    }, [game.id]);
+
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
     const endsAt = game.ends_at ? new Date(game.ends_at) : null;
 
@@ -117,6 +142,57 @@ export default function AdminGameDetail({ game, players }: Props) {
 
                 <main className="mx-auto max-w-4xl p-6 pb-[calc(1.5rem+var(--safe-bottom))]">
                     <div className="space-y-8">
+                        {/* Invite Players - Only for draft games */}
+                        {game.status === 'draft' && (
+                            <section className="rounded-lg border border-primary/30 bg-primary/5 p-6">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-foreground">
+                                            Spelers Uitnodigen
+                                        </h2>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            Verstuur uitnodigingsmails naar alle {players.length} spelers.
+                                            Het spel kan daarna niet meer aangepast worden.
+                                        </p>
+                                    </div>
+                                    <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button className="shrink-0 gap-2">
+                                                <Mail className="size-4" />
+                                                Uitnodigen
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Uitnodigingen versturen?</DialogTitle>
+                                                <DialogDescription>
+                                                    Er worden {players.length} uitnodigingsmails verstuurd naar:
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
+                                                {players.map((player) => (
+                                                    <li key={player.id} className="flex items-center gap-2 text-muted-foreground">
+                                                        <span className="font-medium text-foreground">{player.name}</span>
+                                                        <span className="text-xs">({player.email})</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <DialogFooter>
+                                                <DialogClose asChild>
+                                                    <Button variant="outline" disabled={isInviting}>
+                                                        Annuleren
+                                                    </Button>
+                                                </DialogClose>
+                                                <Button onClick={handleInvitePlayers} disabled={isInviting}>
+                                                    {isInviting ? 'Versturen...' : 'Bevestigen'}
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
+                            </section>
+                        )}
+
                         {/* Game Info */}
                         <section className="rounded-lg border border-border bg-card p-6">
                             <h2 className="mb-4 text-lg font-semibold text-foreground">
