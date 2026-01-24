@@ -156,8 +156,21 @@ class FortuneController extends Controller
         $pointsChange = $won ? $wager : -$wager;
         $newPoints = $points + $pointsChange;
 
+        $spinResult = [
+            'id' => random_int(10000, 99999),
+            'amount' => $wager,
+            'won' => $won,
+            'points_change' => $pointsChange,
+            'created_at' => now()->toISOString(),
+        ];
+
+        $existingSpins = $testGame['spins'] ?? [];
+        array_unshift($existingSpins, $spinResult);
+        $recentSpins = array_slice($existingSpins, 0, 5);
+
         $this->testGameService->updateTestGame([
             'player' => ['points' => $newPoints],
+            'spins' => $recentSpins,
         ]);
 
         $landingSegment = $this->getLandingSegment($won);
@@ -171,12 +184,7 @@ class FortuneController extends Controller
             'points_change' => $pointsChange,
             'points_remaining' => $newPoints,
             'spin_degrees' => $spinDegrees,
-            'spin_result' => [
-                'id' => random_int(10000, 99999),
-                'amount' => $wager,
-                'won' => $won,
-                'points_change' => $pointsChange,
-            ],
+            'spin_result' => $spinResult,
         ]);
     }
 
