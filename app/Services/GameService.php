@@ -115,4 +115,37 @@ class GameService
     {
         return Game::where('status', 'active')->get();
     }
+
+    public function getGamesNeedingEnding(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Game::where('status', 'active')
+            ->where('ends_at', '<=', Carbon::now())
+            ->get();
+    }
+
+    public function endExpiredGame(Game $game): array
+    {
+        if ($game->status !== 'active') {
+            return ['game' => $game, 'winner' => null];
+        }
+
+        $game->load('players');
+
+        $winner = $game->players
+            ->sortByDesc('points')
+            ->first();
+
+        $hasUniqueWinner = $winner && $game->players
+            ->where('points', $winner->points)
+            ->count() === 1;
+
+        $game->status = 'completed';
+        $game->winner_id = $hasUniqueWinner ? $winner->id : null;
+        $game->save();
+
+        return [
+            'game' => $game,
+            'winner' => $hasUniqueWinner ? $winner : null,
+        ];
+    }
 }

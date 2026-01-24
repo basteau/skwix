@@ -198,3 +198,81 @@ describe('activateGame', function () {
         expect($game->status)->toBe('pending');
     });
 });
+
+describe('getGamesNeedingEnding', function () {
+    it('returns active games past their end time', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 28, 12, 0, 0));
+
+        $expiredGame = Game::factory()->create([
+            'status' => 'active',
+            'ends_at' => Carbon::create(2026, 1, 28, 10, 0, 0),
+        ]);
+
+        $futureGame = Game::factory()->create([
+            'status' => 'active',
+            'ends_at' => Carbon::create(2026, 1, 29, 10, 0, 0),
+        ]);
+
+        $completedGame = Game::factory()->create([
+            'status' => 'completed',
+            'ends_at' => Carbon::create(2026, 1, 27, 10, 0, 0),
+        ]);
+
+        $games = $this->gameService->getGamesNeedingEnding();
+
+        expect($games)->toHaveCount(1);
+        expect($games->first()->id)->toBe($expiredGame->id);
+    });
+});
+
+describe('endExpiredGame', function () {
+    it('ends game and selects winner with highest points', function () {
+        $game = Game::factory()->create(['status' => 'active']);
+
+        Player::factory()->create(['game_id' => $game->id, 'points' => 50]);
+        $winner = Player::factory()->create(['game_id' => $game->id, 'points' => 100]);
+        Player::factory()->create(['game_id' => $game->id, 'points' => 75]);
+
+        $result = $this->gameService->endExpiredGame($game);
+
+        $game->refresh();
+        expect($game->status)->toBe('completed');
+        expect($game->winner_id)->toBe($winner->id);
+        expect($result['winner']->id)->toBe($winner->id);
+    });
+
+    it('ends game with no winner when there is a tie', function () {
+        $game = Game::factory()->create(['status' => 'active']);
+
+        Player::factory()->create(['game_id' => $game->id, 'points' => 100]);
+        Player::factory()->create(['game_id' => $game->id, 'points' => 100]);
+
+        $result = $this->gameService->endExpiredGame($game);
+
+        $game->refresh();
+        expect($game->status)->toBe('completed');
+        expect($game->winner_id)->toBeNull();
+        expect($result['winner'])->toBeNull();
+    });
+
+    it('ends game with no winner when no players', function () {
+        $game = Game::factory()->create(['status' => 'active']);
+
+        $result = $this->gameService->endExpiredGame($game);
+
+        $game->refresh();
+        expect($game->status)->toBe('completed');
+        expect($game->winner_id)->toBeNull();
+        expect($result['winner'])->toBeNull();
+    });
+
+    it('does not change non-active game', function () {
+        $game = Game::factory()->create(['status' => 'completed']);
+        $player = Player::factory()->create(['game_id' => $game->id, 'points' => 100]);
+
+        $result = $this->gameService->endExpiredGame($game);
+
+        expect($game->winner_id)->toBeNull();
+        expect($result['winner'])->toBeNull();
+    });
+});

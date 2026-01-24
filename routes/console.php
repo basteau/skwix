@@ -16,3 +16,7 @@ Schedule::command('game:notify-wordle')
     ->dailyAt('08:00')
     ->timezone('Europe/Brussels')
     ->description('Daily Wordle notification at 8:00 AM Brussels time');
+
+Schedule::command('game:end-expired')
+    ->everyMinute()
+    ->description('End games that have reached their end time');
