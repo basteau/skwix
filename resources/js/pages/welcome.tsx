@@ -33,10 +33,10 @@ export default function Welcome() {
                 <main className="relative z-10 flex w-full max-w-sm flex-col items-center text-center">
                     {/* Logo/Title */}
                     <div className="mb-8">
-                        <h1 className="text-5xl font-bold tracking-tight text-foreground">
+                        <h1 className="font-display text-5xl font-extrabold tracking-tight text-foreground">
                             Skwix
                         </h1>
-                        <p className="mt-3 text-lg text-muted-foreground">
+                        <p className="mt-3 text-lg font-medium text-foreground/70">
                             Raad het woord, versla je vrienden
                         </p>
                     </div>
