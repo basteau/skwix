@@ -8,8 +8,8 @@ updated: 2026-01-24
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--color-primary` | oklch(55% 0.15 230) | CTAs, links, active states - crisp winter blue |
-| `--color-primary-hover` | oklch(48% 0.15 230) | Hover states |
+| `--color-primary` | oklch(45% 0.15 230) | CTAs, links, active states - winter blue (WCAG AA) |
+| `--color-primary-hover` | oklch(38% 0.15 230) | Hover states |
 | `--color-primary-light` | oklch(92% 0.04 230) | Subtle backgrounds, highlights |
 | `--color-secondary` | oklch(70% 0.12 220) | Ice blue accents |
 | `--color-surface` | oklch(99% 0.005 230) | Card backgrounds - hint of blue |
@@ -26,7 +26,7 @@ updated: 2026-01-24
 | `--color-wordle-correct` | oklch(55% 0.18 145) | Green - correct letter+position |
 | `--color-wordle-present` | oklch(65% 0.18 85) | Yellow - correct letter, wrong position |
 | `--color-wordle-absent` | oklch(55% 0.02 250) | Gray - letter not in word |
-| `--color-wheel-win` | oklch(55% 0.15 230) | Wheel winning segments |
+| `--color-wheel-win` | oklch(45% 0.15 230) | Wheel winning segments |
 | `--color-wheel-lose` | oklch(65% 0.02 250) | Wheel losing segments |
 
 ## Typography
@@ -88,7 +88,7 @@ updated: 2026-01-24
 | `--shadow-md` | 0 4px 8px oklch(0% 0 0 / 0.06) | Cards, buttons |
 | `--shadow-lg` | 0 8px 16px oklch(0% 0 0 / 0.08) | Elevated cards |
 | `--shadow-xl` | 0 16px 32px oklch(0% 0 0 / 0.12) | Modals, popovers |
-| `--shadow-glow` | 0 0 24px oklch(55% 0.15 230 / 0.3) | Primary glow effect |
+| `--shadow-glow` | 0 0 24px oklch(45% 0.15 230 / 0.3) | Primary glow effect |
 
 ## Breakpoints
 
