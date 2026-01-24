@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SpinResult;
+use App\Services\TestGameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,8 +13,16 @@ class FortuneController extends Controller
 {
     private const SEGMENTS = 8;
 
+    public function __construct(
+        private TestGameService $testGameService,
+    ) {}
+
     public function show(Request $request): Response
     {
+        if ($this->testGameService->isTestMode()) {
+            return $this->showTestMode();
+        }
+
         $user = $request->user();
         $player = $user->activePlayer();
 
@@ -52,11 +61,30 @@ class FortuneController extends Controller
         ]);
     }
 
+    private function showTestMode(): Response
+    {
+        $testGame = $this->testGameService->getTestGame();
+
+        return Inertia::render('play/fortune', [
+            'testMode' => ['active' => true],
+            'player' => $testGame['player'],
+            'game' => [
+                'id' => $testGame['id'],
+                'status' => 'active',
+            ],
+            'recentSpins' => $testGame['spins'] ?? [],
+        ]);
+    }
+
     public function spin(Request $request): JsonResponse
     {
         $request->validate([
             'wager' => 'required|integer|min:1',
         ]);
+
+        if ($this->testGameService->isTestMode()) {
+            return $this->spinTestMode($request);
+        }
 
         $user = $request->user();
         $player = $user->activePlayer();
@@ -110,6 +138,44 @@ class FortuneController extends Controller
                 'amount' => $spinResult->amount_wagered,
                 'won' => $spinResult->won,
                 'points_change' => $spinResult->points_change,
+            ],
+        ]);
+    }
+
+    private function spinTestMode(Request $request): JsonResponse
+    {
+        $testGame = $this->testGameService->getTestGame();
+        $wager = (int) $request->wager;
+        $points = $testGame['player']['points'];
+
+        if ($wager > $points) {
+            return response()->json(['error' => 'insufficient_points'], 400);
+        }
+
+        $won = $this->spinWheel();
+        $pointsChange = $won ? $wager : -$wager;
+        $newPoints = $points + $pointsChange;
+
+        $this->testGameService->updateTestGame([
+            'player' => ['points' => $newPoints],
+        ]);
+
+        $landingSegment = $this->getLandingSegment($won);
+        $rotations = random_int(3, 5);
+        $segmentAngle = 360 / self::SEGMENTS;
+        $spinDegrees = ($rotations * 360) + ($landingSegment * $segmentAngle) + random_int(5, (int) $segmentAngle - 5);
+
+        return response()->json([
+            'success' => true,
+            'won' => $won,
+            'points_change' => $pointsChange,
+            'points_remaining' => $newPoints,
+            'spin_degrees' => $spinDegrees,
+            'spin_result' => [
+                'id' => random_int(10000, 99999),
+                'amount' => $wager,
+                'won' => $won,
+                'points_change' => $pointsChange,
             ],
         ]);
     }

@@ -3,14 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
+use App\Services\TestGameService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PlayersController extends Controller
 {
+    public function __construct(
+        private TestGameService $testGameService,
+    ) {}
+
     public function show(Request $request): Response
     {
+        if ($this->testGameService->isTestMode()) {
+            return $this->showTestMode();
+        }
+
         $user = $request->user();
         $player = $user->activePlayer();
 
@@ -55,6 +64,36 @@ class PlayersController extends Controller
             'game' => [
                 'id' => $game->id,
                 'status' => $game->status,
+            ],
+            'players' => $players,
+        ]);
+    }
+
+    private function showTestMode(): Response
+    {
+        $testGame = $this->testGameService->getTestGame();
+        $allPlayers = $this->testGameService->getAllPlayers();
+
+        $players = collect($allPlayers)->map(function ($p, $index) use ($testGame) {
+            return [
+                'id' => $p['id'],
+                'name' => $p['name'],
+                'avatar_url' => $p['avatar_url'] ?? null,
+                'points' => $p['points'],
+                'rank' => $index + 1,
+                'questions_count' => 0,
+                'wordles_completed' => 0,
+                'avg_wordle_guesses' => null,
+                'is_current' => $p['id'] === $testGame['player']['id'],
+            ];
+        });
+
+        return Inertia::render('play/players', [
+            'testMode' => ['active' => true],
+            'player' => $testGame['player'],
+            'game' => [
+                'id' => $testGame['id'],
+                'status' => 'active',
             ],
             'players' => $players,
         ]);

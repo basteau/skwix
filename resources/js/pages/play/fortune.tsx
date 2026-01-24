@@ -1,4 +1,5 @@
 import { PlayHeader } from '@/components/play-header';
+import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
@@ -32,6 +33,9 @@ interface SpinRecord {
 }
 
 interface Props {
+    testMode?: {
+        active: boolean;
+    };
     player?: {
         id: number;
         name: string;
@@ -52,6 +56,7 @@ const LIGHTS_COUNT = 32;
 const WAGER_PRESETS = [10, 25, 50, 100];
 
 export default function FortunePage({
+    testMode,
     player,
     recentSpins: initialSpins = [],
     error,
@@ -155,6 +160,9 @@ export default function FortunePage({
         <PlayLayout>
             <Head title="Rad" />
             <div className="relative flex h-full flex-col overflow-hidden">
+                {/* Test Mode Banner */}
+                {testMode?.active && <TestModeBanner />}
+
                 <PlayHeader
                     title="Rad van Fortuin"
                     points={points}

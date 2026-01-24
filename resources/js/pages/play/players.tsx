@@ -1,4 +1,5 @@
 import { PlayHeader } from '@/components/play-header';
+import { TestModeBanner } from '@/components/test-mode-banner';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
@@ -28,9 +29,10 @@ interface Props {
     };
     players?: PlayerData[];
     error?: string;
+    testMode?: { active: boolean };
 }
 
-export default function PlayersPage({ player, players = [], error }: Props) {
+export default function PlayersPage({ player, players = [], error, testMode }: Props) {
     if (error === 'no_active_game') {
         return (
             <PlayLayout>
@@ -54,6 +56,7 @@ export default function PlayersPage({ player, players = [], error }: Props) {
         <PlayLayout>
             <Head title="Spelers" />
             <div className="flex h-full flex-col">
+                {testMode?.active && <TestModeBanner />}
                 <PlayHeader title="Ranglijst" points={player?.points ?? 0} />
 
                 {/* Players List */}

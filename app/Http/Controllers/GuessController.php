@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Question;
 use App\Services\GameService;
 use App\Services\OpenRouterService;
+use App\Services\TestGameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,10 +16,15 @@ class GuessController extends Controller
     public function __construct(
         private GameService $gameService,
         private OpenRouterService $openRouterService,
+        private TestGameService $testGameService,
     ) {}
 
     public function show(Request $request): Response
     {
+        if ($this->testGameService->isTestMode()) {
+            return $this->showTestMode();
+        }
+
         $user = $request->user();
         $player = $user->activePlayer();
 
@@ -65,11 +71,40 @@ class GuessController extends Controller
         ]);
     }
 
+    private function showTestMode(): Response
+    {
+        $testGame = $this->testGameService->getTestGame();
+
+        return Inertia::render('play/guess', [
+            'testMode' => ['active' => true, 'secretWord' => $testGame['secret_word']],
+            'player' => $testGame['player'],
+            'game' => [
+                'id' => $testGame['id'],
+                'status' => 'active',
+            ],
+            'questions' => collect($testGame['questions'] ?? [])->map(fn ($q, $idx) => [
+                'id' => $idx + 1,
+                'question' => $q['question'],
+                'answer' => $q['answer'],
+                'player' => [
+                    'id' => $testGame['player']['id'],
+                    'name' => $testGame['player']['name'],
+                    'avatar_url' => $testGame['player']['avatar_url'] ?? null,
+                ],
+                'created_at' => now()->subMinutes(count($testGame['questions'] ?? []) - $idx)->toISOString(),
+            ]),
+        ]);
+    }
+
     public function ask(Request $request): JsonResponse
     {
         $request->validate([
             'question' => 'required|string|min:3|max:500',
         ]);
+
+        if ($this->testGameService->isTestMode()) {
+            return $this->askTestMode($request);
+        }
 
         $user = $request->user();
         $player = $user->activePlayer();
@@ -126,6 +161,57 @@ class GuessController extends Controller
                 'created_at' => $savedQuestion->created_at->toISOString(),
             ],
             'points_remaining' => $player->points,
+        ]);
+    }
+
+    private function askTestMode(Request $request): JsonResponse
+    {
+        $testGame = $this->testGameService->getTestGame();
+        $player = $testGame['player'];
+
+        if ($player['points'] < 3) {
+            return response()->json(['error' => 'insufficient_points'], 400);
+        }
+
+        $question = trim($request->question);
+        $secretWord = $testGame['secret_word'];
+
+        $result = $this->openRouterService->askQuestion($secretWord, $question);
+
+        if (! $result['success']) {
+            return response()->json([
+                'error' => 'ai_error',
+                'message' => $result['error'] ?? 'Er ging iets mis met de AI',
+            ], 500);
+        }
+
+        $newPoints = $player['points'] - 3;
+        $questions = $testGame['questions'] ?? [];
+        $newQuestion = [
+            'question' => $question,
+            'answer' => $result['answer'],
+        ];
+        $questions[] = $newQuestion;
+
+        $this->testGameService->updateTestGame([
+            'player' => ['points' => $newPoints],
+            'questions' => $questions,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'question' => [
+                'id' => count($questions),
+                'question' => $question,
+                'answer' => $result['answer'],
+                'player' => [
+                    'id' => $player['id'],
+                    'name' => $player['name'],
+                    'avatar_url' => $player['avatar_url'] ?? null,
+                ],
+                'created_at' => now()->toISOString(),
+            ],
+            'points_remaining' => $newPoints,
         ]);
     }
 }

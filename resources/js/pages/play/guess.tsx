@@ -1,4 +1,5 @@
 import { PlayHeader } from '@/components/play-header';
+import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
@@ -31,6 +32,7 @@ interface Props {
     };
     questions?: QuestionItem[];
     error?: string;
+    testMode?: { active: boolean; secretWord?: string };
 }
 
 const QUESTION_COST = 3;
@@ -56,6 +58,7 @@ export default function GuessPage({
     player,
     questions: initialQuestions = [],
     error,
+    testMode,
 }: Props) {
     const [questions, setQuestions] = useState<QuestionItem[]>(initialQuestions);
     const [input, setInput] = useState('');
@@ -157,6 +160,8 @@ export default function GuessPage({
         <PlayLayout>
             <Head title="Vraag" />
             <div className="relative flex h-full flex-col overflow-hidden">
+                {testMode?.active && <TestModeBanner wordleWord={testMode.secretWord} />}
+
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (
