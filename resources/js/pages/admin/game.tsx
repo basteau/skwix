@@ -332,11 +332,11 @@ export default function AdminGameDetail({ game, players }: Props) {
                                         value={
                                             selectedWinnerId
                                                 ? String(selectedWinnerId)
-                                                : ''
+                                                : 'none'
                                         }
                                         onValueChange={(value) =>
                                             setSelectedWinnerId(
-                                                value
+                                                value && value !== 'none'
                                                     ? parseInt(value, 10)
                                                     : null,
                                             )
@@ -346,7 +346,7 @@ export default function AdminGameDetail({ game, players }: Props) {
                                             <SelectValue placeholder="Geen winnaar" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">
+                                            <SelectItem value="none">
                                                 Geen winnaar
                                             </SelectItem>
                                             {players.map((player) => (
