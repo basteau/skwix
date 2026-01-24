@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FortuneController;
 use App\Http\Controllers\GameEndController;
 use App\Http\Controllers\GuessController;
+use App\Http\Controllers\JoinController;
 use App\Http\Controllers\LobbyController;
 use App\Http\Controllers\PlayersController;
 use App\Http\Controllers\WordleController;
@@ -46,6 +47,7 @@ Route::get('/welcome', function () {
 })->name('welcome');
 
 Route::post('/resend-invitation', \App\Http\Controllers\ResendInvitationController::class)->name('resend-invitation');
+Route::post('/join', JoinController::class)->name('join');
 
 Route::get('/lobby', [LobbyController::class, 'show'])->name('lobby');
 
