@@ -43,6 +43,7 @@ tests/
     wordle.pest.php
     fortune.pest.php
     guess.pest.php
+    invitation-flow.pest.php  # resend code modal flow
 ```
 
 ## Deterministic Environment (`.env.e2e`)
@@ -82,6 +83,9 @@ Add `data-testid` to React components for stable selectors:
 
 ### Welcome Page
 - `invite-code-input`, `join-game-button`
+- `resend-code-trigger` - Button to open resend code modal
+- `resend-email-input`, `resend-submit-button`
+- `resend-success-message`, `resend-error-message`
 
 ### Lobby
 - `countdown`, `player-list`, `player-card-{id}`

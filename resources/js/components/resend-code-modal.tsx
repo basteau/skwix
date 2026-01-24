@@ -93,7 +93,10 @@ export function ResendCodeModal({ open, onOpenChange }: ResendCodeModalProps) {
                 </DialogHeader>
 
                 {state === 'success' ? (
-                    <div className="px-6 pb-6 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95">
+                    <div
+                        className="px-6 pb-6 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95"
+                        data-testid="resend-success-message"
+                    >
                         <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full bg-success/10">
                             <CheckCircle2 className="size-7 text-success" />
                         </div>
@@ -114,9 +117,13 @@ export function ResendCodeModal({ open, onOpenChange }: ResendCodeModalProps) {
                                 className="h-12 text-center"
                                 autoComplete="email"
                                 autoFocus
+                                data-testid="resend-email-input"
                             />
                             {error && (
-                                <p className="text-center text-sm text-destructive">
+                                <p
+                                    className="text-center text-sm text-destructive"
+                                    data-testid="resend-error-message"
+                                >
                                     {error}
                                 </p>
                             )}
@@ -131,6 +138,7 @@ export function ResendCodeModal({ open, onOpenChange }: ResendCodeModalProps) {
                                     'h-12 w-full font-semibold',
                                     state === 'loading' && 'cursor-wait',
                                 )}
+                                data-testid="resend-submit-button"
                             >
                                 {state === 'loading' ? (
                                     <span className="flex items-center gap-2">

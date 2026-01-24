@@ -218,6 +218,7 @@ export default function Welcome() {
                             type="button"
                             onClick={() => setShowResendModal(true)}
                             className="font-medium text-primary underline-offset-4 hover:underline"
+                            data-testid="resend-code-trigger"
                         >
                             Code kwijt?
                         </button>
