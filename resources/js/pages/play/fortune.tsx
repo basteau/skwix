@@ -28,6 +28,7 @@ interface Props {
 
 const SEGMENTS = 8;
 const SEGMENT_ANGLE = 360 / SEGMENTS;
+const LIGHTS_COUNT = 24;
 
 export default function FortunePage({ player, game, recentSpins: initialSpins = [], error }: Props) {
     const [points, setPoints] = useState(player?.points ?? 0);
@@ -36,6 +37,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
     const [rotation, setRotation] = useState(0);
     const [result, setResult] = useState<{ won: boolean; change: number } | null>(null);
     const [recentSpins, setRecentSpins] = useState<SpinRecord[]>(initialSpins);
+    const [showCelebration, setShowCelebration] = useState(false);
 
     const wagerAmount = parseInt(wager, 10) || 0;
     const canSpin = points > 0 && wagerAmount >= 1 && wagerAmount <= points && !isSpinning;
@@ -45,6 +47,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
 
         setIsSpinning(true);
         setResult(null);
+        setShowCelebration(false);
 
         try {
             const response = await fetch('/play/fortune/spin', {
@@ -72,6 +75,10 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                 setRecentSpins((prev) => [data.spin_result, ...prev.slice(0, 4)]);
                 setWager('');
                 setIsSpinning(false);
+                if (data.won) {
+                    setShowCelebration(true);
+                    setTimeout(() => setShowCelebration(false), 2000);
+                }
             }, 3500);
         } catch {
             setIsSpinning(false);
@@ -97,29 +104,114 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
             <Head title="Rad" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-safe">
-                    <span className="text-sm font-medium text-foreground">Rad van Fortuin</span>
-                    <span className="font-semibold text-foreground">{points} punten</span>
+                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
+                    <span className="font-display text-lg font-bold text-foreground">Rad van Fortuin</span>
+                    <span className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                        {points} punten
+                    </span>
                 </header>
 
-                {/* Wheel */}
-                <div className="flex flex-1 flex-col items-center justify-center px-4 py-6">
+                {/* Wheel Area */}
+                <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-6">
+                    {/* Celebration confetti */}
+                    {showCelebration && (
+                        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                            {Array.from({ length: 20 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute animate-confetti"
+                                    style={{
+                                        left: `${Math.random() * 100}%`,
+                                        animationDelay: `${Math.random() * 500}ms`,
+                                        animationDuration: `${2 + Math.random()}s`,
+                                    }}
+                                >
+                                    <div
+                                        className="size-2 rounded-sm"
+                                        style={{
+                                            backgroundColor: ['var(--success)', 'var(--warning)', 'var(--primary)', 'var(--secondary)'][Math.floor(Math.random() * 4)],
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Wheel Container */}
                     <div className="relative">
-                        {/* Pointer */}
-                        <div className="absolute -top-2 left-1/2 z-10 -translate-x-1/2">
-                            <div className="size-0 border-x-8 border-t-12 border-x-transparent border-t-foreground" />
+                        {/* Pointer - SVG with shadow */}
+                        <div
+                            className={cn(
+                                'absolute -top-3 left-1/2 z-20 -translate-x-1/2 drop-shadow-md transition-transform',
+                                result && !isSpinning && 'motion-safe:animate-bounce'
+                            )}
+                            style={{ animationIterationCount: result ? 2 : undefined }}
+                        >
+                            <svg width="24" height="28" viewBox="0 0 24 28" className="drop-shadow-md">
+                                <defs>
+                                    <linearGradient id="pointer-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="var(--foreground)" stopOpacity="0.9" />
+                                        <stop offset="50%" stopColor="var(--foreground)" />
+                                        <stop offset="100%" stopColor="var(--foreground)" stopOpacity="0.9" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M12 0 L24 24 L12 20 L0 24 Z" fill="url(#pointer-gradient)" />
+                            </svg>
+                        </div>
+
+                        {/* Outer ring with lights */}
+                        <div className="absolute inset-0 -m-4">
+                            <div className="relative size-full">
+                                {Array.from({ length: LIGHTS_COUNT }).map((_, i) => {
+                                    const angle = (i * 360) / LIGHTS_COUNT;
+                                    const rad = (angle * Math.PI) / 180;
+                                    const x = 50 + 48 * Math.cos(rad);
+                                    const y = 50 + 48 * Math.sin(rad);
+                                    const isLit = isSpinning ? i % 3 === Math.floor(Date.now() / 100) % 3 : true;
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={cn(
+                                                'absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity',
+                                                isLit ? 'bg-primary opacity-80' : 'bg-border opacity-40'
+                                            )}
+                                            style={{ left: `${x}%`, top: `${y}%` }}
+                                        />
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Wheel */}
                         <div
-                            className="relative size-[280px] rounded-full border-4 border-primary shadow-lg transition-transform"
+                            className={cn(
+                                'relative size-[260px] rounded-full shadow-xl transition-transform',
+                                result?.won && 'motion-safe:animate-pulse'
+                            )}
                             style={{
                                 transform: `rotate(${rotation}deg)`,
                                 transitionDuration: isSpinning ? '3.5s' : '0s',
                                 transitionTimingFunction: 'cubic-bezier(0.1, 0.8, 0.2, 1)',
+                                boxShadow: '0 8px 32px var(--color-primary) / 0.2, inset 0 2px 4px rgba(255,255,255,0.1)',
                             }}
                         >
                             <svg viewBox="0 0 100 100" className="size-full">
+                                <defs>
+                                    <radialGradient id="wheel-sheen" cx="30%" cy="30%" r="70%">
+                                        <stop offset="0%" stopColor="white" stopOpacity="0.15" />
+                                        <stop offset="100%" stopColor="white" stopOpacity="0" />
+                                    </radialGradient>
+                                    <linearGradient id="win-segment" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="var(--color-wheel-win)" />
+                                        <stop offset="100%" stopColor="oklch(40% 0.15 230)" />
+                                    </linearGradient>
+                                    <linearGradient id="lose-segment" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="var(--color-wheel-lose)" />
+                                        <stop offset="100%" stopColor="oklch(55% 0.02 250)" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                {/* Segments */}
                                 {Array.from({ length: SEGMENTS }).map((_, i) => {
                                     const isWin = i % 2 === 0;
                                     const startAngle = i * SEGMENT_ANGLE - 90;
@@ -130,10 +222,17 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                         <path
                                             key={i}
                                             d={path}
-                                            fill={isWin ? 'var(--color-wheel-win)' : 'var(--color-wheel-lose)'}
+                                            fill={isWin ? 'url(#win-segment)' : 'url(#lose-segment)'}
+                                            stroke="var(--color-border)"
+                                            strokeWidth="0.5"
                                         />
                                     );
                                 })}
+                                
+                                {/* Sheen overlay */}
+                                <circle cx="50" cy="50" r="48" fill="url(#wheel-sheen)" />
+                                
+                                {/* Segment labels */}
                                 {Array.from({ length: SEGMENTS }).map((_, i) => {
                                     const isWin = i % 2 === 0;
                                     const angle = (i * SEGMENT_ANGLE + SEGMENT_ANGLE / 2 - 90) * (Math.PI / 180);
@@ -147,17 +246,22 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                             x={x}
                                             y={y}
                                             fill="white"
-                                            fontSize="6"
+                                            fontSize="7"
                                             fontWeight="bold"
                                             textAnchor="middle"
                                             dominantBaseline="middle"
                                             transform={`rotate(${textRotation}, ${x}, ${y})`}
+                                            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
                                         >
                                             {isWin ? '2×' : '0'}
                                         </text>
                                     );
                                 })}
-                                <circle cx="50" cy="50" r="8" fill="var(--color-background)" stroke="var(--color-border)" strokeWidth="1" />
+                                
+                                {/* Center hub */}
+                                <circle cx="50" cy="50" r="10" fill="var(--color-background)" stroke="var(--color-border-strong)" strokeWidth="2" />
+                                <circle cx="50" cy="50" r="6" fill="var(--color-primary)" />
+                                <circle cx="48" cy="48" r="2" fill="white" fillOpacity="0.4" />
                             </svg>
                         </div>
                     </div>
@@ -166,21 +270,28 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                     {result && (
                         <div
                             className={cn(
-                                'mt-6 rounded-lg px-6 py-3 text-center animate-in fade-in zoom-in duration-300',
-                                result.won ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
+                                'mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300',
+                                result.won && 'motion-safe:animate-pulse'
                             )}
                         >
-                            <p className="text-2xl font-bold">
+                            <p
+                                className={cn(
+                                    'font-display text-4xl font-bold',
+                                    result.won ? 'text-success' : 'text-muted-foreground'
+                                )}
+                            >
                                 {result.won ? `+${result.change}` : result.change}
                             </p>
-                            <p className="text-sm">{result.won ? 'Gewonnen! 🎉' : 'Verloren...'}</p>
+                            <p className={cn('mt-1 text-sm', result.won ? 'text-success' : 'text-muted-foreground')}>
+                                {result.won ? 'Gewonnen! 🎉' : 'Helaas...'}
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Controls */}
-                <div className="border-t border-border bg-background px-4 pb-safe pt-4">
-                    <div className="mb-3">
+                <div className="border-t border-border bg-background px-4 pb-[calc(var(--safe-bottom)+1rem)] pt-4">
+                    <div className="mb-4">
                         <label className="mb-1.5 block text-sm font-medium text-foreground">
                             Inzet
                         </label>
@@ -193,7 +304,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                                 min={1}
                                 max={points}
                                 disabled={isSpinning || points === 0}
-                                className="flex-1 rounded-md border border-input bg-background px-3 py-2.5 text-center text-lg font-semibold outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="h-11 flex-1 rounded-md border border-border-strong bg-card px-3 text-center text-base font-semibold outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                             />
                             <Button
                                 variant="outline"
@@ -224,7 +335,7 @@ export default function FortunePage({ player, game, recentSpins: initialSpins = 
                     </Button>
 
                     {points === 0 && (
-                        <p className="mt-2 text-center text-xs text-muted-foreground">
+                        <p className="mt-3 text-center text-xs text-muted-foreground">
                             Je hebt geen punten om in te zetten
                         </p>
                     )}
