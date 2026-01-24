@@ -1,4 +1,6 @@
 import { Head, router } from '@inertiajs/react';
+import Check from 'lucide-react/icons/check';
+import X from 'lucide-react/icons/x';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
@@ -119,9 +121,11 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
             <Head title="Vraag" />
             <div className="flex h-full flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-safe">
-                    <span className="text-sm font-medium text-foreground">Mystery Woord</span>
-                    <span className="font-semibold text-foreground">{points} punten</span>
+                <header className="flex items-center justify-between border-b border-border px-4 py-3 pt-[var(--safe-top)]">
+                    <span className="font-display text-lg font-bold text-foreground">Mystery Woord</span>
+                    <span className="rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                        {points} punten
+                    </span>
                 </header>
 
                 {/* Message */}
@@ -144,34 +148,23 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                     className="flex-1 overflow-y-auto px-4 py-4"
                 >
                     {questions.length === 0 ? (
-                        <div className="flex h-full flex-col items-center justify-center text-center">
-                            <div className="mb-4 rounded-full bg-primary/10 p-4">
-                                <svg
-                                    className="size-8 text-primary"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <h2 className="text-lg font-semibold text-foreground">
-                                Nog geen vragen
-                            </h2>
-                            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                                Stel ja/nee vragen over het mystery woord.
-                                Elke vraag kost {QUESTION_COST} punten.
+                        <div className="flex h-full flex-col items-center justify-center px-4">
+                            <span className="font-display text-6xl font-bold text-primary/20">?</span>
+                            <p className="mt-4 max-w-xs text-center text-sm leading-relaxed text-muted-foreground">
+                                Stel ja/nee vragen om het mystery woord te raden.
+                                <br />
+                                <span className="text-foreground">Elke vraag kost {QUESTION_COST} punten.</span>
                             </p>
+                            <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3">
+                                <p className="text-center text-sm italic text-muted-foreground">
+                                    "Is het een dier?"
+                                </p>
+                            </div>
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {questions.map((q, idx) => (
-                                <QuestionCard
+                                <QuestionBubble
                                     key={q.id}
                                     question={q}
                                     isOwn={q.player.id === player?.id}
@@ -183,7 +176,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-border bg-background px-4 pb-safe pt-3">
+                <div className="border-t border-border bg-background px-4 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3">
                     <div className="flex gap-2">
                         <input
                             ref={inputRef}
@@ -193,7 +186,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
                             onKeyDown={handleKeyDown}
                             placeholder="Stel een ja/nee vraag..."
                             disabled={isSubmitting || points < QUESTION_COST}
-                            className="flex-1 rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 flex-1 rounded-md border border-border-strong bg-card px-3 text-base outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         />
                         <Button
                             onClick={handleSubmit}
@@ -238,7 +231,7 @@ export default function GuessPage({ player, game, questions: initialQuestions = 
     );
 }
 
-function QuestionCard({
+function QuestionBubble({
     question,
     isOwn,
     isNew,
@@ -248,14 +241,16 @@ function QuestionCard({
     isNew: boolean;
 }) {
     const initials = getInitials(question.player.name);
+    const isYes = question.answer === 'yes';
 
     return (
         <div
             className={cn(
-                'rounded-lg border border-border bg-card p-3 transition-all',
-                isNew && 'animate-in fade-in slide-in-from-bottom-2 duration-300'
+                'motion-safe:transition-all',
+                isNew && 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300'
             )}
         >
+            {/* Question */}
             <div className="flex items-start gap-3">
                 {/* Avatar */}
                 <div className="shrink-0">
@@ -263,10 +258,10 @@ function QuestionCard({
                         <img
                             src={question.player.avatar_url}
                             alt={question.player.name}
-                            className="size-10 rounded-full border-2 border-border object-cover"
+                            className="size-8 rounded-full object-cover"
                         />
                     ) : (
-                        <div className="flex size-10 items-center justify-center rounded-full border-2 border-border bg-primary-light text-xs font-semibold text-primary">
+                        <div className="flex size-8 items-center justify-center rounded-full bg-primary-light text-xs font-semibold text-primary">
                             {initials}
                         </div>
                     )}
@@ -274,22 +269,25 @@ function QuestionCard({
 
                 {/* Content */}
                 <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">
-                            {isOwn ? 'Jij' : question.player.name}
-                        </span>
-                    </div>
+                    <span className="text-xs font-medium text-muted-foreground">
+                        {isOwn ? 'Jij' : question.player.name}
+                    </span>
                     <p className="mt-0.5 text-sm text-foreground">{question.question}</p>
                 </div>
+            </div>
 
-                {/* Answer Badge */}
+            {/* Answer */}
+            <div className="ml-11 mt-2">
                 <div
                     className={cn(
-                        'shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold text-white',
-                        question.answer === 'yes' ? 'bg-success' : 'bg-destructive'
+                        'inline-flex items-center gap-1.5 rounded-full px-3 py-1',
+                        isYes ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'
                     )}
                 >
-                    {question.answer === 'yes' ? 'Ja' : 'Nee'}
+                    {isYes ? <Check className="size-4" /> : <X className="size-4" />}
+                    <span className="text-sm font-semibold">
+                        {isYes ? 'Ja' : 'Nee'}
+                    </span>
                 </div>
             </div>
         </div>
