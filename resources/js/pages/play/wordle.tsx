@@ -316,19 +316,27 @@ function KeyboardKey({
     onPress: (key: string) => void;
     disabled: boolean;
 }) {
-    const isSpecial = keyVal === 'enter' || keyVal === 'backspace';
-    const label = keyVal === 'backspace' ? '←' : keyVal === 'enter' ? 'Enter' : keyVal;
-
-    const baseClasses =
-        'flex h-11 items-center justify-center rounded-sm text-sm font-semibold uppercase transition-colors active:scale-95';
-
-    const widthClass = isSpecial ? 'min-w-[65px] px-2' : 'min-w-[32px]';
+    const isEnter = keyVal === 'enter';
+    const isBackspace = keyVal === 'backspace';
+    const isSpecial = isEnter || isBackspace;
 
     const stateClasses = {
         correct: 'bg-wordle-correct text-white',
         present: 'bg-wordle-present text-white',
         absent: 'bg-wordle-absent text-white',
-        default: 'bg-muted text-foreground',
+        default: 'bg-muted text-foreground hover:bg-muted/80',
+    };
+
+    const getKeyClasses = () => {
+        const base = 'flex min-h-12 items-center justify-center font-semibold uppercase transition-all active:scale-95 disabled:opacity-50';
+        
+        if (isEnter) {
+            return `${base} min-w-[65px] rounded-md bg-primary px-3 text-sm text-primary-foreground shadow-sm hover:bg-primary-hover`;
+        }
+        if (isBackspace) {
+            return `${base} min-w-[65px] rounded-md px-3 text-lg ${stateClasses[state ?? 'default']}`;
+        }
+        return `${base} min-w-[34px] rounded-sm text-sm ${stateClasses[state ?? 'default']}`;
     };
 
     return (
@@ -336,9 +344,9 @@ function KeyboardKey({
             type="button"
             onClick={() => onPress(keyVal)}
             disabled={disabled}
-            className={`${baseClasses} ${widthClass} ${stateClasses[state ?? 'default']} disabled:opacity-50`}
+            className={getKeyClasses()}
         >
-            {label}
+            {isBackspace ? '⌫' : isEnter ? '✓' : keyVal}
         </button>
     );
 }
