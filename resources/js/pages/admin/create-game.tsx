@@ -1,4 +1,6 @@
 import { AdminHeader } from '@/components/admin-header';
+import { AvatarPicker, getAvatarUrl } from '@/components/avatar-picker';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,6 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { getInitials } from '@/hooks/use-initials';
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
 
@@ -19,7 +22,7 @@ interface PlayerRow {
     id: string;
     name: string;
     email: string;
-    avatar_url: string;
+    avatar: string;
 }
 
 export default function CreateGame({ sampleWords }: Props) {
@@ -30,8 +33,8 @@ export default function CreateGame({ sampleWords }: Props) {
         sampleWords.slice(0, 6),
     );
     const [players, setPlayers] = useState<PlayerRow[]>([
-        { id: crypto.randomUUID(), name: '', email: '', avatar_url: '' },
-        { id: crypto.randomUUID(), name: '', email: '', avatar_url: '' },
+        { id: crypto.randomUUID(), name: '', email: '', avatar: '' },
+        { id: crypto.randomUUID(), name: '', email: '', avatar: '' },
     ]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -45,7 +48,7 @@ export default function CreateGame({ sampleWords }: Props) {
                     id: crypto.randomUUID(),
                     name: '',
                     email: '',
-                    avatar_url: '',
+                    avatar: '',
                 },
             ];
         });
@@ -97,7 +100,7 @@ export default function CreateGame({ sampleWords }: Props) {
             players: players.map((p) => ({
                 name: p.name,
                 email: p.email,
-                avatar_url: p.avatar_url || null,
+                avatar: p.avatar || null,
             })),
         };
 
@@ -273,41 +276,66 @@ export default function CreateGame({ sampleWords }: Props) {
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="grid gap-3 sm:grid-cols-3">
-                                            <Input
-                                                placeholder="Naam"
-                                                value={player.name}
-                                                onChange={(e) =>
-                                                    updatePlayer(
-                                                        player.id,
-                                                        'name',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                            <Input
-                                                type="email"
-                                                placeholder="Email"
-                                                value={player.email}
-                                                onChange={(e) =>
-                                                    updatePlayer(
-                                                        player.id,
-                                                        'email',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                            <Input
-                                                placeholder="Avatar URL (optioneel)"
-                                                value={player.avatar_url}
-                                                onChange={(e) =>
-                                                    updatePlayer(
-                                                        player.id,
-                                                        'avatar_url',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
+                                        <div className="flex items-start gap-4">
+                                            <Avatar className="size-14 shrink-0 border-2 border-border">
+                                                <AvatarImage
+                                                    src={getAvatarUrl(
+                                                        player.avatar,
+                                                    )}
+                                                    alt={player.name || 'Avatar'}
+                                                />
+                                                <AvatarFallback className="bg-primary/10 text-primary">
+                                                    {player.name
+                                                        ? getInitials(
+                                                              player.name,
+                                                          )
+                                                        : '?'}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-3">
+                                                <div className="grid gap-3 sm:grid-cols-2">
+                                                    <Input
+                                                        placeholder="Naam"
+                                                        value={player.name}
+                                                        data-testid={`player-name-${i}`}
+                                                        onChange={(e) =>
+                                                            updatePlayer(
+                                                                player.id,
+                                                                'name',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="Email"
+                                                        value={player.email}
+                                                        data-testid={`player-email-${i}`}
+                                                        onChange={(e) =>
+                                                            updatePlayer(
+                                                                player.id,
+                                                                'email',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="mb-1.5 block text-xs text-muted-foreground">
+                                                        Kies avatar
+                                                    </label>
+                                                    <AvatarPicker
+                                                        value={player.avatar}
+                                                        onChange={(avatar) =>
+                                                            updatePlayer(
+                                                                player.id,
+                                                                'avatar',
+                                                                avatar,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

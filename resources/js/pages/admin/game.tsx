@@ -1,4 +1,5 @@
 import { AdminHeader } from '@/components/admin-header';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -18,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import { Mail } from 'lucide-react';
@@ -331,11 +333,27 @@ export default function AdminGameDetail({ game, players }: Props) {
                                         {/* Player info row */}
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
-                                                    {index === 0 && '🥇'}
-                                                    {index === 1 && '🥈'}
-                                                    {index === 2 && '🥉'}
-                                                    {index > 2 && index + 1}
+                                                <div className="relative">
+                                                    <Avatar className="size-10 border-2 border-border">
+                                                        <AvatarImage
+                                                            src={
+                                                                player.avatar_url ||
+                                                                undefined
+                                                            }
+                                                            alt={player.name}
+                                                        />
+                                                        <AvatarFallback className="bg-primary/10 text-primary">
+                                                            {getInitials(
+                                                                player.name,
+                                                            )}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-background text-xs font-bold shadow-sm ring-1 ring-border">
+                                                        {index === 0 && '🥇'}
+                                                        {index === 1 && '🥈'}
+                                                        {index === 2 && '🥉'}
+                                                        {index > 2 && index + 1}
+                                                    </span>
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="truncate font-medium text-foreground">

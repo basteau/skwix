@@ -56,7 +56,7 @@ class AdminController extends Controller
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
             'players.*.email' => 'required|email|max:255',
-            'players.*.avatar_url' => 'nullable|url|max:500',
+            'players.*.avatar' => 'nullable|string|max:100',
         ]);
 
         $game = \DB::transaction(function () use ($request) {
@@ -74,12 +74,15 @@ class AdminController extends Controller
             foreach ($request->players as $playerData) {
                 $inviteCode = strtoupper(Str::random(6));
 
+                $avatar = $playerData['avatar'] ?? null;
+                $avatarUrl = $avatar ? "/images/faces/{$avatar}.png" : null;
+
                 $user = User::firstOrCreate(
                     ['email' => $playerData['email']],
                     [
                         'name' => $playerData['name'],
                         'code' => $inviteCode,
-                        'avatar' => $playerData['avatar_url'] ?? null,
+                        'avatar' => $avatar,
                     ]
                 );
 
@@ -91,7 +94,7 @@ class AdminController extends Controller
                     'game_id' => $game->id,
                     'name' => $playerData['name'],
                     'email' => $playerData['email'],
-                    'avatar_url' => $playerData['avatar_url'] ?? null,
+                    'avatar_url' => $avatarUrl,
                     'points' => 0,
                     'invite_code' => $inviteCode,
                 ]);
