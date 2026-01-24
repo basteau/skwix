@@ -6,10 +6,12 @@ import { FlaskConical, RotateCcw, X } from 'lucide-react';
 interface TestModeBannerProps {
     wordleWord?: string;
     className?: string;
+    onReset?: () => void;
 }
 
-export function TestModeBanner({ wordleWord, className }: TestModeBannerProps) {
+export function TestModeBanner({ wordleWord, className, onReset }: TestModeBannerProps) {
     const handleReset = () => {
+        onReset?.();
         router.post('/test/reset');
     };
 

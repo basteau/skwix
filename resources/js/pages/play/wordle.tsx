@@ -102,6 +102,11 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
         if (player?.points !== undefined) setDisplayPoints(player.points);
     }, [player?.points]);
 
+    // Sync guesses from props (for test mode reset)
+    useEffect(() => {
+        setGuesses(wordle?.guesses ?? []);
+    }, [wordle?.guesses]);
+
     const letterStates = useMemo(() => {
         const states: Record<string, 'correct' | 'present' | 'absent'> = {};
         for (const guess of guesses) {
@@ -321,7 +326,13 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
 
                 {/* Test Mode Banner */}
                 {testMode?.active && (
-                    <TestModeBanner wordleWord={testMode.wordleWord} />
+                    <TestModeBanner
+                        wordleWord={testMode.wordleWord}
+                        onReset={() => {
+                            setCurrentGuess('');
+                            setGuesses([]);
+                        }}
+                    />
                 )}
 
                 {/* Header with animated points */}
