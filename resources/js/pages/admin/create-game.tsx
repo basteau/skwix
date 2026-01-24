@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
+import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -90,9 +91,11 @@ export default function CreateGame({ sampleWords }: Props) {
         <>
             <Head title="Nieuw Spel - Admin" />
             <div className="min-h-svh bg-background">
-                <header className="border-b border-border bg-card px-6 py-4 pt-safe">
-                    <h1 className="text-2xl font-bold text-foreground">Nieuw Spel Aanmaken</h1>
-                </header>
+                <AdminHeader
+                    title="Nieuw Spel Aanmaken"
+                    backHref="/admin"
+                    breadcrumbs={[{ label: 'Nieuw Spel' }]}
+                />
 
                 <main className="mx-auto max-w-2xl p-6 pb-safe">
                     <div className="space-y-8">

@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
+import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -84,29 +85,21 @@ export default function AdminGameDetail({ game, players }: Props) {
         <>
             <Head title={`Spel: ${game.secret_word} - Admin`} />
             <div className="min-h-svh bg-background">
-                <header className="border-b border-border bg-card px-6 py-4 pt-safe">
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href="/admin"
-                            className="flex min-h-11 items-center text-muted-foreground hover:text-foreground"
+                <AdminHeader
+                    title={game.secret_word}
+                    backHref="/admin"
+                    breadcrumbs={[{ label: 'Spellen', href: '/admin' }, { label: game.secret_word }]}
+                    badge={
+                        <span
+                            className={cn(
+                                'rounded-full px-2.5 py-1 text-xs font-medium',
+                                statusColors[game.status]
+                            )}
                         >
-                            ← Terug
-                        </Link>
-                        <div className="flex items-center gap-3">
-                            <h1 className="font-mono text-2xl font-bold uppercase tracking-wider text-foreground">
-                                {game.secret_word}
-                            </h1>
-                            <span
-                                className={cn(
-                                    'rounded-full px-2.5 py-1 text-xs font-medium',
-                                    statusColors[game.status]
-                                )}
-                            >
-                                {statusLabels[game.status]}
-                            </span>
-                        </div>
-                    </div>
-                </header>
+                            {statusLabels[game.status]}
+                        </span>
+                    }
+                />
 
                 <main className="mx-auto max-w-4xl p-6 pb-[calc(1.5rem+var(--safe-bottom))]">
                     <div className="space-y-8">

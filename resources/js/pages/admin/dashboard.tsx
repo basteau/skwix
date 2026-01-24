@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { AdminHeader } from '@/components/admin-header';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -20,17 +21,15 @@ export default function AdminDashboard({ games = [] }: Props) {
         <>
             <Head title="Admin - Skwix" />
             <div className="min-h-svh bg-background">
-                <header className="border-b border-border bg-card px-6 py-4 pt-safe">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
-                            <p className="text-sm text-muted-foreground">Beheer Skwix spellen</p>
-                        </div>
+                <AdminHeader
+                    title="Admin Dashboard"
+                    subtitle="Beheer Skwix spellen"
+                    actions={
                         <Link href="/admin/create">
                             <Button>Nieuw Spel</Button>
                         </Link>
-                    </div>
-                </header>
+                    }
+                />
 
                 <main className="p-6 pb-safe">
                     {games.length === 0 ? (
