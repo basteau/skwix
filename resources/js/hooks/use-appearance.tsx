@@ -34,6 +34,9 @@ const isDarkMode = (appearance: Appearance): boolean => {
     return appearance === 'dark' || (appearance === 'system' && prefersDark());
 };
 
+const THEME_COLOR_LIGHT = '#1d5f9e';
+const THEME_COLOR_DARK = '#1a1a2e';
+
 const applyTheme = (appearance: Appearance): void => {
     if (typeof document === 'undefined') return;
 
@@ -41,6 +44,12 @@ const applyTheme = (appearance: Appearance): void => {
 
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+
+    const themeColor = isDark ? THEME_COLOR_DARK : THEME_COLOR_LIGHT;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+        metaTheme.setAttribute('content', themeColor);
+    }
 };
 
 const subscribe = (callback: () => void) => {
