@@ -63,7 +63,6 @@ class AdminController extends Controller
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
             'players.*.email' => 'required|email|max:255',
-            'players.*.avatar' => 'nullable|string|max:100',
         ]);
 
         $emails = array_map(fn ($p) => strtolower($p['email']), $request->players);
@@ -97,7 +96,7 @@ class AdminController extends Controller
             foreach ($request->players as $playerData) {
                 $inviteCode = strtoupper(Str::random(6));
 
-                $avatar = $playerData['avatar'] ?? null;
+                $avatar = $this->getAvatarForName($playerData['name']);
                 $avatarUrl = $avatar ? "/images/faces/{$avatar}.png" : null;
 
                 $user = User::firstOrCreate(
@@ -262,5 +261,24 @@ class AdminController extends Controller
         }
 
         return $invalidWords;
+    }
+
+    private function getAvatarForName(string $name): ?string
+    {
+        $availableAvatars = [
+            'player09',
+            'player07',
+            'player06',
+            'player08',
+            'player05',
+            'player04',
+            'player01',
+            'player02',
+            'player03',
+        ];
+
+        $normalized = strtolower(trim($name));
+
+        return in_array($normalized, $availableAvatars, true) ? $normalized : null;
     }
 }

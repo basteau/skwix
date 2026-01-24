@@ -1,5 +1,5 @@
 import { AdminHeader } from '@/components/admin-header';
-import { AvatarPicker, getAvatarUrl } from '@/components/avatar-picker';
+import { getAvatarForName, getAvatarUrl } from '@/components/avatar-picker';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,6 @@ interface PlayerRow {
     id: string;
     name: string;
     email: string;
-    avatar: string;
 }
 
 export default function CreateGame({ sampleWords }: Props) {
@@ -33,8 +32,8 @@ export default function CreateGame({ sampleWords }: Props) {
         sampleWords.slice(0, 6),
     );
     const [players, setPlayers] = useState<PlayerRow[]>([
-        { id: crypto.randomUUID(), name: '', email: '', avatar: '' },
-        { id: crypto.randomUUID(), name: '', email: '', avatar: '' },
+        { id: crypto.randomUUID(), name: '', email: '' },
+        { id: crypto.randomUUID(), name: '', email: '' },
     ]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -48,7 +47,6 @@ export default function CreateGame({ sampleWords }: Props) {
                     id: crypto.randomUUID(),
                     name: '',
                     email: '',
-                    avatar: '',
                 },
             ];
         });
@@ -108,7 +106,6 @@ export default function CreateGame({ sampleWords }: Props) {
             players: players.map((p) => ({
                 name: p.name,
                 email: p.email,
-                avatar: p.avatar || null,
             })),
         };
 
@@ -288,7 +285,7 @@ export default function CreateGame({ sampleWords }: Props) {
                                             <Avatar className="size-14 shrink-0 border-2 border-border">
                                                 <AvatarImage
                                                     src={getAvatarUrl(
-                                                        player.avatar,
+                                                        getAvatarForName(player.name),
                                                     )}
                                                     alt={player.name || 'Avatar'}
                                                 />
@@ -300,7 +297,7 @@ export default function CreateGame({ sampleWords }: Props) {
                                                         : '?'}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div className="flex-1 space-y-3">
+                                            <div className="flex-1">
                                                 <div className="grid gap-3 sm:grid-cols-2">
                                                     <Input
                                                         placeholder="Naam"
@@ -324,21 +321,6 @@ export default function CreateGame({ sampleWords }: Props) {
                                                                 player.id,
                                                                 'email',
                                                                 e.target.value,
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="mb-1.5 block text-xs text-muted-foreground">
-                                                        Kies avatar
-                                                    </label>
-                                                    <AvatarPicker
-                                                        value={player.avatar}
-                                                        onChange={(avatar) =>
-                                                            updatePlayer(
-                                                                player.id,
-                                                                'avatar',
-                                                                avatar,
                                                             )
                                                         }
                                                     />
