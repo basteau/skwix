@@ -1,43 +1,23 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function Welcome() {
-    const [code, setCode] = useState('');
-    const [isValidating, setIsValidating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const form = useForm({
+        code: '',
+    });
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!code.trim()) return;
-        
-        setIsValidating(true);
-        setError(null);
+        if (!form.data.code.trim()) return;
 
-        try {
-            const response = await fetch('/api/validate-invite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ code: code.toUpperCase() }),
-            });
-
-            const data = await response.json();
-
-            if (data.valid) {
-                router.visit('/lobby');
-            } else {
-                setError(data.message || 'Ongeldige code');
-            }
-        } catch {
-            setError('Er ging iets mis. Probeer opnieuw.');
-        } finally {
-            setIsValidating(false);
-        }
+        form.post('/login', {
+            onError: () => {
+                form.reset('code');
+            },
+        });
     };
 
     return (
@@ -75,21 +55,21 @@ export default function Welcome() {
                             <Input
                                 id="invite-code"
                                 type="text"
-                                value={code}
+                                value={form.data.code}
                                 onChange={(e) => {
-                                    setCode(e.target.value.toUpperCase());
-                                    setError(null);
+                                    form.setData('code', e.target.value.toUpperCase());
+                                    form.clearErrors('code');
                                 }}
                                 placeholder="VOER JE CODE IN"
                                 className="h-14 text-center font-mono text-xl tracking-[0.3em] uppercase placeholder:tracking-normal placeholder:text-sm placeholder:lowercase"
-                                maxLength={8}
+                                maxLength={16}
                                 autoComplete="off"
-                                aria-invalid={!!error}
-                                aria-describedby={error ? 'code-error' : undefined}
+                                aria-invalid={!!form.errors.code}
+                                aria-describedby={form.errors.code ? 'code-error' : undefined}
                             />
-                            {error && (
+                            {form.errors.code && (
                                 <p id="code-error" className="text-sm text-destructive">
-                                    {error}
+                                    {form.errors.code}
                                 </p>
                             )}
                         </div>
@@ -98,9 +78,9 @@ export default function Welcome() {
                             type="submit"
                             size="lg"
                             className="w-full h-12 text-base font-semibold"
-                            disabled={!code.trim() || isValidating}
+                            disabled={!form.data.code.trim() || form.processing}
                         >
-                            {isValidating ? 'Even kijken...' : 'Doe mee'}
+                            {form.processing ? 'Even kijken...' : 'Doe mee'}
                         </Button>
                     </form>
 
