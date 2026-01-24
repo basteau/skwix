@@ -134,7 +134,7 @@ export default function CreateGame({ sampleWords }: Props) {
                                     <select
                                         value={durationDays}
                                         onChange={(e) => setDurationDays(parseInt(e.target.value, 10))}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
                                     >
                                         <option value={4}>4 dagen</option>
                                         <option value={5}>5 dagen</option>

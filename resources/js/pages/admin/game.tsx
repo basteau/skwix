@@ -279,7 +279,7 @@ export default function AdminGameDetail({ game, players }: Props) {
                                                 e.target.value ? parseInt(e.target.value, 10) : null
                                             )
                                         }
-                                        className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs"
+                                        className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs md:text-sm"
                                     >
                                         <option value="">Geen winnaar</option>
                                         {players.map((player) => (
