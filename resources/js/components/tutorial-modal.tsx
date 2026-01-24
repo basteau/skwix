@@ -51,17 +51,28 @@ const steps: TutorialStep[] = [
         points: '3-6 punten per dag',
         example: (
             <div className="mt-4 flex justify-center gap-1">
-                {['W', 'I', 'N', 'T', 'R'].map((letter, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            'flex size-10 items-center justify-center rounded-md font-mono text-lg font-bold text-white',
-                            i === 0 || i === 4 ? 'bg-wordle-correct' : i === 2 ? 'bg-wordle-present' : 'bg-wordle-absent'
-                        )}
-                    >
-                        {letter}
-                    </div>
-                ))}
+                {['W', 'I', 'N', 'T', 'R'].map((letter, i) => {
+                    const isCorrect = i === 0 || i === 4;
+                    const isPresent = i === 2;
+                    return (
+                        <div
+                            key={i}
+                            className={cn(
+                                'relative flex size-10 items-center justify-center rounded-md font-mono text-lg font-bold text-white',
+                                isCorrect ? 'bg-wordle-correct' : isPresent ? 'bg-wordle-present' : 'bg-wordle-absent'
+                            )}
+                        >
+                            {letter}
+                            {/* Secondary indicator for color blindness */}
+                            {isCorrect && (
+                                <span className="absolute -bottom-0.5 left-1/2 h-1 w-4 -translate-x-1/2 rounded-full bg-white/60" />
+                            )}
+                            {isPresent && (
+                                <span className="absolute -bottom-0.5 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-white/60" />
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         ),
     },
