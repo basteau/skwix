@@ -19,7 +19,7 @@ import AppLogo from './app-logo';
 const mainNavItems: NavItem[] = [
     {
         title: 'Spel',
-        href: '/play/wordle',
+        href: '/wordle',
         icon: Gamepad2,
     },
 ];
@@ -39,7 +39,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/play/wordle" prefetch>
+                            <Link href="/wordle" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
