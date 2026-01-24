@@ -105,7 +105,7 @@ export default function AdminGameDetail({ game, players }: Props) {
                     </div>
                 </header>
 
-                <main className="mx-auto max-w-4xl p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+                <main className="mx-auto max-w-4xl p-6 pb-[calc(1.5rem+var(--safe-bottom))]">
                     <div className="space-y-8">
                         {/* Game Info */}
                         <section className="rounded-lg border border-border bg-card p-6">

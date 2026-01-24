@@ -60,6 +60,12 @@
 }
 
 :root {
+    /* Safe Area Insets - for PWA/mobile notch support */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    
     /* Winter Blue Theme - Light Mode Only */
     
     /* Core Colors */
@@ -160,13 +166,13 @@
     animation: shake 400ms ease-out;
 }
 
-/* Safe area padding */
+/* Safe area padding utilities - use --safe-* variables defined in :root */
 .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: var(--safe-bottom);
 }
 
 .pt-safe {
-    padding-top: env(safe-area-inset-top, 0px);
+    padding-top: var(--safe-top);
 }
 
 /* Confetti animation */

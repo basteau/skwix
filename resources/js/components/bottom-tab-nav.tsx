@@ -30,10 +30,7 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
     const tabs = createTabs(onTutorialClick);
 
     return (
-        <nav
-            className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        >
+        <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card pb-[var(--safe-bottom)]">
             <div className="flex h-16 items-center justify-around">
                 {tabs.map((tab) => {
                     const isActive = tab.href ? url.startsWith(tab.href) : false;
