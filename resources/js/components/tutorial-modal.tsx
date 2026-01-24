@@ -7,8 +7,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { Snowflake, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 const TUTORIAL_SEEN_KEY = 'skwix_tutorial_seen';
 
@@ -18,130 +18,225 @@ interface TutorialModalProps {
 }
 
 interface TutorialStep {
-    emoji: string;
+    icon: React.ReactNode;
     title: string;
     description: string;
-    points?: string;
-    example?: React.ReactNode;
+    points?: { text: string; type: 'earn' | 'cost' | 'risk' };
+    visual: React.ReactNode;
 }
+
+const SNOWFLAKES = Array.from({ length: 8 }).map((_, i) => ({
+    left: 10 + (i * 12) % 80,
+    delay: i * 400,
+    duration: 6 + (i % 3) * 2,
+    size: 10 + (i % 3) * 4,
+    opacity: 0.08 + (i % 4) * 0.03,
+}));
 
 const steps: TutorialStep[] = [
     {
-        emoji: '❄️',
+        icon: <Snowflake className="size-5" />,
         title: 'Welkom bij Skwix!',
         description:
-            'Een spannend woordspel waar je elke dag puzzels oplost om punten te verdienen. Wie als eerste het mystery-woord raadt, wint!',
-        example: (
-            <div className="mt-6 border-l-2 border-primary pl-4">
-                <p className="text-sm text-foreground/80">
-                    Raad het geheime woord en win de prijs!
-                </p>
-            </div>
-        ),
-    },
-    {
-        emoji: '🔤',
-        title: 'Wordle',
-        description:
-            'Elke dag krijg je een 5-letter woord om te raden. Je hebt 6 pogingen.',
-        points: '3–6 punten per dag',
-        example: (
-            <div className="mt-6 space-y-3">
-                <div className="flex gap-1.5">
-                    {['W', 'I', 'N', 'T', 'R'].map((letter, i) => {
-                        const isCorrect = i === 0 || i === 4;
-                        const isPresent = i === 2;
-                        return (
+            'Een dagelijks woordspel waar je puzzels oplost om punten te sparen. Wie als eerste het geheime mystery-woord raadt, wint de hoofdprijs!',
+        visual: (
+            <div className="relative flex items-center justify-center py-6">
+                <div className="relative">
+                    {/* Animated word reveal */}
+                    <div className="flex gap-1">
+                        {['S', 'K', 'I', 'B', 'I'].map((letter, i) => (
                             <div
                                 key={i}
-                                className={cn(
-                                    'relative flex size-9 items-center justify-center rounded font-mono text-base font-bold text-white',
-                                    isCorrect
-                                        ? 'bg-wordle-correct'
-                                        : isPresent
-                                          ? 'bg-wordle-present'
-                                          : 'bg-wordle-absent',
-                                )}
+                                className="flex size-11 items-center justify-center rounded-md bg-primary font-display text-lg font-bold text-primary-foreground shadow-md"
+                                style={{
+                                    animationDelay: `${i * 100}ms`,
+                                }}
                             >
                                 {letter}
-                                {isCorrect && (
-                                    <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-3 -translate-x-1/2 rounded-full bg-white/60" />
-                                )}
-                                {isPresent && (
-                                    <span className="absolute -bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-white/60" />
-                                )}
                             </div>
-                        );
-                    })}
+                        ))}
+                    </div>
+                    {/* Sparkle accents */}
+                    <div className="absolute -top-2 -right-2 text-primary/60">✦</div>
+                    <div className="absolute -bottom-1 -left-2 text-primary/40">✧</div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                    <span className="text-wordle-correct">■</span> correct
-                    &nbsp;
-                    <span className="text-wordle-present">■</span> verkeerde
-                    plek &nbsp;
-                    <span className="text-wordle-absent">■</span> niet in woord
-                </p>
             </div>
         ),
     },
     {
-        emoji: '❓',
+        icon: (
+            <svg viewBox="0 0 20 20" className="size-5 fill-current">
+                <rect x="1" y="1" width="5" height="5" rx="1" className="fill-wordle-correct" />
+                <rect x="7.5" y="1" width="5" height="5" rx="1" className="fill-wordle-present" />
+                <rect x="14" y="1" width="5" height="5" rx="1" className="fill-wordle-absent" />
+                <rect x="1" y="7.5" width="5" height="5" rx="1" />
+                <rect x="7.5" y="7.5" width="5" height="5" rx="1" />
+                <rect x="14" y="7.5" width="5" height="5" rx="1" />
+                <rect x="1" y="14" width="5" height="5" rx="1" />
+                <rect x="7.5" y="14" width="5" height="5" rx="1" />
+                <rect x="14" y="14" width="5" height="5" rx="1" />
+            </svg>
+        ),
+        title: 'Wordle',
+        description: 'Raad elke dag een 5-letter woord in 6 pogingen. Kleuren tonen hoe dichtbij je bent.',
+        points: { text: '3–6 punten', type: 'earn' },
+        visual: (
+            <div className="space-y-3 py-4">
+                {/* Mini wordle grid */}
+                <div className="flex justify-center gap-1.5">
+                    {[
+                        { l: 'W', s: 'correct' },
+                        { l: 'I', s: 'absent' },
+                        { l: 'N', s: 'present' },
+                        { l: 'T', s: 'absent' },
+                        { l: 'R', s: 'correct' },
+                    ].map(({ l, s }, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                'flex size-10 items-center justify-center rounded-md font-mono text-sm font-bold text-white shadow-sm',
+                                s === 'correct' && 'bg-wordle-correct',
+                                s === 'present' && 'bg-wordle-present',
+                                s === 'absent' && 'bg-wordle-absent',
+                            )}
+                        >
+                            {l}
+                        </div>
+                    ))}
+                </div>
+                {/* Legend */}
+                <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                        <span className="size-2.5 rounded-sm bg-wordle-correct" />
+                        Correct
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                        <span className="size-2.5 rounded-sm bg-wordle-present" />
+                        Verkeerde plek
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                        <span className="size-2.5 rounded-sm bg-wordle-absent" />
+                        Niet in woord
+                    </span>
+                </div>
+            </div>
+        ),
+    },
+    {
+        icon: (
+            <svg viewBox="0 0 20 20" className="size-5 fill-current">
+                <circle cx="10" cy="10" r="8" strokeWidth="2" stroke="currentColor" fill="none" />
+                <text x="10" y="14" textAnchor="middle" fontSize="10" fill="currentColor">?</text>
+            </svg>
+        ),
         title: 'Vragen Stellen',
-        description:
-            'Stel ja/nee vragen over het mystery-woord. Gebruik je vragen slim om het woord te raden!',
-        points: '−3 punten per vraag',
-        example: (
-            <div className="mt-6 space-y-2">
-                <div className="flex items-baseline justify-between border-b border-border pb-2">
-                    <p className="text-sm text-foreground">
-                        "Is het een dier?"
-                    </p>
-                    <span className="rounded bg-success/15 px-2 py-0.5 text-xs font-semibold text-success">
+        description: 'Stel ja/nee vragen over het mystery-woord om dichter bij het antwoord te komen.',
+        points: { text: '−3 punten', type: 'cost' },
+        visual: (
+            <div className="space-y-2.5 py-4">
+                {/* Chat-style Q&A */}
+                <div className="flex items-start gap-3">
+                    <div className="flex-1 rounded-xl rounded-tl-sm bg-primary/10 px-3.5 py-2.5">
+                        <p className="text-sm text-foreground">"Is het een dier?"</p>
+                    </div>
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-success/15 text-xs font-bold text-success">
                         JA
-                    </span>
+                    </div>
                 </div>
-                <div className="flex items-baseline justify-between">
-                    <p className="text-sm text-foreground">
-                        "Leeft het in water?"
-                    </p>
-                    <span className="rounded bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">
+                <div className="flex items-start gap-3">
+                    <div className="flex-1 rounded-xl rounded-tl-sm bg-primary/10 px-3.5 py-2.5">
+                        <p className="text-sm text-foreground">"Leeft het in water?"</p>
+                    </div>
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-xs font-bold text-destructive">
                         NEE
-                    </span>
+                    </div>
                 </div>
             </div>
         ),
     },
     {
-        emoji: '🎰',
+        icon: (
+            <svg viewBox="0 0 20 20" className="size-5">
+                <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                <path d="M10 2 L10 6 M10 14 L10 18 M2 10 L6 10 M14 10 L18 10" stroke="currentColor" strokeWidth="1.5" />
+                <circle cx="10" cy="10" r="3" fill="currentColor" />
+            </svg>
+        ),
         title: 'Rad van Fortuin',
-        description:
-            'Waag een gokje met je punten! Zet in wat je durft en draai aan het rad. Je kunt je inzet verdubbelen... of verliezen!',
-        points: 'Verdubbel of verlies je inzet',
-        example: (
-            <div className="mt-6 flex items-center gap-4">
-                <div className="flex size-14 items-center justify-center rounded-full border-2 border-primary bg-primary/5">
-                    <span className="text-xl">🎡</span>
+        description: 'Waag een gokje! Zet punten in en draai aan het rad. Win het dubbele... of verlies alles.',
+        points: { text: '×2 of ×0', type: 'risk' },
+        visual: (
+            <div className="flex items-center justify-center py-4">
+                {/* Mini wheel preview */}
+                <div className="relative">
+                    <svg viewBox="0 0 80 80" className="size-24">
+                        <defs>
+                            <linearGradient id="mini-wheel-win" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="oklch(55% 0.18 145)" />
+                                <stop offset="100%" stopColor="oklch(50% 0.16 145)" />
+                            </linearGradient>
+                            <linearGradient id="mini-wheel-lose" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="oklch(50% 0.12 230)" />
+                                <stop offset="100%" stopColor="oklch(40% 0.10 235)" />
+                            </linearGradient>
+                        </defs>
+                        {/* Segments */}
+                        {Array.from({ length: 8 }).map((_, i) => {
+                            const isWin = i % 2 === 0;
+                            const angle = i * 45 - 90;
+                            const rad = (angle * Math.PI) / 180;
+                            const x1 = 40 + 35 * Math.cos(rad);
+                            const y1 = 40 + 35 * Math.sin(rad);
+                            const rad2 = ((angle + 45) * Math.PI) / 180;
+                            const x2 = 40 + 35 * Math.cos(rad2);
+                            const y2 = 40 + 35 * Math.sin(rad2);
+                            return (
+                                <path
+                                    key={i}
+                                    d={`M40,40 L${x1},${y1} A35,35 0 0,1 ${x2},${y2} Z`}
+                                    fill={isWin ? 'url(#mini-wheel-win)' : 'url(#mini-wheel-lose)'}
+                                />
+                            );
+                        })}
+                        {/* Center */}
+                        <circle cx="40" cy="40" r="10" fill="oklch(90% 0.02 230)" />
+                        <circle cx="40" cy="40" r="6" fill="oklch(45% 0.12 230)" />
+                    </svg>
+                    {/* Pointer */}
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+                        <div className="size-0 border-x-4 border-t-6 border-x-transparent border-t-primary" />
+                    </div>
                 </div>
-                <div className="text-sm">
-                    <p className="font-medium text-foreground">50% kans</p>
-                    <p className="text-muted-foreground">Durf jij het aan?</p>
+                <div className="ml-5 text-left">
+                    <p className="text-2xl font-bold text-success">50%</p>
+                    <p className="text-sm text-muted-foreground">Winkans</p>
                 </div>
             </div>
         ),
     },
     {
-        emoji: '🏆',
+        icon: (
+            <svg viewBox="0 0 20 20" className="size-5 fill-current">
+                <path d="M10 1 L12 7 L18 7 L13 11 L15 17 L10 13 L5 17 L7 11 L2 7 L8 7 Z" />
+            </svg>
+        ),
         title: 'Winnen!',
-        description:
-            'Verzamel punten en raad het mystery-woord. De eerste die het woord raadt, wint de prijs!',
-        example: (
-            <div className="mt-6 rounded-lg border-2 border-success/30 bg-success/5 px-4 py-3">
-                <p className="font-display text-lg font-bold text-success">
-                    Jij bent de winnaar!
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Scan de QR-code om je prijs te claimen.
-                </p>
+        description: 'Verzamel genoeg punten en raad het mystery-woord. De eerste die het woord raadt, claimt de prijs!',
+        visual: (
+            <div className="flex flex-col items-center py-4">
+                {/* Trophy visualization */}
+                <div className="relative mb-3">
+                    <div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg shadow-amber-500/25">
+                        <svg viewBox="0 0 24 24" className="size-8 text-white" fill="currentColor">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                    </div>
+                    <div className="absolute -top-1 -right-1 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-sm">
+                        1
+                    </div>
+                </div>
+                <p className="font-display text-lg font-bold text-foreground">Eerste = Winnaar</p>
+                <p className="mt-1 text-sm text-muted-foreground">Scan de QR-code voor je prijs</p>
             </div>
         ),
     },
@@ -161,6 +256,7 @@ export function TutorialModal({
         getInitialOpenState(forceOpen),
     );
     const [currentStep, setCurrentStep] = useState(0);
+    const [direction, setDirection] = useState<'next' | 'prev'>('next');
 
     const isOpen = forceOpen || internalOpen;
 
@@ -182,6 +278,7 @@ export function TutorialModal({
 
     const handleNext = useCallback(() => {
         if (currentStep < steps.length - 1) {
+            setDirection('next');
             setCurrentStep((s) => s + 1);
         } else {
             handleClose();
@@ -190,39 +287,90 @@ export function TutorialModal({
 
     const handlePrev = useCallback(() => {
         if (currentStep > 0) {
+            setDirection('prev');
             setCurrentStep((s) => s - 1);
         }
     }, [currentStep]);
 
+    const handleStepClick = useCallback((idx: number) => {
+        setDirection(idx > currentStep ? 'next' : 'prev');
+        setCurrentStep(idx);
+    }, [currentStep]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                e.preventDefault();
+                handleNext();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                handlePrev();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, handleNext, handlePrev]);
+
     const step = steps[currentStep];
     const isLastStep = currentStep === steps.length - 1;
+    const isFirstStep = currentStep === 0;
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent
-                className="max-w-sm gap-0 overflow-hidden rounded-xl border-border p-0 shadow-xl [&>button:last-child]:hidden"
+                className="max-w-[360px] gap-0 overflow-hidden rounded-2xl border-0 bg-gradient-to-b from-card via-card to-background p-0 shadow-2xl [&>button:last-child]:hidden"
                 aria-describedby="tutorial-step-description"
             >
+                {/* Background frost effect */}
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    {SNOWFLAKES.map((flake, i) => (
+                        <div
+                            key={i}
+                            className="absolute animate-snow-fall"
+                            style={{
+                                left: `${flake.left}%`,
+                                animationDelay: `${flake.delay}ms`,
+                                animationDuration: `${flake.duration}s`,
+                                opacity: flake.opacity,
+                            }}
+                        >
+                            <Snowflake
+                                className="text-primary"
+                                style={{ width: flake.size, height: flake.size }}
+                            />
+                        </div>
+                    ))}
+                </div>
+
                 {/* Close button */}
                 <DialogClose
-                    className="absolute top-2 right-2 z-10 flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                    className="absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                     aria-label="Sluiten"
                 >
-                    <X className="size-5" />
+                    <X className="size-4" />
                 </DialogClose>
 
-                {/* Content - left aligned */}
-                <div className="bg-card px-5 pt-8 pb-2">
-                    {/* Step indicator - top left */}
-                    <div className="mb-4 text-xs font-medium tracking-wide text-muted-foreground">
-                        {currentStep + 1} / {steps.length}
+                {/* Content */}
+                <div
+                    key={currentStep}
+                    className={cn(
+                        'relative px-6 pt-10 pb-4',
+                        'motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300',
+                        direction === 'next'
+                            ? 'motion-safe:slide-in-from-right-4'
+                            : 'motion-safe:slide-in-from-left-4',
+                    )}
+                >
+                    {/* Step icon + title */}
+                    <div className="mb-3 flex items-center gap-3">
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            {step.icon}
+                        </div>
+                        <DialogTitle className="font-display text-xl font-bold text-foreground">
+                            {step.title}
+                        </DialogTitle>
                     </div>
-
-                    {/* Title with inline emoji */}
-                    <DialogTitle className="mb-2 font-display text-xl font-bold text-foreground">
-                        <span className="mr-2">{step.emoji}</span>
-                        {step.title}
-                    </DialogTitle>
 
                     {/* Description */}
                     <DialogDescription
@@ -232,57 +380,91 @@ export function TutorialModal({
                         {step.description}
                     </DialogDescription>
 
-                    {/* Points badge - inline */}
+                    {/* Points badge */}
                     {step.points && (
-                        <p className="mt-2 text-sm font-medium text-primary">
-                            {step.points}
-                        </p>
+                        <div className="mt-3">
+                            <span
+                                className={cn(
+                                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold',
+                                    step.points.type === 'earn' && 'bg-success/15 text-success',
+                                    step.points.type === 'cost' && 'bg-destructive/15 text-destructive',
+                                    step.points.type === 'risk' && 'bg-warning/15 text-warning',
+                                )}
+                            >
+                                {step.points.text}
+                            </span>
+                        </div>
                     )}
 
-                    {/* Example */}
-                    {step.example}
+                    {/* Visual */}
+                    {step.visual}
                 </div>
 
                 {/* Navigation footer */}
-                <div className="flex items-center justify-between bg-card px-5 pt-6 pb-5">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handlePrev}
-                        disabled={currentStep === 0}
-                        className="gap-1"
-                    >
-                        <ChevronLeft className="size-4" />
-                        Vorige
-                    </Button>
+                <div className="relative flex items-center justify-between border-t border-border/50 bg-muted/30 px-5 py-4">
+                    {/* Previous / Skip */}
+                    {isFirstStep ? (
+                        <button
+                            onClick={handleClose}
+                            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            Overslaan
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handlePrev}
+                            className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M10 12 L6 8 L10 4" />
+                            </svg>
+                            Vorige
+                        </button>
+                    )}
 
                     {/* Progress dots */}
-                    <div className="flex gap-0">
+                    <div className="flex gap-1.5">
                         {steps.map((_, i) => (
                             <button
                                 key={i}
-                                onClick={() => setCurrentStep(i)}
-                                className="relative flex min-h-11 min-w-6 items-center justify-center"
+                                onClick={() => handleStepClick(i)}
+                                className="group relative flex size-8 items-center justify-center"
                                 aria-label={`Stap ${i + 1} van ${steps.length}`}
-                                aria-current={
-                                    i === currentStep ? 'step' : undefined
-                                }
+                                aria-current={i === currentStep ? 'step' : undefined}
                             >
                                 <span
                                     className={cn(
-                                        'h-1.5 w-1.5 rounded-full transition-all',
+                                        'size-2 rounded-full transition-all duration-300',
                                         i === currentStep
-                                            ? 'w-4 bg-primary'
-                                            : 'bg-muted-foreground/40',
+                                            ? 'scale-125 bg-primary'
+                                            : i < currentStep
+                                              ? 'bg-primary/40'
+                                              : 'bg-muted-foreground/30 group-hover:bg-muted-foreground/50',
                                     )}
                                 />
                             </button>
                         ))}
                     </div>
 
-                    <Button size="sm" onClick={handleNext} className="gap-1">
-                        {isLastStep ? 'Start!' : 'Volgende'}
-                        {!isLastStep && <ChevronRight className="size-4" />}
+                    {/* Next / Start */}
+                    <Button
+                        size="sm"
+                        onClick={handleNext}
+                        className={cn(
+                            'gap-1 font-semibold',
+                            isLastStep && 'bg-success hover:bg-success/90 shadow-md shadow-success/25',
+                        )}
+                    >
+                        {isLastStep ? (
+                            'Start!'
+                        ) : (
+                            <>
+                                Volgende
+                                <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M6 4 L10 8 L6 12" />
+                                </svg>
+                            </>
+                        )}
                     </Button>
                 </div>
             </DialogContent>

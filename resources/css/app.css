@@ -293,6 +293,11 @@
     animation: frost-in 2s ease-out forwards;
 }
 
+/* Utility extensions */
+.border-t-6 {
+    border-top-width: 6px;
+}
+
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
     *,
