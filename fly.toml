@@ -23,6 +23,7 @@ console_command = 'php /var/www/html/artisan tinker'
   DB_CONNECTION = 'sqlite'
   DB_DATABASE = '/var/www/html/storage/database/database.sqlite'
   QUEUE_CONNECTION = 'database'
+  MAIL_MAILER = 'resend'
 
 [mounts]
   source = 'sqlite_data'
