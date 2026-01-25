@@ -43,4 +43,13 @@ class FakeAIService extends OpenRouterService
         $this->sequence = $sequence;
         $this->index = 0;
     }
+
+    #[\Override]
+    public function classifyQuestion(string $question): array
+    {
+        return [
+            'success' => true,
+            'type' => 'property_question',
+        ];
+    }
 }
