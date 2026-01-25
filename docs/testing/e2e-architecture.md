@@ -66,13 +66,6 @@ AI_DRIVER=fake
 FORTUNE_DRIVER=fake
 E2E_FORTUNE_SEQUENCE=win,lose,win,lose
 
-# Freeze time (after 8:00 so wordle is available)
-# IMPORTANT: Must be FUTURE datetime to avoid session cookie expiration issues
-# Cookie Max-Age = (frozen_time + session_lifetime) - real_time
-# If frozen_time is in the past relative to real clock, cookies expire immediately (419 errors)
-# Set to tomorrow or leave empty to use real time
-E2E_NOW="2026-01-25 09:00:00"
-
 # Disable PWA caching
 PWA_ENABLED=false
 
@@ -313,5 +306,31 @@ agent-browser screenshot wordle-result.png
 2. **PWA caching**: Disable service workers in E2E
 3. **AI nondeterminism**: Use fake AI driver
 4. **Random wheel**: Use deterministic fortune driver
-5. **Time-based logic**: Freeze time via E2E_NOW config
+5. **Time-based logic**: Use test-level `Time::freeze()` (dynamic future dates)
 6. **Inertia navigation**: Wait for URL + key element
+
+## Time Control
+
+Time freezing is handled at the **test level**, not globally:
+
+```php
+use Tests\E2E\Support\Time;
+
+// Freeze to tomorrow 9:00 AM (after wordle unlock)
+Time::freeze();
+
+// Test wordle before unlock (7:30 AM tomorrow)
+Time::beforeWordleUnlock();
+
+// Test wordle after unlock (9:00 AM tomorrow)
+Time::afterWordleUnlock();
+
+// Restore real time
+Time::unfreeze();
+```
+
+**Why dynamic dates?** Using hardcoded past dates caused 419 cookie errors:
+- Cookie Max-Age = (frozen_time + session_lifetime) - real_time
+- If frozen_time is in the past, cookies expire immediately
+
+Using `Carbon::tomorrow()` ensures dates are always in the future.

@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Services\FakeAIService;
 use App\Services\FakeFortuneService;
 use App\Services\OpenRouterService;
-use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 
 class E2EServiceProvider extends ServiceProvider
@@ -29,10 +28,7 @@ class E2EServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Freeze time if E2E_NOW is set
-        $now = config('e2e.now');
-        if ($now) {
-            Carbon::setTestNow(Carbon::parse($now));
-        }
+        // Time freezing is now handled at test-level via Time::freeze()
+        // This avoids 419 cookie errors when E2E_NOW date passes
     }
 }

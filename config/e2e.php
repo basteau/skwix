@@ -43,14 +43,4 @@ return [
     */
     'fortune_sequence' => env('E2E_FORTUNE_SEQUENCE', 'win,lose'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Frozen Time
-    |--------------------------------------------------------------------------
-    |
-    | Set a specific timestamp to freeze time during E2E tests.
-    | Format: Y-m-d H:i:s
-    |
-    */
-    'now' => env('E2E_NOW'),
 ];

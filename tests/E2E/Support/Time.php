@@ -6,19 +6,21 @@ use Carbon\Carbon;
 
 /**
  * Helper class for deterministic time control in E2E tests.
+ *
+ * Uses dynamic future dates to avoid session cookie expiration issues.
+ * Cookie Max-Age = (frozen_time + session_lifetime) - real_time
+ * Using "tomorrow" ensures cookies never expire prematurely.
  */
 class Time
 {
     /**
-     * Freeze time to the configured E2E_NOW value.
+     * Freeze time to tomorrow 9:00 AM Brussels (after wordle unlock).
+     * Always uses a future date to avoid 419 cookie errors.
      */
     public static function freeze(): void
     {
-        $now = config('e2e.now');
-
-        if ($now) {
-            Carbon::setTestNow(Carbon::parse($now));
-        }
+        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime(9, 0, 0);
+        Carbon::setTestNow($tomorrow);
     }
 
     /**
@@ -48,17 +50,21 @@ class Time
 
     /**
      * Set time to before Wordle unlock (8:00 Brussels time).
+     * Uses tomorrow 7:30 AM - before the 8:00 cutoff.
      */
     public static function beforeWordleUnlock(): void
     {
-        self::freezeTo('2026-01-01 07:30:00');
+        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime(7, 30, 0);
+        Carbon::setTestNow($tomorrow);
     }
 
     /**
      * Set time to after Wordle unlock (8:00 Brussels time).
+     * Uses tomorrow 9:00 AM - after the 8:00 cutoff.
      */
     public static function afterWordleUnlock(): void
     {
-        self::freezeTo('2026-01-01 09:00:00');
+        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime(9, 0, 0);
+        Carbon::setTestNow($tomorrow);
     }
 }
