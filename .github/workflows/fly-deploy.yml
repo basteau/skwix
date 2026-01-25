@@ -1,11 +1,12 @@
-# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
+# Fly.io deployment with retry logic for transient failures
+# See https://fly.io/docs/launch/continuous-deployment-with-github-actions/
 
 name: Fly Deploy
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
+
 jobs:
   deploy:
     name: Deploy app
@@ -13,8 +14,26 @@ jobs:
     concurrency: deploy-group
     steps:
       - uses: actions/checkout@v4
+      
       - uses: superfly/flyctl-actions/setup-flyctl@master
+      
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only --wait-timeout 5m
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::Deployment attempt $attempt"
+            if flyctl deploy --remote-only; then
+              echo "::endgroup::"
+              echo "✅ Deployment succeeded"
+              exit 0
+            fi
+            echo "::endgroup::"
+            if [ $attempt -lt 3 ]; then
+              echo "⚠️ Attempt $attempt failed, retrying in 15s..."
+              sleep 15
+            fi
+          done
+          echo "❌ Deployment failed after 3 attempts"
+          exit 1
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        timeout-minutes: 15
