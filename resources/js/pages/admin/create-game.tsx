@@ -3,6 +3,10 @@ import { getAvatarForName, getAvatarUrl } from '@/components/avatar-picker';
 import { SkipLink } from '@/components/skip-link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+    DateTimePicker,
+    getDefaultStartDate,
+} from '@/components/ui/date-time-picker';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -36,7 +40,9 @@ interface PlayerRow {
 
 export default function CreateGame({ sampleWords }: Props) {
     const [secretWord, setSecretWord] = useState('');
-    const [startsAt, setStartsAt] = useState('');
+    const [startsAt, setStartsAt] = useState<Date | undefined>(
+        getDefaultStartDate(),
+    );
     const [durationDays, setDurationDays] = useState(6);
     const [wordleWords, setWordleWords] = useState<string[]>(
         sampleWords.slice(0, 6).map((w) => w.toLowerCase()),
@@ -164,7 +170,7 @@ export default function CreateGame({ sampleWords }: Props) {
 
         const payload = {
             secret_word: secretWord,
-            starts_at: startsAt,
+            starts_at: startsAt?.toISOString() ?? '',
             duration_days: durationDays,
             wordle_words: wordleWords.slice(0, durationDays),
             players: players.map((p) => ({
@@ -224,12 +230,11 @@ export default function CreateGame({ sampleWords }: Props) {
                                     <label className="mb-1 block text-sm font-medium text-foreground">
                                         Start datum & tijd
                                     </label>
-                                    <Input
-                                        type="datetime-local"
+                                    <DateTimePicker
                                         value={startsAt}
-                                        onChange={(e) =>
-                                            setStartsAt(e.target.value)
-                                        }
+                                        onChange={setStartsAt}
+                                        placeholder="Selecteer datum & tijd"
+                                        data-testid="starts-at-picker"
                                     />
                                     {errors.starts_at && (
                                         <p className="mt-1 text-sm text-destructive">
