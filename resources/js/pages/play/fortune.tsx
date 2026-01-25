@@ -711,11 +711,18 @@ export default function FortunePage({
                         )}
                     </Button>
 
-                    {points === 0 && (
+                    {points === 0 ? (
                         <p className="mt-3 text-center text-xs text-muted-foreground">
                             Je hebt geen punten om in te zetten
                         </p>
-                    )}
+                    ) : wager === 0 && !isSpinning && !showSuspense && !result ? (
+                        <p 
+                            data-testid="fortune-wager-hint"
+                            className="mt-3 text-center text-xs text-muted-foreground animate-in fade-in duration-200"
+                        >
+                            Selecteer eerst een inzet
+                        </p>
+                    ) : null}
                 </div>
             </div>
         </PlayLayout>
