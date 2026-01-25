@@ -80,6 +80,7 @@ class FortuneController extends Controller
     {
         $request->validate([
             'wager' => 'required|integer|min:1',
+            'current_rotation' => 'nullable|numeric|min:0',
         ]);
 
         if ($this->testGameService->isTestMode()) {
@@ -134,10 +135,8 @@ class FortuneController extends Controller
         $spinResult = $result['spinResult'];
         $player = $result['player'];
 
-        $landingSegment = $this->getLandingSegment($won);
-        $rotations = random_int(3, 5);
-        $segmentAngle = 360 / self::SEGMENTS;
-        $spinDegrees = ($rotations * 360) + ($landingSegment * $segmentAngle) + random_int(5, (int) $segmentAngle - 5);
+        $currentRotation = (float) ($request->current_rotation ?? 0);
+        $spinDegrees = $this->calculateSpinDegrees($won, $currentRotation);
 
         return response()->json([
             'success' => true,
@@ -186,10 +185,8 @@ class FortuneController extends Controller
             'spins' => $recentSpins,
         ]);
 
-        $landingSegment = $this->getLandingSegment($won);
-        $rotations = random_int(3, 5);
-        $segmentAngle = 360 / self::SEGMENTS;
-        $spinDegrees = ($rotations * 360) + ($landingSegment * $segmentAngle) + random_int(5, (int) $segmentAngle - 5);
+        $currentRotation = (float) ($request->current_rotation ?? 0);
+        $spinDegrees = $this->calculateSpinDegrees($won, $currentRotation);
 
         return response()->json([
             'success' => true,
@@ -211,8 +208,52 @@ class FortuneController extends Controller
         return (bool) random_int(0, 1);
     }
 
+    private function calculateSpinDegrees(bool $won, float $currentRotation = 0): int
+    {
+        $landingSegment = $this->getLandingSegment($won);
+        $rotations = random_int(3, 5);
+        $segmentAngle = 360 / self::SEGMENTS;
+
+        // The wheel is drawn with segment 0 at top (-90°). When we rotate clockwise by X degrees total,
+        // the segment at top (under pointer) is: (SEGMENTS - floor(X / segmentAngle) % SEGMENTS) % SEGMENTS
+        //
+        // To land on landingSegment after adding spinDegrees to currentRotation:
+        // finalRotation = currentRotation + spinDegrees
+        // We want: (SEGMENTS - floor(finalRotation / segmentAngle) % SEGMENTS) % SEGMENTS = landingSegment
+        //
+        // Solving: floor(finalRotation / segmentAngle) % SEGMENTS = (SEGMENTS - landingSegment) % SEGMENTS
+        // So finalRotation should be: ((SEGMENTS - landingSegment) % SEGMENTS) * segmentAngle + n*360
+
+        $targetSegmentPosition = ((self::SEGMENTS - $landingSegment) % self::SEGMENTS) * $segmentAngle;
+
+        // Add random offset within the segment (not too close to edges)
+        $offsetWithinSegment = random_int(8, (int) $segmentAngle - 8);
+        $targetFinalRotation = $targetSegmentPosition + $offsetWithinSegment;
+
+        // Calculate how much we need to spin from current position
+        // We want: currentRotation + spinDegrees ≡ targetFinalRotation (mod 360)
+        // But we also want to add multiple full rotations for visual effect
+        $baseRotation = $rotations * 360;
+
+        // Normalize current rotation to 0-360
+        $normalizedCurrent = fmod($currentRotation, 360);
+        if ($normalizedCurrent < 0) {
+            $normalizedCurrent += 360;
+        }
+
+        // Calculate the spin needed to reach target position
+        $spinToTarget = $targetFinalRotation - $normalizedCurrent;
+        if ($spinToTarget <= 0) {
+            $spinToTarget += 360; // Ensure we spin forward
+        }
+
+        return (int) ($baseRotation + $spinToTarget);
+    }
+
     private function getLandingSegment(bool $won): int
     {
+        // Segments 0, 2, 4, 6 are WIN (labeled "2×")
+        // Segments 1, 3, 5, 7 are LOSE (labeled "0×")
         $winSegments = [0, 2, 4, 6];
         $loseSegments = [1, 3, 5, 7];
 

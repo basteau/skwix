@@ -1,8 +1,8 @@
 import { GameInfoButton } from '@/components/game-info-button';
-import { GameInfoModal, FORTUNE_INFO } from '@/components/game-info-modal';
+import { FORTUNE_INFO, GameInfoModal } from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
-import { TestModeBanner } from '@/components/test-mode-banner';
+
 import { Button } from '@/components/ui/button';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
@@ -88,7 +88,12 @@ export default function FortunePage({
     const [showInfoModal, setShowInfoModal] = useState(false);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const canSpin = points > 0 && wager >= 1 && wager <= points && !isSpinning && !showSuspense;
+    const canSpin =
+        points > 0 &&
+        wager >= 1 &&
+        wager <= points &&
+        !isSpinning &&
+        !showSuspense;
 
     // Poll for game updates (game completion detection)
     useEffect(() => {
@@ -154,7 +159,7 @@ export default function FortunePage({
                     'X-CSRF-TOKEN': getCsrfToken(),
                     Accept: 'application/json',
                 },
-                body: JSON.stringify({ wager }),
+                body: JSON.stringify({ wager, current_rotation: rotation }),
             });
 
             const data = await response.json();
@@ -182,9 +187,12 @@ export default function FortunePage({
                 setShowSuspense(false);
                 setResult({ won: data.won, change: data.points_change });
                 setPoints(data.points_remaining);
-                setRecentSpins((prev) => [data.spin_result, ...prev.slice(0, 4)]);
+                setRecentSpins((prev) => [
+                    data.spin_result,
+                    ...prev.slice(0, 4),
+                ]);
                 setWager(0);
-                
+
                 if (data.won) {
                     triggerHaptic('win');
                     setShowCelebration(true);
@@ -199,7 +207,7 @@ export default function FortunePage({
             setIsSpinning(false);
             setShowSuspense(false);
         }
-    }, [canSpin, wager, triggerHaptic]);
+    }, [canSpin, wager, triggerHaptic, rotation]);
 
     const adjustWager = (amount: number) => {
         setWager((prev) => Math.max(0, Math.min(points, prev + amount)));
@@ -217,14 +225,16 @@ export default function FortunePage({
         <PlayLayout>
             <Head title="Rad" />
             <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
-                {/* Test Mode Banner */}
-                {testMode?.active && <TestModeBanner />}
-
                 <PlayHeader
                     title="Rad van Fortuin"
                     points={points}
                     testId="fortune-points-display"
-                    rightAction={<GameInfoButton onClick={() => setShowInfoModal(true)} />}
+                    testMode={testMode?.active}
+                    rightAction={
+                        <GameInfoButton
+                            onClick={() => setShowInfoModal(true)}
+                        />
+                    }
                 />
 
                 {/* Game info modal */}
@@ -239,7 +249,7 @@ export default function FortunePage({
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -249,7 +259,10 @@ export default function FortunePage({
                         >
                             <Snowflake
                                 className="text-primary/30"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
@@ -257,7 +270,7 @@ export default function FortunePage({
 
                 {/* Frost overlay on loss */}
                 {showFrostOverlay && (
-                    <div className="pointer-events-none absolute inset-0 z-30 animate-frost-in bg-gradient-to-b from-primary/10 via-transparent to-primary/5" />
+                    <div className="animate-frost-in pointer-events-none absolute inset-0 z-30 bg-gradient-to-b from-primary/10 via-transparent to-primary/5" />
                 )}
 
                 {/* Celebration confetti */}
@@ -266,7 +279,7 @@ export default function FortunePage({
                         {CONFETTI_DATA.map((conf, i) => (
                             <div
                                 key={i}
-                                className="absolute animate-confetti-burst"
+                                className="animate-confetti-burst absolute"
                                 style={{
                                     left: `${conf.left}%`,
                                     animationDelay: `${conf.delay}ms`,
@@ -296,24 +309,55 @@ export default function FortunePage({
                 {/* Wheel Area */}
                 <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-4">
                     {/* Wheel Container - scales to fit available space */}
-                    <div className="relative aspect-square w-full max-w-[320px]" style={{ maxHeight: 'min(320px, 100%)' }}>
+                    <div
+                        className="relative aspect-square w-full max-w-[320px]"
+                        style={{ maxHeight: 'min(320px, 100%)' }}
+                    >
                         {/* Icicle pointer */}
                         <div
                             className={cn(
                                 'absolute -top-4 left-1/2 z-20 -translate-x-1/2 transition-transform',
-                                result && !isSpinning && 'animate-pointer-bounce',
+                                result &&
+                                    !isSpinning &&
+                                    'animate-pointer-bounce',
                             )}
                         >
-                            <svg width="28" height="40" viewBox="0 0 28 40" className="drop-shadow-lg">
+                            <svg
+                                width="28"
+                                height="40"
+                                viewBox="0 0 28 40"
+                                className="drop-shadow-lg"
+                            >
                                 <defs>
-                                    <linearGradient id="icicle-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="oklch(95% 0.02 220)" />
-                                        <stop offset="30%" stopColor="oklch(85% 0.06 220)" />
-                                        <stop offset="70%" stopColor="oklch(70% 0.1 230)" />
-                                        <stop offset="100%" stopColor="oklch(55% 0.12 235)" />
+                                    <linearGradient
+                                        id="icicle-gradient"
+                                        x1="0%"
+                                        y1="0%"
+                                        x2="100%"
+                                        y2="100%"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor="oklch(95% 0.02 220)"
+                                        />
+                                        <stop
+                                            offset="30%"
+                                            stopColor="oklch(85% 0.06 220)"
+                                        />
+                                        <stop
+                                            offset="70%"
+                                            stopColor="oklch(70% 0.1 230)"
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="oklch(55% 0.12 235)"
+                                        />
                                     </linearGradient>
                                     <filter id="icicle-glow">
-                                        <feGaussianBlur stdDeviation="1" result="blur" />
+                                        <feGaussianBlur
+                                            stdDeviation="1"
+                                            result="blur"
+                                        />
                                         <feMerge>
                                             <feMergeNode in="blur" />
                                             <feMergeNode in="SourceGraphic" />
@@ -339,32 +383,36 @@ export default function FortunePage({
                         {/* Outer ring with animated lights */}
                         <div className="absolute inset-0">
                             <div className="relative size-full">
-                                {Array.from({ length: LIGHTS_COUNT }).map((_, i) => {
-                                    const angle = (i * 360) / LIGHTS_COUNT;
-                                    const rad = (angle * Math.PI) / 180;
-                                    const x = 50 + 49 * Math.cos(rad);
-                                    const y = 50 + 49 * Math.sin(rad);
-                                    
-                                    const isActive = isSpinning
-                                        ? (i - lightPhase + LIGHTS_COUNT) % LIGHTS_COUNT < 4
-                                        : i % 2 === 0;
-                                    
-                                    return (
-                                        <div
-                                            key={i}
-                                            className={cn(
-                                                'absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-100',
-                                                isActive
-                                                    ? 'bg-primary shadow-[0_0_8px_var(--primary)]'
-                                                    : 'bg-primary/30',
-                                            )}
-                                            style={{
-                                                left: `${x}%`,
-                                                top: `${y}%`,
-                                            }}
-                                        />
-                                    );
-                                })}
+                                {Array.from({ length: LIGHTS_COUNT }).map(
+                                    (_, i) => {
+                                        const angle = (i * 360) / LIGHTS_COUNT;
+                                        const rad = (angle * Math.PI) / 180;
+                                        const x = 50 + 49 * Math.cos(rad);
+                                        const y = 50 + 49 * Math.sin(rad);
+
+                                        const isActive = isSpinning
+                                            ? (i - lightPhase + LIGHTS_COUNT) %
+                                                  LIGHTS_COUNT <
+                                              4
+                                            : i % 2 === 0;
+
+                                        return (
+                                            <div
+                                                key={i}
+                                                className={cn(
+                                                    'absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-100',
+                                                    isActive
+                                                        ? 'bg-primary shadow-[0_0_8px_var(--primary)]'
+                                                        : 'bg-primary/30',
+                                                )}
+                                                style={{
+                                                    left: `${x}%`,
+                                                    top: `${y}%`,
+                                                }}
+                                            />
+                                        );
+                                    },
+                                )}
                             </div>
                         </div>
 
@@ -372,8 +420,10 @@ export default function FortunePage({
                         <div
                             className="absolute inset-0 m-auto size-[93.75%] rounded-full"
                             style={{
-                                background: 'linear-gradient(135deg, oklch(80% 0.02 230), oklch(60% 0.03 235), oklch(75% 0.02 225))',
-                                boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.1)',
+                                background:
+                                    'linear-gradient(135deg, oklch(80% 0.02 230), oklch(60% 0.03 235), oklch(75% 0.02 225))',
+                                boxShadow:
+                                    'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.1)',
                             }}
                         />
 
@@ -388,7 +438,8 @@ export default function FortunePage({
                             style={{
                                 transform: `rotate(${rotation}deg)`,
                                 transitionDuration: isSpinning ? '4.5s' : '0s',
-                                transitionTimingFunction: 'cubic-bezier(0.05, 0.7, 0.1, 1)',
+                                transitionTimingFunction:
+                                    'cubic-bezier(0.05, 0.7, 0.1, 1)',
                                 boxShadow: showSuspense
                                     ? undefined
                                     : `
@@ -401,113 +452,223 @@ export default function FortunePage({
                             <svg viewBox="0 0 100 100" className="size-full">
                                 <defs>
                                     {/* Win segment gradient - icy blue */}
-                                    <linearGradient id="win-segment" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="oklch(55% 0.15 220)" />
-                                        <stop offset="50%" stopColor="oklch(45% 0.18 230)" />
-                                        <stop offset="100%" stopColor="oklch(38% 0.15 240)" />
+                                    <linearGradient
+                                        id="win-segment"
+                                        x1="0%"
+                                        y1="0%"
+                                        x2="100%"
+                                        y2="100%"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor="oklch(55% 0.15 220)"
+                                        />
+                                        <stop
+                                            offset="50%"
+                                            stopColor="oklch(45% 0.18 230)"
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="oklch(38% 0.15 240)"
+                                        />
                                     </linearGradient>
-                                    
-                                    {/* Lose segment gradient - frosted silver */}
-                                    <linearGradient id="lose-segment" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="oklch(70% 0.02 230)" />
-                                        <stop offset="50%" stopColor="oklch(60% 0.03 235)" />
-                                        <stop offset="100%" stopColor="oklch(50% 0.02 240)" />
+
+                                    {/* Lose segment gradient - frosted rose/failure */}
+                                    <linearGradient
+                                        id="lose-segment"
+                                        x1="0%"
+                                        y1="0%"
+                                        x2="100%"
+                                        y2="100%"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor="oklch(55% 0.12 15)"
+                                        />
+                                        <stop
+                                            offset="50%"
+                                            stopColor="oklch(45% 0.15 10)"
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="oklch(38% 0.12 5)"
+                                        />
                                     </linearGradient>
-                                    
+
                                     {/* Sheen overlay */}
-                                    <radialGradient id="wheel-sheen" cx="25%" cy="25%" r="60%">
-                                        <stop offset="0%" stopColor="white" stopOpacity="0.25" />
-                                        <stop offset="50%" stopColor="white" stopOpacity="0.05" />
-                                        <stop offset="100%" stopColor="white" stopOpacity="0" />
+                                    <radialGradient
+                                        id="wheel-sheen"
+                                        cx="25%"
+                                        cy="25%"
+                                        r="60%"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor="white"
+                                            stopOpacity="0.25"
+                                        />
+                                        <stop
+                                            offset="50%"
+                                            stopColor="white"
+                                            stopOpacity="0.05"
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="white"
+                                            stopOpacity="0"
+                                        />
                                     </radialGradient>
-                                    
+
                                     {/* Frost texture pattern */}
-                                    <pattern id="frost-pattern" patternUnits="userSpaceOnUse" width="4" height="4">
-                                        <circle cx="1" cy="1" r="0.5" fill="white" fillOpacity="0.1" />
-                                        <circle cx="3" cy="3" r="0.3" fill="white" fillOpacity="0.08" />
+                                    <pattern
+                                        id="frost-pattern"
+                                        patternUnits="userSpaceOnUse"
+                                        width="4"
+                                        height="4"
+                                    >
+                                        <circle
+                                            cx="1"
+                                            cy="1"
+                                            r="0.5"
+                                            fill="white"
+                                            fillOpacity="0.1"
+                                        />
+                                        <circle
+                                            cx="3"
+                                            cy="3"
+                                            r="0.3"
+                                            fill="white"
+                                            fillOpacity="0.08"
+                                        />
                                     </pattern>
-                                    
+
                                     {/* Center hub gradient */}
-                                    <radialGradient id="hub-gradient" cx="30%" cy="30%" r="70%">
-                                        <stop offset="0%" stopColor="oklch(90% 0.04 220)" />
-                                        <stop offset="50%" stopColor="oklch(75% 0.08 225)" />
-                                        <stop offset="100%" stopColor="oklch(55% 0.1 230)" />
+                                    <radialGradient
+                                        id="hub-gradient"
+                                        cx="30%"
+                                        cy="30%"
+                                        r="70%"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor="oklch(90% 0.04 220)"
+                                        />
+                                        <stop
+                                            offset="50%"
+                                            stopColor="oklch(75% 0.08 225)"
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="oklch(55% 0.1 230)"
+                                        />
                                     </radialGradient>
                                 </defs>
 
                                 {/* Segments */}
-                                {Array.from({ length: SEGMENTS }).map((_, i) => {
-                                    const isWin = i % 2 === 0;
-                                    const startAngle = i * SEGMENT_ANGLE - 90;
-                                    const endAngle = startAngle + SEGMENT_ANGLE;
-                                    const path = describeArc(50, 50, 48, startAngle, endAngle);
+                                {Array.from({ length: SEGMENTS }).map(
+                                    (_, i) => {
+                                        const isWin = i % 2 === 0;
+                                        const startAngle =
+                                            i * SEGMENT_ANGLE - 90;
+                                        const endAngle =
+                                            startAngle + SEGMENT_ANGLE;
+                                        const path = describeArc(
+                                            50,
+                                            50,
+                                            48,
+                                            startAngle,
+                                            endAngle,
+                                        );
 
-                                    return (
-                                        <g key={i}>
-                                            <path
-                                                d={path}
-                                                fill={isWin ? 'url(#win-segment)' : 'url(#lose-segment)'}
-                                                stroke="oklch(85% 0.03 220)"
-                                                strokeWidth="0.8"
-                                            />
-                                            <path
-                                                d={path}
-                                                fill="url(#frost-pattern)"
-                                            />
-                                        </g>
-                                    );
-                                })}
+                                        return (
+                                            <g key={i}>
+                                                <path
+                                                    d={path}
+                                                    fill={
+                                                        isWin
+                                                            ? 'url(#win-segment)'
+                                                            : 'url(#lose-segment)'
+                                                    }
+                                                    stroke="oklch(85% 0.03 220)"
+                                                    strokeWidth="0.8"
+                                                />
+                                                <path
+                                                    d={path}
+                                                    fill="url(#frost-pattern)"
+                                                />
+                                            </g>
+                                        );
+                                    },
+                                )}
 
                                 {/* Sheen overlay */}
-                                <circle cx="50" cy="50" r="48" fill="url(#wheel-sheen)" />
+                                <circle
+                                    cx="50"
+                                    cy="50"
+                                    r="48"
+                                    fill="url(#wheel-sheen)"
+                                />
 
                                 {/* Segment labels */}
-                                {Array.from({ length: SEGMENTS }).map((_, i) => {
-                                    const isWin = i % 2 === 0;
-                                    const angle = (i * SEGMENT_ANGLE + SEGMENT_ANGLE / 2 - 90) * (Math.PI / 180);
-                                    const x = 50 + 32 * Math.cos(angle);
-                                    const y = 50 + 32 * Math.sin(angle);
-                                    const textRotation = i * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+                                {Array.from({ length: SEGMENTS }).map(
+                                    (_, i) => {
+                                        const isWin = i % 2 === 0;
+                                        const angle =
+                                            (i * SEGMENT_ANGLE +
+                                                SEGMENT_ANGLE / 2 -
+                                                90) *
+                                            (Math.PI / 180);
+                                        const x = 50 + 32 * Math.cos(angle);
+                                        const y = 50 + 32 * Math.sin(angle);
+                                        const textRotation =
+                                            i * SEGMENT_ANGLE +
+                                            SEGMENT_ANGLE / 2;
 
-                                    return (
-                                        <text
-                                            key={`text-${i}`}
-                                            x={x}
-                                            y={y}
-                                            fill="white"
-                                            fontSize="8"
-                                            fontWeight="bold"
-                                            fontFamily="var(--font-display)"
-                                            textAnchor="middle"
-                                            dominantBaseline="middle"
-                                            transform={`rotate(${textRotation}, ${x}, ${y})`}
-                                            style={{
-                                                textShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                                            }}
-                                        >
-                                            {isWin ? '2×' : '❄'}
-                                        </text>
-                                    );
-                                })}
+                                        return (
+                                            <text
+                                                key={`text-${i}`}
+                                                x={x}
+                                                y={y}
+                                                fill="white"
+                                                fontSize="8"
+                                                fontWeight="bold"
+                                                fontFamily="var(--font-display)"
+                                                textAnchor="middle"
+                                                dominantBaseline="middle"
+                                                transform={`rotate(${textRotation}, ${x}, ${y})`}
+                                                style={{
+                                                    textShadow:
+                                                        '0 1px 3px rgba(0,0,0,0.4)',
+                                                }}
+                                            >
+                                                {isWin ? '2×' : '0×'}
+                                            </text>
+                                        );
+                                    },
+                                )}
 
                                 {/* Divider pins */}
-                                {Array.from({ length: SEGMENTS }).map((_, i) => {
-                                    const angle = (i * SEGMENT_ANGLE - 90) * (Math.PI / 180);
-                                    const x = 50 + 46 * Math.cos(angle);
-                                    const y = 50 + 46 * Math.sin(angle);
+                                {Array.from({ length: SEGMENTS }).map(
+                                    (_, i) => {
+                                        const angle =
+                                            (i * SEGMENT_ANGLE - 90) *
+                                            (Math.PI / 180);
+                                        const x = 50 + 46 * Math.cos(angle);
+                                        const y = 50 + 46 * Math.sin(angle);
 
-                                    return (
-                                        <circle
-                                            key={`pin-${i}`}
-                                            cx={x}
-                                            cy={y}
-                                            r="2"
-                                            fill="oklch(85% 0.02 230)"
-                                            stroke="oklch(70% 0.03 235)"
-                                            strokeWidth="0.5"
-                                        />
-                                    );
-                                })}
+                                        return (
+                                            <circle
+                                                key={`pin-${i}`}
+                                                cx={x}
+                                                cy={y}
+                                                r="2"
+                                                fill="oklch(85% 0.02 230)"
+                                                stroke="oklch(70% 0.03 235)"
+                                                strokeWidth="0.5"
+                                            />
+                                        );
+                                    },
+                                )}
 
                                 {/* Center hub */}
                                 <circle
@@ -541,8 +702,10 @@ export default function FortunePage({
                     {showSuspense && (
                         <div className="mt-8 text-center">
                             <div className="inline-block rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 px-8 py-4">
-                                <p className="font-display text-2xl font-bold text-primary animate-pulse">
-                                    <span className="animate-suspense-dots">Even kijken</span>
+                                <p className="animate-pulse font-display text-2xl font-bold text-primary">
+                                    <span className="animate-suspense-dots">
+                                        Even kijken
+                                    </span>
                                 </p>
                             </div>
                         </div>
@@ -554,7 +717,9 @@ export default function FortunePage({
                             data-testid="fortune-result"
                             className={cn(
                                 'mt-8 text-center',
-                                result.won ? 'animate-result-reveal-win' : 'animate-result-reveal-lose',
+                                result.won
+                                    ? 'animate-result-reveal-win'
+                                    : 'animate-result-reveal-lose',
                             )}
                         >
                             <div
@@ -568,18 +733,26 @@ export default function FortunePage({
                                 <p
                                     className={cn(
                                         'font-display text-5xl font-bold tracking-tight',
-                                        result.won ? 'text-success' : 'text-muted-foreground',
+                                        result.won
+                                            ? 'text-success'
+                                            : 'text-muted-foreground',
                                     )}
                                 >
-                                    {result.won ? `+${result.change}` : result.change}
+                                    {result.won
+                                        ? `+${result.change}`
+                                        : result.change}
                                 </p>
                                 <p
                                     className={cn(
                                         'mt-1 text-sm font-medium',
-                                        result.won ? 'text-success' : 'text-muted-foreground',
+                                        result.won
+                                            ? 'text-success'
+                                            : 'text-muted-foreground',
                                     )}
                                 >
-                                    {result.won ? 'Jackpot!' : 'Ingevroren...'}
+                                    {result.won
+                                        ? 'Jackpot!'
+                                        : 'Volgende keer beter'}
                                 </p>
                             </div>
                         </div>
@@ -587,10 +760,10 @@ export default function FortunePage({
 
                     {/* Wager preview on wheel */}
                     {wager > 0 && !isSpinning && !result && (
-                        <div className="mt-4 text-center animate-in fade-in duration-200">
-                            <span 
+                        <div className="mt-4 animate-in text-center duration-200 fade-in">
+                            <span
                                 key={wager}
-                                className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary animate-wager-preview"
+                                className="animate-wager-preview inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
                             >
                                 Inzet: {wager} → Win: {wager * 2}
                             </span>
@@ -603,35 +776,39 @@ export default function FortunePage({
                     {/* Wager chips */}
                     <div className="mb-4">
                         <div className="mb-2 flex items-center justify-between">
-                            <span className="text-sm font-medium text-foreground">Inzet</span>
+                            <span className="text-sm font-medium text-foreground">
+                                Inzet
+                            </span>
                             <span className="text-sm text-muted-foreground">
                                 Beschikbaar: {points}
                             </span>
                         </div>
-                        
+
                         {/* Preset chips */}
                         <div className="mb-3 flex gap-2">
-                            {WAGER_PRESETS.filter(p => p <= points).map((preset) => (
-                                <button
-                                    key={preset}
-                                    onClick={() => {
-                                        triggerHaptic('tick');
-                                        setPresetWager(preset);
-                                    }}
-                                    disabled={isSpinning || points === 0}
-                                    className={cn(
-                                        'flex-1 rounded-full py-2.5 text-sm font-semibold',
-                                        'border-2 active:scale-95',
-                                        'transition-all duration-150 ease-out',
-                                        wager === preset
-                                            ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30 scale-[1.02] animate-wager-selected'
-                                            : 'border-border bg-card text-foreground hover:border-primary/50 hover:bg-primary/5',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed',
-                                    )}
-                                >
-                                    {preset}
-                                </button>
-                            ))}
+                            {WAGER_PRESETS.filter((p) => p <= points).map(
+                                (preset) => (
+                                    <button
+                                        key={preset}
+                                        onClick={() => {
+                                            triggerHaptic('tick');
+                                            setPresetWager(preset);
+                                        }}
+                                        disabled={isSpinning || points === 0}
+                                        className={cn(
+                                            'flex-1 rounded-full py-2.5 text-sm font-semibold',
+                                            'border-2 active:scale-95',
+                                            'transition-all duration-150 ease-out',
+                                            wager === preset
+                                                ? 'animate-wager-selected scale-[1.02] border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30'
+                                                : 'border-border bg-card text-foreground hover:border-primary/50 hover:bg-primary/5',
+                                            'disabled:cursor-not-allowed disabled:opacity-50',
+                                        )}
+                                    >
+                                        {preset}
+                                    </button>
+                                ),
+                            )}
                             <button
                                 onClick={() => {
                                     triggerHaptic('tick');
@@ -643,9 +820,9 @@ export default function FortunePage({
                                     'border-2 active:scale-95',
                                     'transition-all duration-150 ease-out',
                                     wager === points && points > 0
-                                        ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30 scale-[1.02] animate-wager-selected'
+                                        ? 'animate-wager-selected scale-[1.02] border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30'
                                         : 'border-border bg-card text-foreground hover:border-primary/50 hover:bg-primary/5',
-                                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                                    'disabled:cursor-not-allowed disabled:opacity-50',
                                 )}
                             >
                                 Max
@@ -664,11 +841,11 @@ export default function FortunePage({
                             >
                                 −
                             </button>
-                            <div className="flex-1 rounded-lg bg-muted/50 py-3 text-center overflow-hidden">
+                            <div className="flex-1 overflow-hidden rounded-lg bg-muted/50 py-3 text-center">
                                 <span
                                     key={wager}
                                     data-testid="fortune-wager-display"
-                                    className="inline-block font-display text-2xl font-bold text-foreground animate-wager-preview"
+                                    className="animate-wager-preview inline-block font-display text-2xl font-bold text-foreground"
                                 >
                                     {wager}
                                 </span>
@@ -716,10 +893,13 @@ export default function FortunePage({
                         <p className="mt-3 text-center text-xs text-muted-foreground">
                             Je hebt geen punten om in te zetten
                         </p>
-                    ) : wager === 0 && !isSpinning && !showSuspense && !result ? (
-                        <p 
+                    ) : wager === 0 &&
+                      !isSpinning &&
+                      !showSuspense &&
+                      !result ? (
+                        <p
                             data-testid="fortune-wager-hint"
-                            className="mt-3 text-center text-xs text-muted-foreground animate-in fade-in duration-200"
+                            className="mt-3 animate-in text-center text-xs text-muted-foreground duration-200 fade-in"
                         >
                             Selecteer eerst een inzet
                         </p>
@@ -750,9 +930,20 @@ function describeArc(
     const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
 
     return [
-        'M', cx, cy,
-        'L', start.x, start.y,
-        'A', r, r, 0, largeArc, 0, end.x, end.y,
+        'M',
+        cx,
+        cy,
+        'L',
+        start.x,
+        start.y,
+        'A',
+        r,
+        r,
+        0,
+        largeArc,
+        0,
+        end.x,
+        end.y,
         'Z',
     ].join(' ');
 }
