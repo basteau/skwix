@@ -1,6 +1,7 @@
 import { getPortraitUrl } from '@/components/avatar-picker';
 import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, GUESS_INFO } from '@/components/game-info-modal';
+import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
@@ -292,19 +293,7 @@ export default function GuessPage({
     };
 
     if (error === 'no_active_game') {
-        return (
-            <PlayLayout>
-                <Head title="Vraag" />
-                <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <h1 className="font-display text-2xl font-bold text-foreground">
-                        Geen actief spel
-                    </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        Wacht tot de beheerder een spel start.
-                    </p>
-                </div>
-            </PlayLayout>
-        );
+        return <NoActiveGame title="Vraag" />;
     }
 
     // Victory screen - takes over the entire view

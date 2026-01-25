@@ -1,6 +1,7 @@
 import { getAvatarUrl } from '@/components/avatar-picker';
 import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, WORDLE_INFO } from '@/components/game-info-modal';
+import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -256,19 +257,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
     }, [handleKey]);
 
     if (error === 'no_active_game') {
-        return (
-            <PlayLayout>
-                <Head title="Wordle" />
-                <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <h1 className="font-display text-2xl font-bold text-foreground">
-                        Geen actief spel
-                    </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        Wacht tot de beheerder een spel start.
-                    </p>
-                </div>
-            </PlayLayout>
-        );
+        return <NoActiveGame title="Wordle" />;
     }
 
     const states = letterStates;

@@ -1,3 +1,4 @@
+import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { getInitials } from '@/hooks/use-initials';
@@ -59,19 +60,7 @@ export default function PlayersPage({ player, game, players = [], error, testMod
     }, [game?.status]);
 
     if (error === 'no_active_game') {
-        return (
-            <PlayLayout>
-                <Head title="Spelers" />
-                <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <h1 className="text-2xl font-bold text-foreground">
-                        Geen actief spel
-                    </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        Wacht tot de beheerder een spel start.
-                    </p>
-                </div>
-            </PlayLayout>
-        );
+        return <NoActiveGame title="Spelers" />;
     }
 
     return (
