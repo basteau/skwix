@@ -2,7 +2,7 @@
 # Production smoke tests for Skwix
 # Usage: ./scripts/smoke-test.sh [base_url]
 
-BASE_URL="${1:-https://skwix.fly.dev}"
+BASE_URL="${1:-https://skwix.example}"
 PASSED=0
 FAILED=0
 
