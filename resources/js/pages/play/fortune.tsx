@@ -75,9 +75,16 @@ export default function FortunePage({
     const [showCelebration, setShowCelebration] = useState(false);
     const [lightPhase, setLightPhase] = useState(0);
     const [showFrostOverlay, setShowFrostOverlay] = useState(false);
+    const [showSuspense, setShowSuspense] = useState(false);
+    const [pendingResult, setPendingResult] = useState<{
+        won: boolean;
+        change: number;
+        pointsRemaining: number;
+        spinResult: SpinRecord;
+    } | null>(null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const canSpin = points > 0 && wager >= 1 && wager <= points && !isSpinning;
+    const canSpin = points > 0 && wager >= 1 && wager <= points && !isSpinning && !showSuspense;
 
     // Poll for game updates (game completion detection)
     useEffect(() => {
@@ -109,6 +116,21 @@ export default function FortunePage({
         return () => clearInterval(interval);
     }, [isSpinning]);
 
+    const triggerHaptic = useCallback((pattern: 'tick' | 'win' | 'lose') => {
+        if (!navigator.vibrate) return;
+        switch (pattern) {
+            case 'tick':
+                navigator.vibrate(10);
+                break;
+            case 'win':
+                navigator.vibrate([50, 50, 50, 50, 100, 50, 150]);
+                break;
+            case 'lose':
+                navigator.vibrate([100, 30, 100]);
+                break;
+        }
+    }, []);
+
     const handleSpin = useCallback(async () => {
         if (!canSpin) return;
 
@@ -116,6 +138,8 @@ export default function FortunePage({
         setResult(null);
         setShowCelebration(false);
         setShowFrostOverlay(false);
+        setShowSuspense(false);
+        setPendingResult(null);
 
         try {
             const response = await fetch('/play/fortune/spin', {
@@ -138,24 +162,39 @@ export default function FortunePage({
             setRotation((prev) => prev + data.spin_degrees);
 
             setTimeout(() => {
+                setIsSpinning(false);
+                setShowSuspense(true);
+                triggerHaptic('tick');
+                setPendingResult({
+                    won: data.won,
+                    change: data.points_change,
+                    pointsRemaining: data.points_remaining,
+                    spinResult: data.spin_result,
+                });
+            }, 4500);
+
+            setTimeout(() => {
+                setShowSuspense(false);
                 setResult({ won: data.won, change: data.points_change });
                 setPoints(data.points_remaining);
                 setRecentSpins((prev) => [data.spin_result, ...prev.slice(0, 4)]);
                 setWager(0);
-                setIsSpinning(false);
                 
                 if (data.won) {
+                    triggerHaptic('win');
                     setShowCelebration(true);
                     setTimeout(() => setShowCelebration(false), 3000);
                 } else {
+                    triggerHaptic('lose');
                     setShowFrostOverlay(true);
                     setTimeout(() => setShowFrostOverlay(false), 2000);
                 }
-            }, 4000);
+            }, 5800);
         } catch {
             setIsSpinning(false);
+            setShowSuspense(false);
         }
-    }, [canSpin, wager]);
+    }, [canSpin, wager, triggerHaptic]);
 
     const adjustWager = (amount: number) => {
         setWager((prev) => Math.max(0, Math.min(points, prev + amount)));
@@ -343,16 +382,19 @@ export default function FortunePage({
                             className={cn(
                                 'absolute inset-0 m-auto size-[87.5%] rounded-full transition-transform',
                                 isSpinning && 'wheel-spinning',
+                                showSuspense && 'wheel-suspense',
                             )}
                             style={{
                                 transform: `rotate(${rotation}deg)`,
-                                transitionDuration: isSpinning ? '4s' : '0s',
-                                transitionTimingFunction: 'cubic-bezier(0.15, 0.85, 0.15, 1)',
-                                boxShadow: `
-                                    0 0 40px oklch(45% 0.15 230 / 0.3),
-                                    inset 0 4px 8px rgba(255,255,255,0.15),
-                                    inset 0 -4px 8px rgba(0,0,0,0.1)
-                                `,
+                                transitionDuration: isSpinning ? '4.5s' : '0s',
+                                transitionTimingFunction: 'cubic-bezier(0.05, 0.7, 0.1, 1)',
+                                boxShadow: showSuspense
+                                    ? undefined
+                                    : `
+                                        0 0 40px oklch(45% 0.15 230 / 0.3),
+                                        inset 0 4px 8px rgba(255,255,255,0.15),
+                                        inset 0 -4px 8px rgba(0,0,0,0.1)
+                                    `,
                             }}
                         >
                             <svg viewBox="0 0 100 100" className="size-full">
@@ -494,13 +536,24 @@ export default function FortunePage({
                         </div>
                     </div>
 
+                    {/* Suspense display */}
+                    {showSuspense && (
+                        <div className="mt-8 text-center">
+                            <div className="inline-block rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 px-8 py-4">
+                                <p className="font-display text-2xl font-bold text-primary animate-pulse">
+                                    <span className="animate-suspense-dots">Even kijken</span>
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Result display */}
-                    {result && (
+                    {result && !showSuspense && (
                         <div
                             data-testid="fortune-result"
                             className={cn(
                                 'mt-8 text-center',
-                                'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in motion-safe:duration-500',
+                                result.won ? 'animate-result-reveal-win' : 'animate-result-reveal-lose',
                             )}
                         >
                             <div
@@ -629,6 +682,11 @@ export default function FortunePage({
                             <span className="flex items-center gap-2">
                                 <Snowflake className="size-4 animate-spin" />
                                 Draait...
+                            </span>
+                        ) : showSuspense ? (
+                            <span className="flex items-center gap-2">
+                                <Snowflake className="size-4 animate-pulse" />
+                                Even geduld...
                             </span>
                         ) : (
                             'Draai het rad'
