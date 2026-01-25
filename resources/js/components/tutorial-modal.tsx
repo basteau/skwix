@@ -26,7 +26,7 @@ interface TutorialStep {
 }
 
 const SNOWFLAKES = Array.from({ length: 8 }).map((_, i) => ({
-    left: 10 + (i * 12) % 80,
+    left: 10 + ((i * 12) % 80),
     delay: i * 400,
     duration: 6 + (i % 3) * 2,
     size: 10 + (i % 3) * 4,
@@ -57,8 +57,12 @@ const steps: TutorialStep[] = [
                         ))}
                     </div>
                     {/* Sparkle accents */}
-                    <div className="absolute -top-2 -right-2 text-primary/60">✦</div>
-                    <div className="absolute -bottom-1 -left-2 text-primary/40">✧</div>
+                    <div className="absolute -top-2 -right-2 text-primary/60">
+                        ✦
+                    </div>
+                    <div className="absolute -bottom-1 -left-2 text-primary/40">
+                        ✧
+                    </div>
                 </div>
             </div>
         ),
@@ -66,9 +70,30 @@ const steps: TutorialStep[] = [
     {
         icon: (
             <svg viewBox="0 0 20 20" className="size-5 fill-current">
-                <rect x="1" y="1" width="5" height="5" rx="1" className="fill-wordle-correct" />
-                <rect x="7.5" y="1" width="5" height="5" rx="1" className="fill-wordle-present" />
-                <rect x="14" y="1" width="5" height="5" rx="1" className="fill-wordle-absent" />
+                <rect
+                    x="1"
+                    y="1"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    className="fill-wordle-correct"
+                />
+                <rect
+                    x="7.5"
+                    y="1"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    className="fill-wordle-present"
+                />
+                <rect
+                    x="14"
+                    y="1"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    className="fill-wordle-absent"
+                />
                 <rect x="1" y="7.5" width="5" height="5" rx="1" />
                 <rect x="7.5" y="7.5" width="5" height="5" rx="1" />
                 <rect x="14" y="7.5" width="5" height="5" rx="1" />
@@ -78,7 +103,8 @@ const steps: TutorialStep[] = [
             </svg>
         ),
         title: 'Wordle',
-        description: 'Raad elke dag een 5-letter woord in 6 pogingen. Kleuren tonen hoe dichtbij je bent.',
+        description:
+            'Raad elke dag een 5-letter woord in 6 pogingen. Kleuren tonen hoe dichtbij je bent.',
         points: { text: '3–6 punten', type: 'earn' },
         visual: (
             <div className="space-y-3 py-4">
@@ -125,19 +151,37 @@ const steps: TutorialStep[] = [
     {
         icon: (
             <svg viewBox="0 0 20 20" className="size-5 fill-current">
-                <circle cx="10" cy="10" r="8" strokeWidth="2" stroke="currentColor" fill="none" />
-                <text x="10" y="14" textAnchor="middle" fontSize="10" fill="currentColor">?</text>
+                <circle
+                    cx="10"
+                    cy="10"
+                    r="8"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    fill="none"
+                />
+                <text
+                    x="10"
+                    y="14"
+                    textAnchor="middle"
+                    fontSize="10"
+                    fill="currentColor"
+                >
+                    ?
+                </text>
             </svg>
         ),
         title: 'Vragen Stellen',
-        description: 'Stel ja/nee vragen over het mystery-woord om dichter bij het antwoord te komen.',
+        description:
+            'Stel ja/nee vragen over het mystery-woord om dichter bij het antwoord te komen.',
         points: { text: '−3 punten', type: 'cost' },
         visual: (
             <div className="space-y-2.5 py-4">
                 {/* Chat-style Q&A */}
                 <div className="flex items-start gap-3">
                     <div className="flex-1 rounded-xl rounded-tl-sm bg-primary/10 px-3.5 py-2.5">
-                        <p className="text-sm text-foreground">"Is het een dier?"</p>
+                        <p className="text-sm text-foreground">
+                            "Is het een dier?"
+                        </p>
                     </div>
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-success/15 text-xs font-bold text-success">
                         JA
@@ -145,7 +189,9 @@ const steps: TutorialStep[] = [
                 </div>
                 <div className="flex items-start gap-3">
                     <div className="flex-1 rounded-xl rounded-tl-sm bg-primary/10 px-3.5 py-2.5">
-                        <p className="text-sm text-foreground">"Leeft het in water?"</p>
+                        <p className="text-sm text-foreground">
+                            "Leeft het in water?"
+                        </p>
                     </div>
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-xs font-bold text-destructive">
                         NEE
@@ -157,13 +203,25 @@ const steps: TutorialStep[] = [
     {
         icon: (
             <svg viewBox="0 0 20 20" className="size-5">
-                <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
-                <path d="M10 2 L10 6 M10 14 L10 18 M2 10 L6 10 M14 10 L18 10" stroke="currentColor" strokeWidth="1.5" />
+                <circle
+                    cx="10"
+                    cy="10"
+                    r="8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                />
+                <path
+                    d="M10 2 L10 6 M10 14 L10 18 M2 10 L6 10 M14 10 L18 10"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                />
                 <circle cx="10" cy="10" r="3" fill="currentColor" />
             </svg>
         ),
         title: 'Rad van Fortuin',
-        description: 'Waag een gokje! Zet punten in en draai aan het rad. Win het dubbele... of verlies alles.',
+        description:
+            'Waag een gokje! Zet punten in en draai aan het rad. Win het dubbele... of verlies alles.',
         points: { text: '×2 of ×0', type: 'risk' },
         visual: (
             <div className="flex items-center justify-center py-4">
@@ -171,13 +229,37 @@ const steps: TutorialStep[] = [
                 <div className="relative">
                     <svg viewBox="0 0 80 80" className="size-24">
                         <defs>
-                            <linearGradient id="mini-wheel-win" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="oklch(55% 0.18 145)" />
-                                <stop offset="100%" stopColor="oklch(50% 0.16 145)" />
+                            <linearGradient
+                                id="mini-wheel-win"
+                                x1="0%"
+                                y1="0%"
+                                x2="100%"
+                                y2="100%"
+                            >
+                                <stop
+                                    offset="0%"
+                                    stopColor="oklch(55% 0.18 145)"
+                                />
+                                <stop
+                                    offset="100%"
+                                    stopColor="oklch(50% 0.16 145)"
+                                />
                             </linearGradient>
-                            <linearGradient id="mini-wheel-lose" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="oklch(50% 0.12 230)" />
-                                <stop offset="100%" stopColor="oklch(40% 0.10 235)" />
+                            <linearGradient
+                                id="mini-wheel-lose"
+                                x1="0%"
+                                y1="0%"
+                                x2="100%"
+                                y2="100%"
+                            >
+                                <stop
+                                    offset="0%"
+                                    stopColor="oklch(50% 0.12 230)"
+                                />
+                                <stop
+                                    offset="100%"
+                                    stopColor="oklch(40% 0.10 235)"
+                                />
                             </linearGradient>
                         </defs>
                         {/* Segments */}
@@ -194,13 +276,27 @@ const steps: TutorialStep[] = [
                                 <path
                                     key={i}
                                     d={`M40,40 L${x1},${y1} A35,35 0 0,1 ${x2},${y2} Z`}
-                                    fill={isWin ? 'url(#mini-wheel-win)' : 'url(#mini-wheel-lose)'}
+                                    fill={
+                                        isWin
+                                            ? 'url(#mini-wheel-win)'
+                                            : 'url(#mini-wheel-lose)'
+                                    }
                                 />
                             );
                         })}
                         {/* Center */}
-                        <circle cx="40" cy="40" r="10" fill="oklch(90% 0.02 230)" />
-                        <circle cx="40" cy="40" r="6" fill="oklch(45% 0.12 230)" />
+                        <circle
+                            cx="40"
+                            cy="40"
+                            r="10"
+                            fill="oklch(90% 0.02 230)"
+                        />
+                        <circle
+                            cx="40"
+                            cy="40"
+                            r="6"
+                            fill="oklch(45% 0.12 230)"
+                        />
                     </svg>
                     {/* Pointer */}
                     <div className="absolute -top-1 left-1/2 -translate-x-1/2">
@@ -221,13 +317,18 @@ const steps: TutorialStep[] = [
             </svg>
         ),
         title: 'Winnen!',
-        description: 'Verzamel genoeg punten en raad het mystery-woord. De eerste die het woord raadt, claimt de prijs!',
+        description:
+            'Verzamel genoeg punten en raad het mystery-woord. De eerste die het woord raadt, claimt de prijs!',
         visual: (
             <div className="flex flex-col items-center py-4">
                 {/* Trophy visualization */}
                 <div className="relative mb-3">
                     <div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg shadow-amber-500/25">
-                        <svg viewBox="0 0 24 24" className="size-8 text-white" fill="currentColor">
+                        <svg
+                            viewBox="0 0 24 24"
+                            className="size-8 text-white"
+                            fill="currentColor"
+                        >
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                         </svg>
                     </div>
@@ -235,8 +336,12 @@ const steps: TutorialStep[] = [
                         1
                     </div>
                 </div>
-                <p className="font-display text-lg font-bold text-foreground">Eerste = Winnaar</p>
-                <p className="mt-1 text-sm text-muted-foreground">Scan de QR-code voor je prijs</p>
+                <p className="font-display text-lg font-bold text-foreground">
+                    Eerste = Winnaar
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Scan de QR-code voor je prijs
+                </p>
             </div>
         ),
     },
@@ -292,10 +397,13 @@ export function TutorialModal({
         }
     }, [currentStep]);
 
-    const handleStepClick = useCallback((idx: number) => {
-        setDirection(idx > currentStep ? 'next' : 'prev');
-        setCurrentStep(idx);
-    }, [currentStep]);
+    const handleStepClick = useCallback(
+        (idx: number) => {
+            setDirection(idx > currentStep ? 'next' : 'prev');
+            setCurrentStep(idx);
+        },
+        [currentStep],
+    );
 
     useEffect(() => {
         if (!isOpen) return;
@@ -327,7 +435,7 @@ export function TutorialModal({
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -337,37 +445,40 @@ export function TutorialModal({
                         >
                             <Snowflake
                                 className="text-primary"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
                 </div>
 
-                {/* Close button */}
+                {/* Close button - larger touch target */}
                 <DialogClose
-                    className="absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                    className="absolute top-2.5 right-2.5 z-10 flex size-11 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none active:bg-muted/80"
                     aria-label="Sluiten"
                 >
-                    <X className="size-4" />
+                    <X className="size-5" />
                 </DialogClose>
 
                 {/* Content */}
                 <div
                     key={currentStep}
                     className={cn(
-                        'relative px-6 pt-10 pb-4',
-                        'motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300',
+                        'relative px-5 pt-12 pb-3',
+                        'motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in',
                         direction === 'next'
                             ? 'motion-safe:slide-in-from-right-4'
                             : 'motion-safe:slide-in-from-left-4',
                     )}
                 >
                     {/* Step icon + title */}
-                    <div className="mb-3 flex items-center gap-3">
-                        <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="mb-2 flex items-center gap-2.5">
+                        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                             {step.icon}
                         </div>
-                        <DialogTitle className="font-display text-xl font-bold text-foreground">
+                        <DialogTitle className="font-display text-lg font-bold text-foreground">
                             {step.title}
                         </DialogTitle>
                     </div>
@@ -382,13 +493,16 @@ export function TutorialModal({
 
                     {/* Points badge */}
                     {step.points && (
-                        <div className="mt-3">
+                        <div className="mt-2.5">
                             <span
                                 className={cn(
                                     'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold',
-                                    step.points.type === 'earn' && 'bg-success/15 text-success',
-                                    step.points.type === 'cost' && 'bg-destructive/15 text-destructive',
-                                    step.points.type === 'risk' && 'bg-warning/15 text-warning',
+                                    step.points.type === 'earn' &&
+                                        'bg-success/15 text-success',
+                                    step.points.type === 'cost' &&
+                                        'bg-destructive/15 text-destructive',
+                                    step.points.type === 'risk' &&
+                                        'bg-warning/15 text-warning',
                                 )}
                             >
                                 {step.points.text}
@@ -397,44 +511,54 @@ export function TutorialModal({
                     )}
 
                     {/* Visual */}
-                    {step.visual}
+                    <div className="mt-2">{step.visual}</div>
                 </div>
 
                 {/* Navigation footer */}
-                <div className="relative flex items-center justify-between border-t border-border/50 bg-muted/30 px-5 py-4">
+                <div className="relative grid grid-cols-[1fr_auto_1fr] items-center border-t border-border/50 bg-muted/30 px-3 py-2.5">
                     {/* Previous / Skip */}
-                    {isFirstStep ? (
-                        <button
-                            onClick={handleClose}
-                            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                        >
-                            Overslaan
-                        </button>
-                    ) : (
-                        <button
-                            onClick={handlePrev}
-                            className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                        >
-                            <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M10 12 L6 8 L10 4" />
-                            </svg>
-                            Vorige
-                        </button>
-                    )}
+                    <div className="justify-self-start">
+                        {isFirstStep ? (
+                            <button
+                                onClick={handleClose}
+                                className="flex h-10 items-center px-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground active:text-foreground/80"
+                            >
+                                Overslaan
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handlePrev}
+                                className="flex h-10 items-center gap-0.5 px-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground active:text-foreground/80"
+                            >
+                                <svg
+                                    viewBox="0 0 16 16"
+                                    className="size-3.5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path d="M10 12 L6 8 L10 4" />
+                                </svg>
+                                Vorige
+                            </button>
+                        )}
+                    </div>
 
                     {/* Progress dots */}
-                    <div className="flex gap-1.5">
+                    <div className="flex justify-center gap-0.5">
                         {steps.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => handleStepClick(i)}
-                                className="group relative flex size-8 items-center justify-center"
+                                className="group flex size-7 items-center justify-center"
                                 aria-label={`Stap ${i + 1} van ${steps.length}`}
-                                aria-current={i === currentStep ? 'step' : undefined}
+                                aria-current={
+                                    i === currentStep ? 'step' : undefined
+                                }
                             >
                                 <span
                                     className={cn(
-                                        'size-2 rounded-full transition-all duration-300',
+                                        'size-1.5 rounded-full transition-all duration-300',
                                         i === currentStep
                                             ? 'scale-125 bg-primary'
                                             : i < currentStep
@@ -447,25 +571,34 @@ export function TutorialModal({
                     </div>
 
                     {/* Next / Start */}
-                    <Button
-                        size="sm"
-                        onClick={handleNext}
-                        className={cn(
-                            'gap-1 font-semibold',
-                            isLastStep && 'bg-success hover:bg-success/90 shadow-md shadow-success/25',
-                        )}
-                    >
-                        {isLastStep ? (
-                            'Start!'
-                        ) : (
-                            <>
-                                Volgende
-                                <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M6 4 L10 8 L6 12" />
-                                </svg>
-                            </>
-                        )}
-                    </Button>
+                    <div className="justify-self-end">
+                        <Button
+                            size="sm"
+                            onClick={handleNext}
+                            className={cn(
+                                'h-9 gap-0.5 px-3 text-sm font-semibold',
+                                isLastStep &&
+                                    'bg-success shadow-md shadow-success/25 hover:bg-success/90',
+                            )}
+                        >
+                            {isLastStep ? (
+                                'Start!'
+                            ) : (
+                                <>
+                                    Volgende
+                                    <svg
+                                        viewBox="0 0 16 16"
+                                        className="size-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <path d="M6 4 L10 8 L6 12" />
+                                    </svg>
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

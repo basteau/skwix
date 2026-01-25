@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getAvatarUrl } from '@/components/avatar-picker';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -60,7 +60,8 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
     const statusMessage = useMemo(() => {
         if (!game) return null;
         if (game.status === 'completed') return 'Dit spel is al afgelopen.';
-        if (game.status === 'draft' || game.status === 'cancelled') return 'Dit spel is geannuleerd.';
+        if (game.status === 'draft' || game.status === 'cancelled')
+            return 'Dit spel is geannuleerd.';
         return null;
     }, [game]);
 
@@ -72,7 +73,11 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
             return;
         }
 
-        if (game.status === 'completed' || game.status === 'draft' || game.status === 'cancelled') {
+        if (
+            game.status === 'completed' ||
+            game.status === 'draft' ||
+            game.status === 'cancelled'
+        ) {
             return;
         }
 
@@ -118,29 +123,44 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     />
                     <Snowflake
                         className="absolute top-[8%] right-[12%] size-10 text-primary opacity-[0.06] motion-safe:animate-pulse"
-                        style={{ animationDuration: '5s', animationDelay: '1s' }}
+                        style={{
+                            animationDuration: '5s',
+                            animationDelay: '1s',
+                        }}
                     />
                     <Snowflake
                         className="absolute bottom-[15%] left-[15%] size-12 text-primary opacity-[0.05] motion-safe:animate-pulse"
-                        style={{ animationDuration: '6s', animationDelay: '2s' }}
+                        style={{
+                            animationDuration: '6s',
+                            animationDelay: '2s',
+                        }}
                     />
                     <Snowflake
                         className="absolute right-[8%] bottom-[25%] size-18 text-primary opacity-[0.04] motion-safe:animate-pulse"
-                        style={{ animationDuration: '5s', animationDelay: '0.5s' }}
+                        style={{
+                            animationDuration: '5s',
+                            animationDelay: '0.5s',
+                        }}
                     />
                     <Snowflake
                         className="absolute top-[5%] left-[50%] size-8 text-primary opacity-[0.07] motion-safe:animate-pulse"
-                        style={{ animationDuration: '4.5s', animationDelay: '1.5s' }}
+                        style={{
+                            animationDuration: '4.5s',
+                            animationDelay: '1.5s',
+                        }}
                     />
                     <Snowflake
                         className="absolute right-[30%] bottom-[10%] size-14 text-primary opacity-[0.05] motion-safe:animate-pulse"
-                        style={{ animationDuration: '5.5s', animationDelay: '2.5s' }}
+                        style={{
+                            animationDuration: '5.5s',
+                            animationDelay: '2.5s',
+                        }}
                     />
                 </div>
 
                 <main className="relative z-10 flex w-full max-w-md flex-col items-center text-center">
                     {/* Header with spinning snowflake */}
-                    <div className="mb-8 flex flex-col items-center motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700">
+                    <div className="mb-8 flex flex-col items-center motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in">
                         <div className="mb-4">
                             <Snowflake
                                 className="size-10 text-primary motion-safe:animate-spin"
@@ -164,7 +184,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     {statusMessage && (
                         <div
                             data-testid="status-message"
-                            className="mb-10 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-4 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
+                            className="mb-10 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-4 motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in"
                         >
                             <AlertCircle className="size-5 shrink-0 text-destructive" />
                             <p className="text-sm font-medium text-destructive">
@@ -177,19 +197,19 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                     {countdown !== null && !statusMessage && (
                         <div
                             data-testid="countdown"
-                            className="mb-10 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 to-primary/10 px-8 py-5 shadow-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
+                            className="mb-10 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 to-primary/10 px-8 py-5 shadow-sm motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in"
                         >
                             <p className="mb-1.5 text-xs font-medium tracking-widest text-muted-foreground uppercase">
                                 Start over
                             </p>
-                            <p className="font-display text-4xl font-bold text-primary tabular-nums tracking-tight">
+                            <p className="font-display text-4xl font-bold tracking-tight text-primary tabular-nums">
                                 {formatCountdown(countdown)}
                             </p>
                         </div>
                     )}
 
                     {/* Players Grid */}
-                    <div className="w-full motion-safe:animate-in motion-safe:fade-in motion-safe:delay-100 motion-safe:duration-700">
+                    <div className="w-full motion-safe:animate-in motion-safe:delay-100 motion-safe:duration-700 motion-safe:fade-in">
                         <h2 className="mb-4 text-xs font-medium tracking-widest text-muted-foreground uppercase">
                             Spelers ({players.length})
                         </h2>
@@ -241,7 +261,11 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                                 )}
                                             >
                                                 <AvatarImage
-                                                    src={getAvatarUrl(p.avatar_url) || undefined}
+                                                    src={
+                                                        getAvatarUrl(
+                                                            p.avatar_url,
+                                                        ) || undefined
+                                                    }
                                                     alt={p.name}
                                                 />
                                                 <AvatarFallback
@@ -281,7 +305,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
 
                     {/* Footer hint */}
                     {!statusMessage && (
-                        <p className="mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground motion-safe:animate-in motion-safe:fade-in motion-safe:delay-200 motion-safe:duration-700">
+                        <p className="mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground motion-safe:animate-in motion-safe:delay-200 motion-safe:duration-700 motion-safe:fade-in">
                             <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary/50" />
                             Je wordt automatisch doorgestuurd
                         </p>

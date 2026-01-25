@@ -4,7 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/react';
-import { Clock, FlaskConical, Mail, Play, Trophy, UserSearch, Users } from 'lucide-react';
+import {
+    Clock,
+    FlaskConical,
+    Mail,
+    Play,
+    Trophy,
+    UserSearch,
+    Users,
+} from 'lucide-react';
 
 type GameStatus = 'draft' | 'pending' | 'active' | 'completed';
 
@@ -32,14 +40,12 @@ export default function AdminDashboard({ games = [] }: Props) {
                     subtitle="Beheer Skwix spellen"
                     actions={
                         <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                asChild
-                                className="gap-2"
-                            >
+                            <Button variant="outline" asChild className="gap-2">
                                 <Link href="/admin/players">
                                     <UserSearch className="size-4" />
-                                    <span className="hidden sm:inline">Spelers</span>
+                                    <span className="hidden sm:inline">
+                                        Spelers
+                                    </span>
                                 </Link>
                             </Button>
                             <Button
@@ -48,7 +54,9 @@ export default function AdminDashboard({ games = [] }: Props) {
                                 className="gap-2"
                             >
                                 <FlaskConical className="size-4" />
-                                <span className="hidden sm:inline">Test Mode</span>
+                                <span className="hidden sm:inline">
+                                    Test Mode
+                                </span>
                             </Button>
                             <Button asChild>
                                 <Link href="/admin/create">Nieuw Spel</Link>
@@ -57,7 +65,11 @@ export default function AdminDashboard({ games = [] }: Props) {
                     }
                 />
 
-                <main id="main-content" tabIndex={-1} className="pb-safe p-6 outline-none">
+                <main
+                    id="main-content"
+                    tabIndex={-1}
+                    className="pb-safe p-6 outline-none"
+                >
                     {games.length === 0 ? (
                         <div className="mx-auto max-w-md py-12">
                             <div className="mb-8 flex justify-center">
@@ -179,7 +191,7 @@ function GameCard({ game }: { game: GameData }) {
             <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-lg font-semibold uppercase tracking-wider text-foreground">
+                        <span className="font-mono text-lg font-semibold tracking-wider text-foreground uppercase">
                             {game.secret_word}
                         </span>
                         <Badge

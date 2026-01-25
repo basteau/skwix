@@ -1,6 +1,5 @@
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
-import { TestModeBanner } from '@/components/test-mode-banner';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
@@ -36,7 +35,13 @@ interface Props {
 
 const POLL_INTERVAL = 10_000; // 10 seconds
 
-export default function PlayersPage({ player, game, players = [], error, testMode }: Props) {
+export default function PlayersPage({
+    player,
+    game,
+    players = [],
+    error,
+    testMode,
+}: Props) {
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Poll for leaderboard updates
@@ -67,8 +72,11 @@ export default function PlayersPage({ player, game, players = [], error, testMod
         <PlayLayout>
             <Head title="Spelers" />
             <div className="flex h-full flex-col pt-[calc(var(--header-height)+var(--safe-top))]">
-                {testMode?.active && <TestModeBanner />}
-                <PlayHeader title="Ranglijst" points={player?.points ?? 0} />
+                <PlayHeader
+                    title="Ranglijst"
+                    points={player?.points ?? 0}
+                    testMode={testMode?.active}
+                />
 
                 {/* Players List */}
                 <div
@@ -88,7 +96,7 @@ function PlayerCard({ player }: { player: PlayerData }) {
     const initials = getInitials(player.name);
     const medals = ['🥇', '🥈', '🥉'];
     const medal = player.rank <= 3 ? medals[player.rank - 1] : null;
-    
+
     const isPodium = player.rank <= 3;
     const avatarSize = isPodium ? 'size-11' : 'size-9';
     const textSize = isPodium ? 'text-xl' : 'text-base';
@@ -102,12 +110,15 @@ function PlayerCard({ player }: { player: PlayerData }) {
                 player.rank === 2 && 'bg-zinc-50 dark:bg-zinc-800/30',
                 player.rank === 3 && 'bg-orange-50 dark:bg-orange-900/20',
                 player.rank > 3 && 'bg-card',
-                player.is_current && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+                player.is_current &&
+                    'ring-2 ring-primary ring-offset-2 ring-offset-background',
             )}
         >
             {/* Rank indicator or medal */}
             {medal ? (
-                <span className="w-8 shrink-0 text-center text-2xl">{medal}</span>
+                <span className="w-8 shrink-0 text-center text-2xl">
+                    {medal}
+                </span>
             ) : (
                 <span className="w-8 shrink-0 text-center text-sm font-semibold text-muted-foreground">
                     {player.rank}
@@ -162,10 +173,17 @@ function PlayerCard({ player }: { player: PlayerData }) {
 
             {/* Points */}
             <div className="shrink-0 text-right">
-                <span className={cn('font-display font-bold text-foreground', textSize)}>
+                <span
+                    className={cn(
+                        'font-display font-bold text-foreground',
+                        textSize,
+                    )}
+                >
                     {player.points}
                 </span>
-                {isPodium && <p className="text-xs text-muted-foreground">pts</p>}
+                {isPodium && (
+                    <p className="text-xs text-muted-foreground">pts</p>
+                )}
             </div>
         </div>
     );

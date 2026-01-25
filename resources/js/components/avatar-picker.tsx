@@ -12,7 +12,9 @@ const AVAILABLE_AVATARS = [
 
 export type AvatarName = (typeof AVAILABLE_AVATARS)[number] | '';
 
-export function getAvatarUrl(avatar: string | null | undefined): string | undefined {
+export function getAvatarUrl(
+    avatar: string | null | undefined,
+): string | undefined {
     if (!avatar) return undefined;
     if (avatar.startsWith('http')) return avatar;
     return `/images/faces/${avatar}.png`;
@@ -24,12 +26,18 @@ export function getAvatarForName(name: string): AvatarName {
     return avatar ?? '';
 }
 
-export function getPortraitUrl(avatarUrl: string | null | undefined): string | undefined {
+export function getPortraitUrl(
+    avatarUrl: string | null | undefined,
+): string | undefined {
     if (!avatarUrl) return undefined;
     const match = avatarUrl.match(/\/images\/faces\/([^/.]+)\.png$/);
     if (!match) return undefined;
     const avatarName = match[1];
-    if (!AVAILABLE_AVATARS.includes(avatarName as (typeof AVAILABLE_AVATARS)[number])) {
+    if (
+        !AVAILABLE_AVATARS.includes(
+            avatarName as (typeof AVAILABLE_AVATARS)[number],
+        )
+    ) {
         return undefined;
     }
     return `/images/portraits/${avatarName}.png`;

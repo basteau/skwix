@@ -15,11 +15,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 import { getInitials } from '@/hooks/use-initials';
+import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface WordValidation {
     valid: boolean;
@@ -47,7 +47,9 @@ export default function CreateGame({ sampleWords }: Props) {
     const [wordleWords, setWordleWords] = useState<string[]>(
         sampleWords.slice(0, 6).map((w) => w.toLowerCase()),
     );
-    const [wordValidations, setWordValidations] = useState<Record<number, WordValidation>>({});
+    const [wordValidations, setWordValidations] = useState<
+        Record<number, WordValidation>
+    >({});
     const validationTimers = useRef<Record<number, NodeJS.Timeout>>({});
     const [players, setPlayers] = useState<PlayerRow[]>([
         { id: crypto.randomUUID(), name: '', email: '' },
@@ -90,7 +92,12 @@ export default function CreateGame({ sampleWords }: Props) {
         if (word.length !== 5) {
             setWordValidations((prev) => ({
                 ...prev,
-                [index]: { valid: false, message: 'Woord moet 5 letters zijn', suggestions: [], loading: false },
+                [index]: {
+                    valid: false,
+                    message: 'Woord moet 5 letters zijn',
+                    suggestions: [],
+                    loading: false,
+                },
             }));
             return;
         }
@@ -101,7 +108,9 @@ export default function CreateGame({ sampleWords }: Props) {
         }));
 
         try {
-            const res = await fetch(`/admin/validate-word?word=${encodeURIComponent(word)}`);
+            const res = await fetch(
+                `/admin/validate-word?word=${encodeURIComponent(word)}`,
+            );
             const data = await res.json();
             setWordValidations((prev) => ({
                 ...prev,
@@ -110,7 +119,12 @@ export default function CreateGame({ sampleWords }: Props) {
         } catch {
             setWordValidations((prev) => ({
                 ...prev,
-                [index]: { valid: false, message: 'Validatie mislukt', suggestions: [], loading: false },
+                [index]: {
+                    valid: false,
+                    message: 'Validatie mislukt',
+                    suggestions: [],
+                    loading: false,
+                },
             }));
         }
     }, []);
@@ -128,27 +142,35 @@ export default function CreateGame({ sampleWords }: Props) {
         }
     }, [durationDays]);
 
-    const updateWordleWord = useCallback((index: number, value: string) => {
-        const word = value.toLowerCase();
-        setWordleWords((prev) =>
-            prev.map((w, i) => (i === index ? word : w)),
-        );
+    const updateWordleWord = useCallback(
+        (index: number, value: string) => {
+            const word = value.toLowerCase();
+            setWordleWords((prev) =>
+                prev.map((w, i) => (i === index ? word : w)),
+            );
 
-        if (validationTimers.current[index]) {
-            clearTimeout(validationTimers.current[index]);
-        }
+            if (validationTimers.current[index]) {
+                clearTimeout(validationTimers.current[index]);
+            }
 
-        if (word.length === 5) {
-            validationTimers.current[index] = setTimeout(() => {
-                validateWord(word, index);
-            }, 300);
-        } else {
-            setWordValidations((prev) => ({
-                ...prev,
-                [index]: { valid: false, message: '', suggestions: [], loading: false },
-            }));
-        }
-    }, [validateWord]);
+            if (word.length === 5) {
+                validationTimers.current[index] = setTimeout(() => {
+                    validateWord(word, index);
+                }, 300);
+            } else {
+                setWordValidations((prev) => ({
+                    ...prev,
+                    [index]: {
+                        valid: false,
+                        message: '',
+                        suggestions: [],
+                        loading: false,
+                    },
+                }));
+            }
+        },
+        [validateWord],
+    );
 
     useEffect(() => {
         const timers = validationTimers.current;
@@ -164,7 +186,9 @@ export default function CreateGame({ sampleWords }: Props) {
         const emails = players.map((p) => p.email.toLowerCase().trim());
         const uniqueEmails = new Set(emails);
         if (emails.length !== uniqueEmails.size) {
-            setErrors({ players: 'Elke speler moet een uniek e-mailadres hebben' });
+            setErrors({
+                players: 'Elke speler moet een uniek e-mailadres hebben',
+            });
             setIsSubmitting(false);
             return;
         }
@@ -201,7 +225,11 @@ export default function CreateGame({ sampleWords }: Props) {
                     breadcrumbs={[{ label: 'Nieuw Spel' }]}
                 />
 
-                <main id="main-content" tabIndex={-1} className="pb-safe mx-auto max-w-2xl p-6 outline-none">
+                <main
+                    id="main-content"
+                    tabIndex={-1}
+                    className="pb-safe mx-auto max-w-2xl p-6 outline-none"
+                >
                     <div className="space-y-8">
                         {/* Secret Word */}
                         <section>
@@ -291,7 +319,8 @@ export default function CreateGame({ sampleWords }: Props) {
                                     .slice(0, durationDays)
                                     .map((word, i) => {
                                         const validation = wordValidations[i];
-                                        const showStatus = word.length === 5 && validation;
+                                        const showStatus =
+                                            word.length === 5 && validation;
                                         return (
                                             <div key={i}>
                                                 <label className="mb-1 block text-xs text-muted-foreground">
@@ -308,13 +337,18 @@ export default function CreateGame({ sampleWords }: Props) {
                                                         }
                                                         maxLength={5}
                                                         className={cn(
-                                                            'font-mono uppercase pr-9',
-                                                            showStatus && validation.valid && 'border-green-500 focus-visible:ring-green-500',
-                                                            showStatus && !validation.valid && !validation.loading && 'border-destructive focus-visible:ring-destructive',
+                                                            'pr-9 font-mono uppercase',
+                                                            showStatus &&
+                                                                validation.valid &&
+                                                                'border-green-500 focus-visible:ring-green-500',
+                                                            showStatus &&
+                                                                !validation.valid &&
+                                                                !validation.loading &&
+                                                                'border-destructive focus-visible:ring-destructive',
                                                         )}
                                                     />
                                                     {showStatus && (
-                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                        <div className="absolute top-1/2 right-3 -translate-y-1/2">
                                                             {validation.loading ? (
                                                                 <Loader2 className="size-4 animate-spin text-muted-foreground" />
                                                             ) : validation.valid ? (
@@ -325,24 +359,44 @@ export default function CreateGame({ sampleWords }: Props) {
                                                         </div>
                                                     )}
                                                 </div>
-                                                {showStatus && !validation.valid && !validation.loading && validation.suggestions.length > 0 && (
-                                                    <div className="mt-1.5 text-xs">
-                                                        <span className="text-muted-foreground">Suggesties: </span>
-                                                        {validation.suggestions.map((s, si) => (
-                                                            <button
-                                                                key={s}
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    updateWordleWord(i, s);
-                                                                    validateWord(s, i);
-                                                                }}
-                                                                className="font-mono uppercase text-primary hover:underline"
-                                                            >
-                                                                {s}{si < validation.suggestions.length - 1 && ', '}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                                {showStatus &&
+                                                    !validation.valid &&
+                                                    !validation.loading &&
+                                                    validation.suggestions
+                                                        .length > 0 && (
+                                                        <div className="mt-1.5 text-xs">
+                                                            <span className="text-muted-foreground">
+                                                                Suggesties:{' '}
+                                                            </span>
+                                                            {validation.suggestions.map(
+                                                                (s, si) => (
+                                                                    <button
+                                                                        key={s}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            updateWordleWord(
+                                                                                i,
+                                                                                s,
+                                                                            );
+                                                                            validateWord(
+                                                                                s,
+                                                                                i,
+                                                                            );
+                                                                        }}
+                                                                        className="font-mono text-primary uppercase hover:underline"
+                                                                    >
+                                                                        {s}
+                                                                        {si <
+                                                                            validation
+                                                                                .suggestions
+                                                                                .length -
+                                                                                1 &&
+                                                                            ', '}
+                                                                    </button>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    )}
                                             </div>
                                         );
                                     })}
@@ -395,9 +449,13 @@ export default function CreateGame({ sampleWords }: Props) {
                                             <Avatar className="size-14 shrink-0 border-2 border-border">
                                                 <AvatarImage
                                                     src={getAvatarUrl(
-                                                        getAvatarForName(player.name),
+                                                        getAvatarForName(
+                                                            player.name,
+                                                        ),
                                                     )}
-                                                    alt={player.name || 'Avatar'}
+                                                    alt={
+                                                        player.name || 'Avatar'
+                                                    }
                                                 />
                                                 <AvatarFallback className="bg-primary/10 text-primary">
                                                     {player.name

@@ -94,7 +94,7 @@ export function ResendCodeModal({ open, onOpenChange }: ResendCodeModalProps) {
 
                 {state === 'success' ? (
                     <div
-                        className="px-6 pb-6 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95"
+                        className="px-6 pb-6 text-center motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in"
                         data-testid="resend-success-message"
                     >
                         <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full bg-success/10">

@@ -170,27 +170,27 @@ export default function Welcome() {
                                 <InputOTPGroup>
                                     <InputOTPSlot
                                         index={0}
-                                        className="size-12 text-lg font-mono font-semibold"
+                                        className="size-12 font-mono text-lg font-semibold"
                                     />
                                     <InputOTPSlot
                                         index={1}
-                                        className="size-12 text-lg font-mono font-semibold"
+                                        className="size-12 font-mono text-lg font-semibold"
                                     />
                                     <InputOTPSlot
                                         index={2}
-                                        className="size-12 text-lg font-mono font-semibold"
+                                        className="size-12 font-mono text-lg font-semibold"
                                     />
                                     <InputOTPSlot
                                         index={3}
-                                        className="size-12 text-lg font-mono font-semibold"
+                                        className="size-12 font-mono text-lg font-semibold"
                                     />
                                     <InputOTPSlot
                                         index={4}
-                                        className="size-12 text-lg font-mono font-semibold"
+                                        className="size-12 font-mono text-lg font-semibold"
                                     />
                                     <InputOTPSlot
                                         index={5}
-                                        className="size-12 text-lg font-mono font-semibold"
+                                        className="size-12 font-mono text-lg font-semibold"
                                     />
                                 </InputOTPGroup>
                             </InputOTP>

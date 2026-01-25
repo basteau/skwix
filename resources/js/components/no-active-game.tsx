@@ -27,7 +27,7 @@ export function NoActiveGame({ title }: NoActiveGameProps) {
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -37,7 +37,10 @@ export function NoActiveGame({ title }: NoActiveGameProps) {
                         >
                             <Snowflake
                                 className="text-primary"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
@@ -52,7 +55,8 @@ export function NoActiveGame({ title }: NoActiveGameProps) {
                         Nog even geduld...
                     </h1>
                     <p className="mt-3 max-w-xs text-muted-foreground">
-                        Wacht tot de beheerder een spel start. De sneeuw valt al!
+                        Wacht tot de beheerder een spel start. De sneeuw valt
+                        al!
                     </p>
                 </div>
             </div>

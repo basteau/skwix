@@ -45,10 +45,7 @@ interface Props {
     players: PlayerData[];
 }
 
-const statusConfig: Record<
-    GameStatus,
-    { label: string; className: string }
-> = {
+const statusConfig: Record<GameStatus, { label: string; className: string }> = {
     draft: {
         label: 'Concept',
         className: 'bg-warning/15 text-[oklch(45%_0.15_85)] border-warning/30',
@@ -90,14 +87,17 @@ export default function AdminPlayers({ players }: Props) {
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [copiedId, setCopiedId] = useState<number | null>(null);
 
-    const handleSort = useCallback((field: SortField) => {
-        if (sortField === field) {
-            setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
-        } else {
-            setSortField(field);
-            setSortDirection('asc');
-        }
-    }, [sortField]);
+    const handleSort = useCallback(
+        (field: SortField) => {
+            if (sortField === field) {
+                setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+            } else {
+                setSortField(field);
+                setSortDirection('asc');
+            }
+        },
+        [sortField],
+    );
 
     const handleCopyCode = useCallback(async (id: number, code: string) => {
         try {
@@ -176,7 +176,7 @@ export default function AdminPlayers({ players }: Props) {
                     className="pb-safe p-6 outline-none"
                 >
                     <div className="relative mb-6">
-                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             type="search"
                             placeholder="Zoeken op naam, email, code of spel..."
@@ -207,7 +207,13 @@ export default function AdminPlayers({ players }: Props) {
                                                 className="inline-flex items-center gap-1 hover:text-foreground"
                                             >
                                                 Speler
-                                                <SortIcon field="name" sortField={sortField} sortDirection={sortDirection} />
+                                                <SortIcon
+                                                    field="name"
+                                                    sortField={sortField}
+                                                    sortDirection={
+                                                        sortDirection
+                                                    }
+                                                />
                                             </button>
                                         </th>
                                         <th className="hidden p-3 text-left font-medium text-muted-foreground md:table-cell">
@@ -219,7 +225,13 @@ export default function AdminPlayers({ players }: Props) {
                                                 className="inline-flex items-center gap-1 hover:text-foreground"
                                             >
                                                 Email
-                                                <SortIcon field="email" sortField={sortField} sortDirection={sortDirection} />
+                                                <SortIcon
+                                                    field="email"
+                                                    sortField={sortField}
+                                                    sortDirection={
+                                                        sortDirection
+                                                    }
+                                                />
                                             </button>
                                         </th>
                                         <th className="p-3 text-left font-medium text-muted-foreground">
@@ -231,7 +243,13 @@ export default function AdminPlayers({ players }: Props) {
                                                 className="inline-flex items-center gap-1 hover:text-foreground"
                                             >
                                                 Code
-                                                <SortIcon field="invite_code" sortField={sortField} sortDirection={sortDirection} />
+                                                <SortIcon
+                                                    field="invite_code"
+                                                    sortField={sortField}
+                                                    sortDirection={
+                                                        sortDirection
+                                                    }
+                                                />
                                             </button>
                                         </th>
                                         <th className="hidden p-3 text-left font-medium text-muted-foreground sm:table-cell">
@@ -243,7 +261,13 @@ export default function AdminPlayers({ players }: Props) {
                                                 className="inline-flex items-center gap-1 hover:text-foreground"
                                             >
                                                 Spel
-                                                <SortIcon field="game_id" sortField={sortField} sortDirection={sortDirection} />
+                                                <SortIcon
+                                                    field="game_id"
+                                                    sortField={sortField}
+                                                    sortDirection={
+                                                        sortDirection
+                                                    }
+                                                />
                                             </button>
                                         </th>
                                         <th className="hidden p-3 text-center font-medium text-muted-foreground lg:table-cell">
@@ -255,7 +279,13 @@ export default function AdminPlayers({ players }: Props) {
                                                 className="inline-flex items-center gap-1 hover:text-foreground"
                                             >
                                                 Status
-                                                <SortIcon field="joined_at" sortField={sortField} sortDirection={sortDirection} />
+                                                <SortIcon
+                                                    field="joined_at"
+                                                    sortField={sortField}
+                                                    sortDirection={
+                                                        sortDirection
+                                                    }
+                                                />
                                             </button>
                                         </th>
                                         <th className="p-3 text-right font-medium text-muted-foreground">
@@ -267,7 +297,13 @@ export default function AdminPlayers({ players }: Props) {
                                                 className="inline-flex items-center gap-1 hover:text-foreground"
                                             >
                                                 Punten
-                                                <SortIcon field="points" sortField={sortField} sortDirection={sortDirection} />
+                                                <SortIcon
+                                                    field="points"
+                                                    sortField={sortField}
+                                                    sortDirection={
+                                                        sortDirection
+                                                    }
+                                                />
                                             </button>
                                         </th>
                                     </tr>
@@ -339,21 +375,25 @@ export default function AdminPlayers({ players }: Props) {
                                                     href={`/admin/game/${player.game_id}`}
                                                     className="group inline-flex items-center gap-2"
                                                 >
-                                                    <span className="font-mono text-xs uppercase tracking-wider text-foreground group-hover:text-primary">
-                                                        {player.game_secret_word}
+                                                    <span className="font-mono text-xs tracking-wider text-foreground uppercase group-hover:text-primary">
+                                                        {
+                                                            player.game_secret_word
+                                                        }
                                                     </span>
                                                     <Badge
                                                         variant="outline"
                                                         className={cn(
                                                             'text-[10px]',
                                                             statusConfig[
-                                                                player.game_status
+                                                                player
+                                                                    .game_status
                                                             ].className,
                                                         )}
                                                     >
                                                         {
                                                             statusConfig[
-                                                                player.game_status
+                                                                player
+                                                                    .game_status
                                                             ].label
                                                         }
                                                     </Badge>

@@ -3,7 +3,7 @@ import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, WORDLE_INFO } from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
-import { TestModeBanner } from '@/components/test-mode-banner';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
@@ -74,7 +74,13 @@ const SNOWFLAKES = Array.from({ length: 8 }).map((_, i) => ({
     opacity: 0.08 + (i % 3) * 0.04,
 }));
 
-export default function WordlePage({ testMode, player, game, wordle, error }: Props) {
+export default function WordlePage({
+    testMode,
+    player,
+    game,
+    wordle,
+    error,
+}: Props) {
     const [currentGuess, setCurrentGuess] = useState('');
     const [guesses, setGuesses] = useState<Guess[]>(wordle?.guesses ?? []);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,7 +91,9 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
     const [showCelebration, setShowCelebration] = useState(false);
     const [displayPoints, setDisplayPoints] = useState(player?.points ?? 0);
     const [showInfoModal, setShowInfoModal] = useState(false);
-    const [wasSuccessful, setWasSuccessful] = useState<boolean | null>(wordle?.was_successful ?? null);
+    const [wasSuccessful, setWasSuccessful] = useState<boolean | null>(
+        wordle?.was_successful ?? null,
+    );
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const isCompleted = wordle?.completed ?? false;
@@ -175,12 +183,22 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     setWasSuccessful(data.correct);
                     if (data.correct) {
                         setShowCelebration(true);
-                        setMessage(`Gefeliciteerd! +${data.points_earned} punten`);
-                        animatePoints(displayPoints, displayPoints + data.points_earned);
+                        setMessage(
+                            `Gefeliciteerd! +${data.points_earned} punten`,
+                        );
+                        animatePoints(
+                            displayPoints,
+                            displayPoints + data.points_earned,
+                        );
                         setTimeout(() => setShowCelebration(false), 3000);
                     } else {
-                        setMessage(`Niet gevonden, maar goed geprobeerd! +${data.points_earned} punten`);
-                        animatePoints(displayPoints, displayPoints + data.points_earned);
+                        setMessage(
+                            `Niet gevonden, maar goed geprobeerd! +${data.points_earned} punten`,
+                        );
+                        animatePoints(
+                            displayPoints,
+                            displayPoints + data.points_earned,
+                        );
                     }
                     setTimeout(() => router.reload(), 2500);
                 }
@@ -200,7 +218,10 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
         let current = from;
         const interval = setInterval(() => {
             current += increment;
-            if ((increment > 0 && current >= to) || (increment < 0 && current <= to)) {
+            if (
+                (increment > 0 && current >= to) ||
+                (increment < 0 && current <= to)
+            ) {
                 setDisplayPoints(to);
                 clearInterval(interval);
             } else {
@@ -238,7 +259,14 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                 setCurrentGuess((prev) => prev + key);
             }
         },
-        [currentGuess, isSubmitting, isCompleted, isAvailable, submitGuess, triggerHaptic],
+        [
+            currentGuess,
+            isSubmitting,
+            isCompleted,
+            isAvailable,
+            submitGuess,
+            triggerHaptic,
+        ],
     );
 
     useEffect(() => {
@@ -275,7 +303,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -285,7 +313,10 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                         >
                             <Snowflake
                                 className="text-primary/40"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
@@ -297,7 +328,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                         {CONFETTI_DATA.map((conf, i) => (
                             <div
                                 key={i}
-                                className="absolute animate-confetti-burst"
+                                className="animate-confetti-burst absolute"
                                 style={{
                                     left: `${conf.left}%`,
                                     animationDelay: `${conf.delay}ms`,
@@ -324,22 +355,25 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     </div>
                 )}
 
-                {/* Test Mode Banner */}
-                {testMode?.active && (
-                    <TestModeBanner
-                        onReset={() => {
-                            setCurrentGuess('');
-                            setGuesses([]);
-                        }}
-                    />
-                )}
-
                 {/* Header with animated points */}
                 <PlayHeader
                     title="Wordle"
-                    subtitle={testMode?.active ? `Test Dag ${game?.day_number ?? 1}` : `Dag ${game?.day_number ?? 1}`}
+                    subtitle={
+                        testMode?.active
+                            ? `Test Dag ${game?.day_number ?? 1}`
+                            : `Dag ${game?.day_number ?? 1}`
+                    }
                     points={displayPoints}
-                    rightAction={<GameInfoButton onClick={() => setShowInfoModal(true)} />}
+                    testMode={testMode?.active}
+                    onTestReset={() => {
+                        setCurrentGuess('');
+                        setGuesses([]);
+                    }}
+                    rightAction={
+                        <GameInfoButton
+                            onClick={() => setShowInfoModal(true)}
+                        />
+                    }
                     leftContent={
                         <div className="flex items-center gap-2.5">
                             <Avatar
@@ -359,7 +393,9 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                     Wordle
                                 </span>
                                 <span className="text-xs font-medium text-muted-foreground">
-                                    {testMode?.active ? `Test Dag ${game?.day_number ?? 1}` : `Dag ${game?.day_number ?? 1}`}
+                                    {testMode?.active
+                                        ? `Test Dag ${game?.day_number ?? 1}`
+                                        : `Dag ${game?.day_number ?? 1}`}
                                 </span>
                             </div>
                         </div>
@@ -385,7 +421,9 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                 : 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary',
                         )}
                     >
-                        {showCelebration && <Sparkles className="mr-2 inline-block size-4" />}
+                        {showCelebration && (
+                            <Sparkles className="mr-2 inline-block size-4" />
+                        )}
                         {message}
                     </div>
                 )}
@@ -394,13 +432,14 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                 <div
                     data-testid="wordle-grid"
                     className={cn(
-                        "flex flex-1 flex-col items-center gap-1 px-4 py-4",
-                        isCompleted ? "justify-start pt-8" : "justify-center"
+                        'flex flex-1 flex-col items-center gap-1 px-4 py-4',
+                        isCompleted ? 'justify-start pt-8' : 'justify-center',
                     )}
                 >
                     {[...Array(6)].map((_, rowIdx) => {
                         const guess = guesses[rowIdx];
-                        const isCurrentRow = rowIdx === guesses.length && !isCompleted;
+                        const isCurrentRow =
+                            rowIdx === guesses.length && !isCompleted;
                         const isRevealing = revealingRow === rowIdx;
                         const isEmptyRow = !guess && !isCurrentRow;
 
@@ -412,7 +451,8 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                 className={cn(
                                     'flex gap-1',
                                     isCurrentRow && shakeRow && 'animate-shake',
-                                    isCurrentRow && 'rounded-lg ring-2 ring-primary/20 ring-offset-2 ring-offset-background',
+                                    isCurrentRow &&
+                                        'rounded-lg ring-2 ring-primary/20 ring-offset-2 ring-offset-background',
                                 )}
                             >
                                 {[...Array(5)].map((_, colIdx) => {
@@ -425,21 +465,31 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                         | 'absent' = 'empty';
 
                                     if (guess) {
-                                        letter = guess.result[colIdx]?.letter ?? '';
-                                        status = guess.result[colIdx]?.status ?? 'absent';
+                                        letter =
+                                            guess.result[colIdx]?.letter ?? '';
+                                        status =
+                                            guess.result[colIdx]?.status ??
+                                            'absent';
                                     } else if (isCurrentRow) {
                                         letter = currentGuess[colIdx] ?? '';
                                         status = letter ? 'filled' : 'empty';
                                     }
 
-                                    const shouldPop = isCurrentRow && popTile === colIdx && !!letter;
+                                    const shouldPop =
+                                        isCurrentRow &&
+                                        popTile === colIdx &&
+                                        !!letter;
 
                                     return (
                                         <Tile
                                             key={colIdx}
                                             letter={letter}
                                             status={status}
-                                            delay={isRevealing ? colIdx * 150 : undefined}
+                                            delay={
+                                                isRevealing
+                                                    ? colIdx * 150
+                                                    : undefined
+                                            }
                                             pop={shouldPop}
                                             testId={`wordle-tile-r${rowIdx}-c${colIdx}`}
                                         />
@@ -451,14 +501,16 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
 
                     {/* Completion state - different UI for success vs failure */}
                     {isCompleted && wasSuccessful && (
-                        <div className="mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
+                        <div className="mt-8 text-center motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in motion-safe:slide-in-from-bottom-4">
                             <div className="inline-flex flex-col items-center gap-3">
                                 <div className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-br from-success/20 via-success/10 to-success/5 px-8 py-4 shadow-lg shadow-success/10">
                                     <Sparkles className="size-6 text-success motion-safe:animate-pulse" />
                                     <span className="font-display text-3xl font-bold text-success">
                                         +{wordle?.points_earned}
                                     </span>
-                                    <span className="text-lg font-medium text-success/80">punten</span>
+                                    <span className="text-lg font-medium text-success/80">
+                                        punten
+                                    </span>
                                 </div>
                                 <p className="text-base text-muted-foreground">
                                     Morgen weer een nieuwe 🎯
@@ -471,7 +523,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     {isCompleted && wasSuccessful === false && (
                         <div
                             data-testid="wordle-failed-state"
-                            className="mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500"
+                            className="mt-8 text-center motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
                         >
                             <div className="inline-flex flex-col items-center gap-3">
                                 <div className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-amber-500/5 px-8 py-4 shadow-lg shadow-amber-500/10">
@@ -479,12 +531,14 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                     <span className="font-display text-3xl font-bold text-amber-500">
                                         +{wordle?.points_earned}
                                     </span>
-                                    <span className="text-lg font-medium text-amber-500/80">punten</span>
+                                    <span className="text-lg font-medium text-amber-500/80">
+                                        punten
+                                    </span>
                                 </div>
                                 {wordle?.target_word && (
                                     <p className="text-sm text-muted-foreground">
                                         Het woord was:{' '}
-                                        <span className="font-semibold uppercase text-foreground">
+                                        <span className="font-semibold text-foreground uppercase">
                                             {wordle.target_word}
                                         </span>
                                     </p>
@@ -514,7 +568,10 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     <div className="border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 px-1.5 pt-3 pb-[calc(var(--safe-bottom)+0.75rem)]">
                         <div className="flex flex-col gap-1.5">
                             {KEYBOARD_ROWS.map((row, rowIdx) => (
-                                <div key={rowIdx} className="flex justify-center gap-1">
+                                <div
+                                    key={rowIdx}
+                                    className="flex justify-center gap-1"
+                                >
                                     {row.map((key) => (
                                         <KeyboardKey
                                             key={key}
@@ -559,22 +616,31 @@ function Tile({
             'border-2 border-primary/40 bg-card text-foreground shadow-sm',
             pop && 'animate-tile-pop',
         ),
-        correct: 'border-0 bg-wordle-correct text-white shadow-md shadow-wordle-correct/30',
-        present: 'border-0 bg-wordle-present text-white shadow-md shadow-wordle-present/30',
+        correct:
+            'border-0 bg-wordle-correct text-white shadow-md shadow-wordle-correct/30',
+        present:
+            'border-0 bg-wordle-present text-white shadow-md shadow-wordle-present/30',
         absent: 'border-0 bg-wordle-absent text-white/90',
     };
 
-    const style = delay !== undefined ? { animationDelay: `${delay}ms` } : undefined;
+    const style =
+        delay !== undefined ? { animationDelay: `${delay}ms` } : undefined;
 
     return (
         <div
             data-testid={testId}
-            className={cn(baseClasses, statusClasses[status], delay !== undefined && 'animate-flip-3d')}
+            className={cn(
+                baseClasses,
+                statusClasses[status],
+                delay !== undefined && 'animate-flip-3d',
+            )}
             style={style}
         >
             <span
                 className={cn(
-                    status !== 'empty' && status !== 'filled' && 'drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]',
+                    status !== 'empty' &&
+                        status !== 'filled' &&
+                        'drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]',
                 )}
             >
                 {letter}
@@ -599,10 +665,13 @@ function KeyboardKey({
     const isAction = keyVal === 'enter' || keyVal === 'backspace';
 
     const stateClasses = {
-        correct: 'bg-wordle-correct text-white shadow-sm shadow-wordle-correct/20',
-        present: 'bg-wordle-present text-white shadow-sm shadow-wordle-present/20',
+        correct:
+            'bg-wordle-correct text-white shadow-sm shadow-wordle-correct/20',
+        present:
+            'bg-wordle-present text-white shadow-sm shadow-wordle-present/20',
         absent: 'bg-wordle-absent text-white/90',
-        default: 'bg-card text-foreground hover:bg-muted border border-border/50',
+        default:
+            'bg-card text-foreground hover:bg-muted border border-border/50',
     };
 
     const baseClasses = cn(
@@ -620,8 +689,8 @@ function KeyboardKey({
                 disabled={disabled}
                 className={cn(
                     baseClasses,
-                    'min-w-[56px] h-12 rounded-md px-2 text-xs',
-                    'bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover',
+                    'h-12 min-w-[56px] rounded-md px-2 text-xs',
+                    'hover:bg-primary-hover bg-primary text-primary-foreground shadow-sm',
                 )}
             >
                 {keyVal === 'backspace' ? '⌫' : '↵'}
@@ -637,7 +706,7 @@ function KeyboardKey({
             disabled={disabled}
             className={cn(
                 baseClasses,
-                'min-w-[32px] h-12 rounded-md text-sm',
+                'h-12 min-w-[32px] rounded-md text-sm',
                 stateClasses[state ?? 'default'],
             )}
         >

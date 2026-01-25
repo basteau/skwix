@@ -3,13 +3,22 @@ import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, GUESS_INFO } from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
-import { TestModeBanner } from '@/components/test-mode-banner';
+
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { Check, Crown, Search, Snowflake, Sparkles, Star, Trophy, X } from 'lucide-react';
+import {
+    Check,
+    Crown,
+    Search,
+    Snowflake,
+    Sparkles,
+    Star,
+    Trophy,
+    X,
+} from 'lucide-react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import QRCode from 'react-qr-code';
 
@@ -92,7 +101,8 @@ export default function GuessPage({
     error,
     testMode,
 }: Props) {
-    const [questions, setQuestions] = useState<QuestionItem[]>(initialQuestions);
+    const [questions, setQuestions] =
+        useState<QuestionItem[]>(initialQuestions);
     const [input, setInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [points, setPoints] = useState(player?.points ?? 0);
@@ -113,15 +123,21 @@ export default function GuessPage({
         secretWord: string;
         prizeUrl: string;
     } | null>(null);
-    const [victoryPhase, setVictoryPhase] = useState<'reveal' | 'celebrate' | 'prize'>('reveal');
+    const [victoryPhase, setVictoryPhase] = useState<
+        'reveal' | 'celebrate' | 'prize'
+    >('reveal');
     const [showInfoModal, setShowInfoModal] = useState(false);
 
     const canAsk = points >= QUESTION_COST && input.trim().length >= 3;
 
     // Cleanup victory timer on unmount
-    useEffect(() => () => {
-        if (victoryTimerRef.current) window.clearTimeout(victoryTimerRef.current);
-    }, []);
+    useEffect(
+        () => () => {
+            if (victoryTimerRef.current)
+                window.clearTimeout(victoryTimerRef.current);
+        },
+        [],
+    );
 
     useEffect(() => {
         if (listRef.current) {
@@ -219,32 +235,42 @@ export default function GuessPage({
                     insufficient_points: 'Niet genoeg punten',
                     game_not_active: 'Spel is niet actief',
                     ai_error: (data?.message as string) || 'Er ging iets mis',
-                    multi_guess: (data?.message as string) || 'Raad één woord tegelijk',
+                    multi_guess:
+                        (data?.message as string) || 'Raad één woord tegelijk',
                 };
                 setMessage({
                     type: 'error',
-                    text: errorMessages[(data?.error as string) || ''] || 'Er ging iets mis',
+                    text:
+                        errorMessages[(data?.error as string) || ''] ||
+                        'Er ging iets mis',
                 });
                 setInput(questionText);
                 return;
             }
 
             if (!data) {
-                setMessage({ type: 'error', text: 'Ongeldig antwoord ontvangen' });
+                setMessage({
+                    type: 'error',
+                    text: 'Ongeldig antwoord ontvangen',
+                });
                 setInput(questionText);
                 return;
             }
 
             // Check if this is a winning response
             if (data.winner === true) {
-                setQuestions((prev) => [...prev, data.question as QuestionItem]);
+                setQuestions((prev) => [
+                    ...prev,
+                    data.question as QuestionItem,
+                ]);
                 setPoints(data.points_remaining as number);
 
                 // Trigger victory celebration with cleanup-safe timer
                 victoryTimerRef.current = window.setTimeout(() => {
                     setVictoryData({
                         winner: data.winner_data as WinnerData,
-                        secretWord: (data.game as { secret_word: string }).secret_word,
+                        secretWord: (data.game as { secret_word: string })
+                            .secret_word,
                         prizeUrl: data.prize_url as string,
                     });
                     setShowVictory(true);
@@ -260,7 +286,10 @@ export default function GuessPage({
 
             // Wrong guess feedback
             if (data.wrong_guess) {
-                setQuestions((prev) => [...prev, data.question as QuestionItem]);
+                setQuestions((prev) => [
+                    ...prev,
+                    data.question as QuestionItem,
+                ]);
                 setPoints(data.points_remaining as number);
                 setMessage({
                     type: 'error',
@@ -316,14 +345,12 @@ export default function GuessPage({
         <PlayLayout>
             <Head title="Vraag" />
             <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
-                {testMode?.active && <TestModeBanner />}
-
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -333,7 +360,10 @@ export default function GuessPage({
                         >
                             <Snowflake
                                 className="text-primary/40"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
@@ -343,7 +373,12 @@ export default function GuessPage({
                     title="Mystery Woord"
                     points={points}
                     testId="guess-points-display"
-                    rightAction={<GameInfoButton onClick={() => setShowInfoModal(true)} />}
+                    testMode={testMode?.active}
+                    rightAction={
+                        <GameInfoButton
+                            onClick={() => setShowInfoModal(true)}
+                        />
+                    }
                 />
 
                 {/* Game info modal */}
@@ -357,9 +392,15 @@ export default function GuessPage({
                 {game?.secret_word_length && (
                     <div className="mx-4 mt-2 flex justify-center">
                         <div className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1">
-                            <span className="text-xs text-muted-foreground">Het woord heeft</span>
-                            <span className="font-mono text-xs font-semibold text-foreground">{game.secret_word_length}</span>
-                            <span className="text-xs text-muted-foreground">letters</span>
+                            <span className="text-xs text-muted-foreground">
+                                Het woord heeft
+                            </span>
+                            <span className="font-mono text-xs font-semibold text-foreground">
+                                {game.secret_word_length}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                letters
+                            </span>
                         </div>
                     </div>
                 )}
@@ -401,8 +442,13 @@ export default function GuessPage({
                                         key={q.id}
                                         question={q}
                                         isOwn={q.player.id === player?.id}
-                                        isNew={idx === questions.length - 1 && !pendingQuestion}
-                                        playerColorIdx={q.player.id % PLAYER_COLORS.length}
+                                        isNew={
+                                            idx === questions.length - 1 &&
+                                            !pendingQuestion
+                                        }
+                                        playerColorIdx={
+                                            q.player.id % PLAYER_COLORS.length
+                                        }
                                     />
                                 ))}
                                 {pendingQuestion && player && (
@@ -425,7 +471,8 @@ export default function GuessPage({
                     <div className="mb-3 flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
                             <Sparkles className="size-3.5" />
-                            {questionsRemaining} {questionsRemaining === 1 ? 'vraag' : 'vragen'} over
+                            {questionsRemaining}{' '}
+                            {questionsRemaining === 1 ? 'vraag' : 'vragen'} over
                         </span>
                         <span className="font-medium text-primary">
                             {QUESTION_COST} punten per vraag
@@ -442,9 +489,11 @@ export default function GuessPage({
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Stel een vraag of raad: 'Is het woord...'"
-                                disabled={isSubmitting || points < QUESTION_COST}
+                                disabled={
+                                    isSubmitting || points < QUESTION_COST
+                                }
                                 className={cn(
-                                    'h-12 w-full rounded-xl border-2 border-border/60 bg-card pl-4 pr-12 text-base',
+                                    'h-12 w-full rounded-xl border-2 border-border/60 bg-card pr-12 pl-4 text-base',
                                     'transition-all duration-200 outline-none',
                                     'placeholder:text-muted-foreground/70',
                                     'focus:border-primary/50 focus:ring-4 focus:ring-primary/10',
@@ -463,17 +512,14 @@ export default function GuessPage({
                                 canAsk && 'shadow-lg shadow-primary/25',
                             )}
                         >
-                            {isSubmitting ? (
-                                <ThinkingDots />
-                            ) : (
-                                'Vraag'
-                            )}
+                            {isSubmitting ? <ThinkingDots /> : 'Vraag'}
                         </Button>
                     </div>
 
                     {points < QUESTION_COST && (
                         <p className="mt-3 text-center text-xs text-muted-foreground">
-                            Je hebt {QUESTION_COST} punten nodig om een vraag te stellen
+                            Je hebt {QUESTION_COST} punten nodig om een vraag te
+                            stellen
                         </p>
                     )}
                 </div>
@@ -546,7 +592,9 @@ function VictoryCelebration({
             >
                 {/* Screen reader announcement */}
                 <div className="sr-only" aria-live="assertive">
-                    {isOwnVictory ? 'Je hebt gewonnen!' : `${winner.name} heeft gewonnen!`}
+                    {isOwnVictory
+                        ? 'Je hebt gewonnen!'
+                        : `${winner.name} heeft gewonnen!`}
                 </div>
 
                 {/* Confetti - only in celebrate phase, hidden for reduced motion */}
@@ -559,7 +607,8 @@ function VictoryCelebration({
                         phase === 'reveal' ? 'opacity-0' : 'opacity-100',
                     )}
                     style={{
-                        background: 'radial-gradient(ellipse at center, oklch(80% 0.15 80 / 0.15) 0%, transparent 60%)',
+                        background:
+                            'radial-gradient(ellipse at center, oklch(80% 0.15 80 / 0.15) 0%, transparent 60%)',
                     }}
                 />
 
@@ -569,7 +618,9 @@ function VictoryCelebration({
                     <div
                         className={cn(
                             'transition-all duration-700',
-                            phase === 'reveal' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 absolute',
+                            phase === 'reveal'
+                                ? 'scale-100 opacity-100'
+                                : 'absolute scale-95 opacity-0',
                         )}
                     >
                         <p className="mb-4 text-sm font-medium tracking-widest text-muted-foreground uppercase">
@@ -597,7 +648,7 @@ function VictoryCelebration({
 
                     {/* Phase 2 & 3: Celebration */}
                     {phase !== 'reveal' && (
-                        <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-700">
+                        <div className="motion-safe:animate-in motion-safe:duration-700 motion-safe:zoom-in-95 motion-safe:fade-in">
                             {/* Trophy / Crown */}
                             <div className="relative mb-4 flex justify-center">
                                 <div className="relative">
@@ -609,12 +660,18 @@ function VictoryCelebration({
                                         )}
                                     </div>
                                     <Star className="absolute -top-1 -right-1 size-6 fill-amber-300 text-amber-300 motion-safe:animate-pulse" />
-                                    <Star className="absolute -bottom-1 -left-2 size-4 fill-amber-200 text-amber-200 motion-safe:animate-pulse" style={{ animationDelay: '0.5s' }} />
+                                    <Star
+                                        className="absolute -bottom-1 -left-2 size-4 fill-amber-200 text-amber-200 motion-safe:animate-pulse"
+                                        style={{ animationDelay: '0.5s' }}
+                                    />
                                 </div>
                             </div>
 
                             {/* Title */}
-                            <h1 id="victory-title" className="font-display text-4xl font-bold tracking-tight text-foreground">
+                            <h1
+                                id="victory-title"
+                                className="font-display text-4xl font-bold tracking-tight text-foreground"
+                            >
                                 {isOwnVictory ? 'Gewonnen!' : 'Spel Afgelopen'}
                             </h1>
 
@@ -649,7 +706,9 @@ function VictoryCelebration({
                                     {winner.name}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {isOwnVictory ? 'heeft het mysterie opgelost!' : 'heeft gewonnen'}
+                                    {isOwnVictory
+                                        ? 'heeft het mysterie opgelost!'
+                                        : 'heeft gewonnen'}
                                 </p>
 
                                 {/* Points badge */}
@@ -666,7 +725,7 @@ function VictoryCelebration({
                                 <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
                                     Het woord was
                                 </p>
-                                <p className="mt-1 font-display text-lg font-bold uppercase tracking-wider text-primary">
+                                <p className="mt-1 font-display text-lg font-bold tracking-wider text-primary uppercase">
                                     {secretWord}
                                 </p>
                             </div>
@@ -676,7 +735,7 @@ function VictoryCelebration({
                                 <div
                                     role="group"
                                     aria-label="Prijs QR-code"
-                                    className="mt-6 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500"
+                                    className="mt-6 motion-safe:animate-in motion-safe:duration-500 motion-safe:zoom-in-95 motion-safe:fade-in"
                                 >
                                     <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-white p-1 shadow-lg">
                                         <div className="flex items-center justify-center gap-2 rounded-t-xl bg-gradient-to-r from-primary via-primary to-primary/90 py-2">
@@ -687,7 +746,10 @@ function VictoryCelebration({
                                             <Star className="size-4 text-primary-foreground" />
                                         </div>
                                         <div className="bg-white p-3">
-                                            <QRCode value={prizeUrl} size={120} />
+                                            <QRCode
+                                                value={prizeUrl}
+                                                size={120}
+                                            />
                                         </div>
                                     </div>
                                     <p className="mt-2 text-xs text-muted-foreground">
@@ -703,7 +765,9 @@ function VictoryCelebration({
                                 size="lg"
                                 className="mt-8 w-full max-w-xs shadow-lg"
                             >
-                                {isOwnVictory ? 'Bekijk je prijs' : 'Bekijk resultaten'}
+                                {isOwnVictory
+                                    ? 'Bekijk je prijs'
+                                    : 'Bekijk resultaten'}
                             </Button>
                         </div>
                     )}
@@ -715,11 +779,11 @@ function VictoryCelebration({
 
 const Confetti = memo(function Confetti() {
     const colors = [
-        'oklch(80% 0.15 85)',   // Gold
-        'oklch(85% 0.05 250)',  // Silver
-        'oklch(70% 0.12 230)',  // Ice blue
-        'oklch(75% 0.10 80)',   // Warm gold
-        'oklch(90% 0.08 220)',  // Light ice
+        'oklch(80% 0.15 85)', // Gold
+        'oklch(85% 0.05 250)', // Silver
+        'oklch(70% 0.12 230)', // Ice blue
+        'oklch(75% 0.10 80)', // Warm gold
+        'oklch(90% 0.08 220)', // Light ice
     ];
 
     return (
@@ -727,7 +791,7 @@ const Confetti = memo(function Confetti() {
             {CONFETTI_DATA.map((piece) => (
                 <div
                     key={piece.id}
-                    className="absolute animate-confetti-burst"
+                    className="animate-confetti-burst absolute"
                     style={{
                         left: `${piece.x}%`,
                         animationDelay: `${piece.delay}s`,
@@ -780,16 +844,29 @@ function EmptyState({
 
             {/* Example hints - clickable to auto-fill input */}
             <div className="mt-6 space-y-2">
-                <ExampleHint emoji="🐾" text="Is het een dier?" onClick={() => onSelectHint?.('Is het een dier?')} />
-                <ExampleHint emoji="🎯" text="Is het woord 'winter'?" onClick={() => onSelectHint?.("Is het woord 'winter'?")} />
-                <ExampleHint emoji="❄️" text="Is het koud?" onClick={() => onSelectHint?.('Is het koud?')} />
+                <ExampleHint
+                    emoji="🐾"
+                    text="Is het een dier?"
+                    onClick={() => onSelectHint?.('Is het een dier?')}
+                />
+                <ExampleHint
+                    emoji="🎯"
+                    text="Is het woord 'winter'?"
+                    onClick={() => onSelectHint?.("Is het woord 'winter'?")}
+                />
+                <ExampleHint
+                    emoji="❄️"
+                    text="Is het koud?"
+                    onClick={() => onSelectHint?.('Is het koud?')}
+                />
             </div>
 
             {questionsRemaining > 0 && (
                 <div className="mt-8 flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2">
                     <Sparkles className="size-4 text-primary" />
                     <span className="text-sm font-medium text-primary">
-                        Je kunt {questionsRemaining} {questionsRemaining === 1 ? 'vraag' : 'vragen'} stellen
+                        Je kunt {questionsRemaining}{' '}
+                        {questionsRemaining === 1 ? 'vraag' : 'vragen'} stellen
                     </span>
                 </div>
             )}
@@ -818,7 +895,9 @@ function ExampleHint({
             )}
         >
             <span className="text-lg">{emoji}</span>
-            <span className="text-sm text-muted-foreground italic">"{text}"</span>
+            <span className="text-sm text-muted-foreground italic">
+                "{text}"
+            </span>
         </button>
     );
 }
@@ -865,7 +944,10 @@ function PendingBubble({
             {/* Thinking indicator */}
             <div className="mt-3 flex items-center gap-2 pl-2">
                 <div className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-muted to-muted/60">
-                    <Snowflake className="size-4 animate-spin text-primary/60" style={{ animationDuration: '3s' }} />
+                    <Snowflake
+                        className="size-4 animate-spin text-primary/60"
+                        style={{ animationDuration: '3s' }}
+                    />
                 </div>
                 <div className="rounded-2xl rounded-bl-sm bg-muted/80 px-4 py-2.5 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1.5">
@@ -899,7 +981,8 @@ function QuestionBubble({
         <div
             data-testid={`guess-item-${question.id}`}
             className={cn(
-                isNew && 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300',
+                isNew &&
+                    'motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
             )}
         >
             {isOwn ? (
@@ -960,7 +1043,7 @@ function QuestionBubble({
                 <div
                     className={cn(
                         'inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm px-4 py-2 text-sm font-semibold shadow-sm',
-                        'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95',
+                        'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in',
                         isWinner
                             ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600 dark:text-amber-400'
                             : isYes

@@ -50,7 +50,8 @@ export function BottomTabNav() {
                     const isActive = tab.href
                         ? url.startsWith(tab.href)
                         : false;
-                    const isLoading = tab.href && navigatingTo?.startsWith(tab.href);
+                    const isLoading =
+                        tab.href && navigatingTo?.startsWith(tab.href);
                     const Icon = tab.icon;
 
                     const baseClasses = cn(

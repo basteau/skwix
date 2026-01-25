@@ -55,9 +55,12 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
     useEffect(() => {
         const word = game.secret_word;
         if (revealedLetters < word.length) {
-            const timer = setTimeout(() => {
-                setRevealedLetters((prev) => prev + 1);
-            }, 600 + revealedLetters * 120);
+            const timer = setTimeout(
+                () => {
+                    setRevealedLetters((prev) => prev + 1);
+                },
+                600 + revealedLetters * 120,
+            );
             return () => clearTimeout(timer);
         }
     }, [revealedLetters, game.secret_word]);
@@ -77,7 +80,7 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -87,7 +90,10 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                         >
                             <Snowflake
                                 className="text-primary"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
@@ -99,15 +105,48 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     <div className="relative mb-2 motion-safe:animate-in motion-safe:duration-700 motion-safe:zoom-in">
                         <svg viewBox="0 0 80 80" className="size-20">
                             <defs>
-                                <linearGradient id="trophy-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="oklch(85% 0.15 85)" />
-                                    <stop offset="50%" stopColor="oklch(75% 0.18 80)" />
-                                    <stop offset="100%" stopColor="oklch(65% 0.15 75)" />
+                                <linearGradient
+                                    id="trophy-gradient"
+                                    x1="0%"
+                                    y1="0%"
+                                    x2="100%"
+                                    y2="100%"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stopColor="oklch(85% 0.15 85)"
+                                    />
+                                    <stop
+                                        offset="50%"
+                                        stopColor="oklch(75% 0.18 80)"
+                                    />
+                                    <stop
+                                        offset="100%"
+                                        stopColor="oklch(65% 0.15 75)"
+                                    />
                                 </linearGradient>
-                                <linearGradient id="trophy-shine" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="white" stopOpacity="0" />
-                                    <stop offset="50%" stopColor="white" stopOpacity="0.4" />
-                                    <stop offset="100%" stopColor="white" stopOpacity="0" />
+                                <linearGradient
+                                    id="trophy-shine"
+                                    x1="0%"
+                                    y1="0%"
+                                    x2="100%"
+                                    y2="0%"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stopColor="white"
+                                        stopOpacity="0"
+                                    />
+                                    <stop
+                                        offset="50%"
+                                        stopColor="white"
+                                        stopOpacity="0.4"
+                                    />
+                                    <stop
+                                        offset="100%"
+                                        stopColor="white"
+                                        stopOpacity="0"
+                                    />
                                 </linearGradient>
                             </defs>
                             {/* Cup */}
@@ -148,8 +187,15 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                             />
                         </svg>
                         {/* Sparkles */}
-                        <div className="absolute -top-1 -right-1 text-amber-400 motion-safe:animate-pulse">✦</div>
-                        <div className="absolute -bottom-0 -left-2 text-amber-300 motion-safe:animate-pulse" style={{ animationDelay: '0.3s' }}>✧</div>
+                        <div className="absolute -top-1 -right-1 text-amber-400 motion-safe:animate-pulse">
+                            ✦
+                        </div>
+                        <div
+                            className="absolute -bottom-0 -left-2 text-amber-300 motion-safe:animate-pulse"
+                            style={{ animationDelay: '0.3s' }}
+                        >
+                            ✧
+                        </div>
                     </div>
 
                     {/* Title */}
@@ -166,7 +212,8 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                         <div
                             className="absolute -inset-4 motion-safe:animate-pulse"
                             style={{
-                                background: 'radial-gradient(circle, oklch(75% 0.18 80 / 0.4) 0%, transparent 70%)',
+                                background:
+                                    'radial-gradient(circle, oklch(75% 0.18 80 / 0.4) 0%, transparent 70%)',
                             }}
                         />
                         {portraitUrl ? (
@@ -196,9 +243,24 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                                     stroke="oklch(70% 0.15 75)"
                                     strokeWidth="1"
                                 />
-                                <circle cx="6" cy="8" r="2" fill="oklch(85% 0.12 80)" />
-                                <circle cx="16" cy="4" r="2.5" fill="oklch(90% 0.15 80)" />
-                                <circle cx="26" cy="8" r="2" fill="oklch(85% 0.12 80)" />
+                                <circle
+                                    cx="6"
+                                    cy="8"
+                                    r="2"
+                                    fill="oklch(85% 0.12 80)"
+                                />
+                                <circle
+                                    cx="16"
+                                    cy="4"
+                                    r="2.5"
+                                    fill="oklch(90% 0.15 80)"
+                                />
+                                <circle
+                                    cx="26"
+                                    cy="8"
+                                    r="2"
+                                    fill="oklch(85% 0.12 80)"
+                                />
                             </svg>
                         </div>
                     </div>
@@ -241,9 +303,22 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
 
                     {/* Points badge */}
                     <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400/20 via-amber-500/20 to-amber-400/20 px-5 py-2 motion-safe:animate-in motion-safe:delay-400 motion-safe:duration-700 motion-safe:fade-in">
-                        <svg viewBox="0 0 20 20" className="size-5 text-amber-500" fill="currentColor">
+                        <svg
+                            viewBox="0 0 20 20"
+                            className="size-5 text-amber-500"
+                            fill="currentColor"
+                        >
                             <circle cx="10" cy="10" r="8" />
-                            <text x="10" y="14" textAnchor="middle" fontSize="10" fill="white" fontWeight="bold">★</text>
+                            <text
+                                x="10"
+                                y="14"
+                                textAnchor="middle"
+                                fontSize="10"
+                                fill="white"
+                                fontWeight="bold"
+                            >
+                                ★
+                            </text>
                         </svg>
                         <span className="font-display text-lg font-bold text-foreground">
                             {winner.points} punten
@@ -253,18 +328,26 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                     {/* QR Code Prize */}
                     <div
                         data-testid="prize-qr-code"
-                        className="mt-8 w-full motion-safe:animate-in motion-safe:delay-500 motion-safe:duration-700 motion-safe:fade-in motion-safe:zoom-in-95"
+                        className="mt-8 w-full motion-safe:animate-in motion-safe:delay-500 motion-safe:duration-700 motion-safe:zoom-in-95 motion-safe:fade-in"
                     >
                         <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-white p-1 shadow-lg">
                             {/* Ribbon header */}
                             <div className="flex items-center justify-center gap-2 rounded-t-xl bg-gradient-to-r from-primary via-primary to-primary/90 py-2.5">
-                                <svg viewBox="0 0 20 20" className="size-4 text-primary-foreground" fill="currentColor">
+                                <svg
+                                    viewBox="0 0 20 20"
+                                    className="size-4 text-primary-foreground"
+                                    fill="currentColor"
+                                >
                                     <path d="M10 2L12 8H18L13 12L15 18L10 14L5 18L7 12L2 8H8L10 2Z" />
                                 </svg>
                                 <span className="text-sm font-bold tracking-wide text-primary-foreground uppercase">
                                     Jouw Prijs
                                 </span>
-                                <svg viewBox="0 0 20 20" className="size-4 text-primary-foreground" fill="currentColor">
+                                <svg
+                                    viewBox="0 0 20 20"
+                                    className="size-4 text-primary-foreground"
+                                    fill="currentColor"
+                                >
                                     <path d="M10 2L12 8H18L13 12L15 18L10 14L5 18L7 12L2 8H8L10 2Z" />
                                 </svg>
                             </div>
@@ -287,11 +370,11 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
 
 function Confetti() {
     const colors = [
-        'oklch(80% 0.15 85)',   // Gold
-        'oklch(85% 0.05 250)',  // Silver
-        'oklch(70% 0.12 230)',  // Ice blue
-        'oklch(75% 0.10 80)',   // Warm gold
-        'oklch(90% 0.08 220)',  // Light ice
+        'oklch(80% 0.15 85)', // Gold
+        'oklch(85% 0.05 250)', // Silver
+        'oklch(70% 0.12 230)', // Ice blue
+        'oklch(75% 0.10 80)', // Warm gold
+        'oklch(90% 0.08 220)', // Light ice
     ];
 
     return (
@@ -299,7 +382,7 @@ function Confetti() {
             {CONFETTI_DATA.map((piece) => (
                 <div
                     key={piece.id}
-                    className="absolute animate-confetti-burst"
+                    className="animate-confetti-burst absolute"
                     style={{
                         left: `${piece.x}%`,
                         animationDelay: `${piece.delay}s`,

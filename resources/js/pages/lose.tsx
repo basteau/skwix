@@ -52,9 +52,12 @@ export default function LosePage({ winner, player, game }: Props) {
     useEffect(() => {
         const word = game.secret_word;
         if (revealedLetters < word.length) {
-            const timer = setTimeout(() => {
-                setRevealedLetters((prev) => prev + 1);
-            }, 400 + revealedLetters * 100);
+            const timer = setTimeout(
+                () => {
+                    setRevealedLetters((prev) => prev + 1);
+                },
+                400 + revealedLetters * 100,
+            );
             return () => clearTimeout(timer);
         }
     }, [revealedLetters, game.secret_word]);
@@ -68,7 +71,7 @@ export default function LosePage({ winner, player, game }: Props) {
                     {SNOWFLAKES.map((flake, i) => (
                         <div
                             key={i}
-                            className="absolute animate-snow-fall"
+                            className="animate-snow-fall absolute"
                             style={{
                                 left: `${flake.left}%`,
                                 animationDelay: `${flake.delay}ms`,
@@ -78,7 +81,10 @@ export default function LosePage({ winner, player, game }: Props) {
                         >
                             <Snowflake
                                 className="text-muted-foreground"
-                                style={{ width: flake.size, height: flake.size }}
+                                style={{
+                                    width: flake.size,
+                                    height: flake.size,
+                                }}
                             />
                         </div>
                     ))}
@@ -90,13 +96,37 @@ export default function LosePage({ winner, player, game }: Props) {
                     <div className="relative mb-4 motion-safe:animate-in motion-safe:duration-700 motion-safe:zoom-in">
                         <svg viewBox="0 0 64 80" className="size-16">
                             <defs>
-                                <linearGradient id="medal-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="oklch(75% 0.08 230)" />
-                                    <stop offset="100%" stopColor="oklch(60% 0.10 235)" />
+                                <linearGradient
+                                    id="medal-gradient"
+                                    x1="0%"
+                                    y1="0%"
+                                    x2="100%"
+                                    y2="100%"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stopColor="oklch(75% 0.08 230)"
+                                    />
+                                    <stop
+                                        offset="100%"
+                                        stopColor="oklch(60% 0.10 235)"
+                                    />
                                 </linearGradient>
-                                <linearGradient id="ribbon-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="oklch(50% 0.12 230)" />
-                                    <stop offset="100%" stopColor="oklch(40% 0.10 235)" />
+                                <linearGradient
+                                    id="ribbon-gradient"
+                                    x1="0%"
+                                    y1="0%"
+                                    x2="0%"
+                                    y2="100%"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stopColor="oklch(50% 0.12 230)"
+                                    />
+                                    <stop
+                                        offset="100%"
+                                        stopColor="oklch(40% 0.10 235)"
+                                    />
                                 </linearGradient>
                             </defs>
                             {/* Ribbon */}
@@ -105,8 +135,20 @@ export default function LosePage({ winner, player, game }: Props) {
                                 fill="url(#ribbon-gradient)"
                             />
                             {/* Medal */}
-                            <circle cx="32" cy="50" r="22" fill="url(#medal-gradient)" />
-                            <circle cx="32" cy="50" r="17" fill="oklch(85% 0.04 230)" stroke="oklch(70% 0.06 230)" strokeWidth="1" />
+                            <circle
+                                cx="32"
+                                cy="50"
+                                r="22"
+                                fill="url(#medal-gradient)"
+                            />
+                            <circle
+                                cx="32"
+                                cy="50"
+                                r="17"
+                                fill="oklch(85% 0.04 230)"
+                                stroke="oklch(70% 0.06 230)"
+                                strokeWidth="1"
+                            />
                             {/* Star */}
                             <path
                                 d="M32 40 L34 46 L40 46 L35 50 L37 56 L32 52 L27 56 L29 50 L24 46 L30 46 Z"
@@ -126,8 +168,10 @@ export default function LosePage({ winner, player, game }: Props) {
                     {/* Rank display */}
                     <div className="mt-5 motion-safe:animate-in motion-safe:delay-100 motion-safe:duration-700 motion-safe:fade-in">
                         <div className="inline-flex items-baseline gap-1.5">
-                            <span className="text-sm text-muted-foreground">Plek</span>
-                            <span className="font-display text-5xl font-bold tabular-nums text-foreground">
+                            <span className="text-sm text-muted-foreground">
+                                Plek
+                            </span>
+                            <span className="font-display text-5xl font-bold text-foreground tabular-nums">
                                 {countedRank}
                             </span>
                             <span className="text-sm text-muted-foreground">
@@ -141,10 +185,14 @@ export default function LosePage({ winner, player, game }: Props) {
                                     key={pos}
                                     className={cn(
                                         'flex w-8 items-center justify-center rounded-t text-xs font-bold transition-all',
-                                        pos === 1 && 'h-8 bg-amber-400/80 text-white',
-                                        pos === 2 && 'h-6 bg-muted text-muted-foreground',
-                                        pos === 3 && 'h-5 bg-muted/70 text-muted-foreground',
-                                        player.rank === pos && 'ring-2 ring-primary ring-offset-2',
+                                        pos === 1 &&
+                                            'h-8 bg-amber-400/80 text-white',
+                                        pos === 2 &&
+                                            'h-6 bg-muted text-muted-foreground',
+                                        pos === 3 &&
+                                            'h-5 bg-muted/70 text-muted-foreground',
+                                        player.rank === pos &&
+                                            'ring-2 ring-primary ring-offset-2',
                                     )}
                                 >
                                     {pos}
@@ -179,7 +227,9 @@ export default function LosePage({ winner, player, game }: Props) {
 
                         {/* Winner credit with portrait */}
                         <div className="mt-5 flex flex-col items-center gap-3">
-                            <p className="text-xs text-muted-foreground">Geraden door</p>
+                            <p className="text-xs text-muted-foreground">
+                                Geraden door
+                            </p>
                             <div className="relative">
                                 {winnerPortraitUrl ? (
                                     <img
@@ -201,7 +251,10 @@ export default function LosePage({ winner, player, game }: Props) {
                                 )}
                                 {/* Mini crown for winner */}
                                 <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                                    <svg viewBox="0 0 16 12" className="size-5 text-amber-500">
+                                    <svg
+                                        viewBox="0 0 16 12"
+                                        className="size-5 text-amber-500"
+                                    >
                                         <path
                                             d="M1 10 L3 4 L6 7 L8 2 L10 7 L13 4 L15 10 Z"
                                             fill="currentColor"
@@ -210,10 +263,17 @@ export default function LosePage({ winner, player, game }: Props) {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <span data-testid="winner-name" className="font-medium text-foreground">
+                                <span
+                                    data-testid="winner-name"
+                                    className="font-medium text-foreground"
+                                >
                                     {winner.name}
                                 </span>
-                                <svg viewBox="0 0 16 16" className="size-4 text-amber-500" fill="currentColor">
+                                <svg
+                                    viewBox="0 0 16 16"
+                                    className="size-4 text-amber-500"
+                                    fill="currentColor"
+                                >
                                     <path d="M8 2L9.5 6H14L10.5 9L12 14L8 11L4 14L5.5 9L2 6H6.5L8 2Z" />
                                 </svg>
                             </div>
@@ -223,16 +283,34 @@ export default function LosePage({ winner, player, game }: Props) {
                     {/* Player stats */}
                     <div className="mt-6 inline-flex items-center gap-3 rounded-full bg-muted/50 px-5 py-2.5 motion-safe:animate-in motion-safe:delay-300 motion-safe:duration-700 motion-safe:fade-in">
                         <div className="text-left">
-                            <p className="text-xs text-muted-foreground">Jouw score</p>
-                            <p className="font-display text-xl font-bold tabular-nums text-foreground">
+                            <p className="text-xs text-muted-foreground">
+                                Jouw score
+                            </p>
+                            <p className="font-display text-xl font-bold text-foreground tabular-nums">
                                 {player.points}
                             </p>
                         </div>
                         <div className="h-8 w-px bg-border" />
                         <div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
-                            <svg viewBox="0 0 20 20" className="size-5 text-primary" fill="currentColor">
-                                <circle cx="10" cy="10" r="8" fillOpacity="0.2" />
-                                <text x="10" y="14" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">
+                            <svg
+                                viewBox="0 0 20 20"
+                                className="size-5 text-primary"
+                                fill="currentColor"
+                            >
+                                <circle
+                                    cx="10"
+                                    cy="10"
+                                    r="8"
+                                    fillOpacity="0.2"
+                                />
+                                <text
+                                    x="10"
+                                    y="14"
+                                    textAnchor="middle"
+                                    fontSize="10"
+                                    fill="currentColor"
+                                    fontWeight="bold"
+                                >
                                     ★
                                 </text>
                             </svg>

@@ -21,23 +21,23 @@ export function TestModeBanner({ className, onReset }: TestModeBannerProps) {
     return (
         <div
             className={cn(
-                'flex items-center justify-between gap-3 bg-gradient-to-r from-warning/20 via-warning/15 to-warning/10 px-4 py-2',
-                'border-b border-warning/30',
+                'pointer-events-auto absolute inset-x-0 top-[calc(var(--header-height)+var(--safe-top))] z-40',
+                'flex items-center justify-between gap-2 bg-warning/90 px-3 py-1.5 backdrop-blur-sm',
                 className,
             )}
         >
-            <div className="flex items-center gap-2">
-                <FlaskConical className="size-4 text-warning" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-warning">
-                    Test Mode
+            <div className="flex items-center gap-1.5">
+                <FlaskConical className="text-warning-foreground size-3.5" />
+                <span className="text-warning-foreground text-xs font-semibold tracking-wider uppercase">
+                    Test
                 </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleReset}
-                    className="h-7 px-2 text-xs text-warning hover:bg-warning/20 hover:text-warning"
+                    className="text-warning-foreground hover:bg-warning-foreground/20 hover:text-warning-foreground h-6 px-2 text-xs"
                 >
                     <RotateCcw className="mr-1 size-3" />
                     Reset
@@ -46,7 +46,7 @@ export function TestModeBanner({ className, onReset }: TestModeBannerProps) {
                     variant="ghost"
                     size="sm"
                     onClick={handleExit}
-                    className="h-7 px-2 text-xs text-warning hover:bg-warning/20 hover:text-warning"
+                    className="text-warning-foreground hover:bg-warning-foreground/20 hover:text-warning-foreground h-6 px-2 text-xs"
                 >
                     <X className="mr-1 size-3" />
                     Stop

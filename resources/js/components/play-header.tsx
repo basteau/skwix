@@ -2,10 +2,18 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Link, router } from '@inertiajs/react';
-import { LogOut, MoreVertical, Sparkles } from 'lucide-react';
+import {
+    FlaskConical,
+    LogOut,
+    MoreVertical,
+    RotateCcw,
+    Sparkles,
+    X,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface PlayHeaderProps {
@@ -16,6 +24,8 @@ interface PlayHeaderProps {
     points: number;
     testId?: string;
     showMenu?: boolean;
+    testMode?: boolean;
+    onTestReset?: () => void;
 }
 
 export function PlayHeader({
@@ -26,9 +36,20 @@ export function PlayHeader({
     points,
     testId = 'points-header',
     showMenu = true,
+    testMode = false,
+    onTestReset,
 }: PlayHeaderProps) {
     const handleLogout = () => {
         router.flushAll();
+    };
+
+    const handleTestReset = () => {
+        onTestReset?.();
+        router.post('/test/reset');
+    };
+
+    const handleTestExit = () => {
+        router.post('/test/exit');
     };
 
     return (
@@ -49,12 +70,23 @@ export function PlayHeader({
                 </div>
             )}
             <div className="flex items-center gap-2">
+                {testMode && (
+                    <div
+                        data-testid="test-mode-indicator"
+                        className="flex items-center gap-1 rounded-full bg-warning/20 px-2 py-1 ring-1 ring-warning/30"
+                    >
+                        <FlaskConical className="size-3 text-warning" />
+                        <span className="text-[10px] font-semibold text-warning uppercase">
+                            Test
+                        </span>
+                    </div>
+                )}
                 <div
                     data-testid={testId}
                     className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary/15 to-primary/10 px-3.5 py-1.5 shadow-sm ring-1 ring-primary/20"
                 >
                     <Sparkles className="size-3.5 text-primary" />
-                    <span className="font-display text-sm font-bold tabular-nums text-primary">
+                    <span className="font-display text-sm font-bold text-primary tabular-nums">
                         {points}
                     </span>
                 </div>
@@ -69,6 +101,27 @@ export function PlayHeader({
                             <span className="sr-only">Menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            {testMode && (
+                                <>
+                                    <DropdownMenuItem
+                                        onClick={handleTestReset}
+                                        data-testid="test-reset-button"
+                                        className="cursor-pointer text-warning"
+                                    >
+                                        <RotateCcw className="mr-2 size-4" />
+                                        Reset Test
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={handleTestExit}
+                                        data-testid="test-exit-button"
+                                        className="cursor-pointer text-warning"
+                                    >
+                                        <X className="mr-2 size-4" />
+                                        Stop Test
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                </>
+                            )}
                             <DropdownMenuItem asChild>
                                 <Link
                                     href="/logout"
