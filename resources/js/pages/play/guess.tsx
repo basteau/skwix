@@ -91,7 +91,6 @@ export default function GuessPage({
     questions: initialQuestions = [],
     error,
     testMode,
-    isAdmin,
 }: Props) {
     const [questions, setQuestions] = useState<QuestionItem[]>(initialQuestions);
     const [input, setInput] = useState('');
@@ -892,7 +891,6 @@ function QuestionBubble({
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
-    const isNo = question.answer === 'no';
     const isUnclear = question.answer === 'unclear';
     const isWinner = question.answer === 'winner';
     const playerColor = PLAYER_COLORS[playerColorIdx];

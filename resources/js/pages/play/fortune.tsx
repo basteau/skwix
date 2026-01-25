@@ -79,7 +79,7 @@ export default function FortunePage({
     const [lightPhase, setLightPhase] = useState(0);
     const [showFrostOverlay, setShowFrostOverlay] = useState(false);
     const [showSuspense, setShowSuspense] = useState(false);
-    const [pendingResult, setPendingResult] = useState<{
+    const [, setPendingResult] = useState<{
         won: boolean;
         change: number;
         pointsRemaining: number;
@@ -107,10 +107,11 @@ export default function FortunePage({
         };
     }, [testMode?.active, error, game?.status, isSpinning]);
 
-    // Sync points from props (for polling updates)
-    useEffect(() => {
-        if (player?.points !== undefined) setPoints(player.points);
-    }, [player?.points]);
+    // Sync points from props (for polling updates) - using key pattern instead
+    const latestPoints = player?.points ?? points;
+    if (latestPoints !== points && !isSpinning) {
+        setPoints(latestPoints);
+    }
 
     useEffect(() => {
         if (!isSpinning) return;

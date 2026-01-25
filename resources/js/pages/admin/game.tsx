@@ -76,8 +76,9 @@ export default function AdminGameDetail({ game, players }: Props) {
     );
 
     useEffect(() => {
+        const timers = validationTimers.current;
         return () => {
-            Object.values(validationTimers.current).forEach(clearTimeout);
+            Object.values(timers).forEach(clearTimeout);
         };
     }, []);
 

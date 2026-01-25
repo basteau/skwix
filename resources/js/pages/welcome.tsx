@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/input-otp';
 import { getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { REGEXP_ONLY_CHARS } from 'input-otp';
+
 import { Snowflake } from 'lucide-react';
 import { type FormEvent, useCallback, useState } from 'react';
 
@@ -152,12 +152,11 @@ export default function Welcome() {
                                     setCode(value.toUpperCase());
                                     setError(null);
                                 }}
-                                pattern={REGEXP_ONLY_CHARS.source}
+                                pattern="^[a-zA-Z]+$"
                                 aria-invalid={!!error}
                                 aria-describedby={
                                     error ? 'code-error' : undefined
                                 }
-                                textTransform="uppercase"
                                 inputMode="text"
                             >
                                 <InputOTPGroup>

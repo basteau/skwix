@@ -4,7 +4,7 @@ import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import { AlertCircle, Crown, Snowflake } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface Player {
     id: number;
@@ -55,8 +55,14 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
     const [countdown, setCountdown] = useState<number | null>(() =>
         game?.starts_at ? calculateRemaining(game.starts_at) : null,
     );
-    const [statusMessage, setStatusMessage] = useState<string | null>(null);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const statusMessage = useMemo(() => {
+        if (!game) return null;
+        if (game.status === 'completed') return 'Dit spel is al afgelopen.';
+        if (game.status === 'draft' || game.status === 'cancelled') return 'Dit spel is geannuleerd.';
+        return null;
+    }, [game]);
 
     useEffect(() => {
         if (!game) return;
@@ -66,13 +72,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
             return;
         }
 
-        if (game.status === 'completed') {
-            setStatusMessage('Dit spel is al afgelopen.');
-            return;
-        }
-
-        if (game.status === 'draft' || game.status === 'cancelled') {
-            setStatusMessage('Dit spel is geannuleerd.');
+        if (game.status === 'completed' || game.status === 'draft' || game.status === 'cancelled') {
             return;
         }
 
@@ -85,7 +85,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                 clearInterval(pollIntervalRef.current);
             }
         };
-    }, [game?.status]);
+    }, [game]);
 
     useEffect(() => {
         if (!game?.starts_at) return;

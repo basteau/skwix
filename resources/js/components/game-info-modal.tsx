@@ -6,7 +6,7 @@ import {
     DialogDescription,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+
 import { Snowflake, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 

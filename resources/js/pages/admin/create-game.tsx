@@ -151,8 +151,9 @@ export default function CreateGame({ sampleWords }: Props) {
     }, [validateWord]);
 
     useEffect(() => {
+        const timers = validationTimers.current;
         return () => {
-            Object.values(validationTimers.current).forEach(clearTimeout);
+            Object.values(timers).forEach(clearTimeout);
         };
     }, []);
 
