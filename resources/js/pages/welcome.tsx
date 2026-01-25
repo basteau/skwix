@@ -36,10 +36,17 @@ export default function Welcome() {
                     body: JSON.stringify({ code: code.trim() }),
                 });
 
+                const data = await response.json();
+
                 if (!response.ok) {
-                    const data = await response.json();
                     setError(data.message ?? 'Code ongeldig');
                     setIsSubmitting(false);
+                    return;
+                }
+
+                // Admin redirect
+                if (data.redirect) {
+                    router.visit(data.redirect);
                     return;
                 }
 
@@ -152,7 +159,7 @@ export default function Welcome() {
                                     setCode(value.toUpperCase());
                                     setError(null);
                                 }}
-                                pattern="^[a-zA-Z]+$"
+                                pattern="^[a-zA-Z0-9]+$"
                                 aria-invalid={!!error}
                                 aria-describedby={
                                     error ? 'code-error' : undefined

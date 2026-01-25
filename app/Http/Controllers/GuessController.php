@@ -123,7 +123,7 @@ class GuessController extends Controller
             return response()->json(['error' => 'game_not_active'], 400);
         }
 
-        if ($player->points < 3) {
+        if ($player->points < config('game.guess_cost')) {
             return response()->json(['error' => 'insufficient_points'], 400);
         }
 
@@ -163,7 +163,7 @@ class GuessController extends Controller
         }
 
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $result) {
-            $player->decrement('points', 3);
+            $player->decrement('points', config('game.guess_cost'));
 
             return Question::create([
                 'game_id' => $game->id,
@@ -198,7 +198,7 @@ class GuessController extends Controller
 
         // Deduct points and save the question
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $isCorrect, $guessedWord) {
-            $player->decrement('points', 3);
+            $player->decrement('points', config('game.guess_cost'));
 
             return Question::create([
                 'game_id' => $game->id,
@@ -269,7 +269,7 @@ class GuessController extends Controller
         $testGame = $this->testGameService->getTestGame();
         $player = $testGame['player'];
 
-        if ($player['points'] < 3) {
+        if ($player['points'] < config('game.guess_cost')) {
             return response()->json(['error' => 'insufficient_points'], 400);
         }
 
@@ -299,7 +299,7 @@ class GuessController extends Controller
             $guessedWord = $classification['guessed_word'];
             $isCorrect = strtolower($guessedWord) === strtolower($secretWord);
 
-            $newPoints = $player['points'] - 3;
+            $newPoints = $player['points'] - config('game.guess_cost');
             $questions = $testGame['questions'] ?? [];
             $newQuestion = [
                 'question' => $question,
@@ -372,7 +372,7 @@ class GuessController extends Controller
             ], 500);
         }
 
-        $newPoints = $player['points'] - 3;
+        $newPoints = $player['points'] - config('game.guess_cost');
         $questions = $testGame['questions'] ?? [];
         $newQuestion = [
             'question' => $question,

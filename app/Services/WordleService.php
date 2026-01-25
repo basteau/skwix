@@ -49,20 +49,22 @@ class WordleService
 
     /**
      * Calculate points for a completed wordle.
-     * 6 points for 1 guess, 5 for 2, 4 for 3, minimum 3 for 4-6 guesses.
-     * Failed wordle (6 guesses, not correct) still gets 3 points.
+     * Points are tied to guess cost (10 pts) using multipliers:
+     * - 1 guess: 2.0x = 20 points
+     * - 2 guesses: 1.7x = 17 points
+     * - 3 guesses: 1.5x = 15 points
+     * - 4 guesses: 1.4x = 14 points
+     * - 5 guesses: 1.2x = 12 points
+     * - 6 guesses or failed: 1.0x = 10 points
      */
     public function calculatePoints(int $attempts, bool $isCorrect): int
     {
+        $rewards = config('game.wordle_rewards');
+
         if (! $isCorrect) {
-            return 3;
+            return $rewards['failed'];
         }
 
-        return match ($attempts) {
-            1 => 6,
-            2 => 5,
-            3 => 4,
-            default => 3,
-        };
+        return $rewards[$attempts] ?? $rewards[6];
     }
 }

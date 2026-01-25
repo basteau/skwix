@@ -145,10 +145,10 @@ describe('GuessController ask', function () {
             'points_remaining',
         ]);
 
-        expect($player->fresh()->points)->toBe(47); // Deducted 3 points
+        expect($player->fresh()->points)->toBe(40); // Deducted 10 points (guess_cost)
     });
 
-    it('rejects question with insufficient points', function () {
+    it('rejects question with insufficient points (9 pts < 10 guess_cost)', function () {
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         $game = Game::factory()->create([
@@ -159,7 +159,7 @@ describe('GuessController ask', function () {
         Player::factory()->create([
             'game_id' => $game->id,
             'email' => 'test@example.com',
-            'points' => 2,
+            'points' => 9,
         ]);
 
         $response = $this->actingAs($user)->postJson('/play/guess/ask', [
@@ -168,6 +168,38 @@ describe('GuessController ask', function () {
 
         $response->assertStatus(400);
         $response->assertJson(['error' => 'insufficient_points']);
+    });
+
+    it('allows exactly one question with 10 points', function () {
+        $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('classifyQuestion')
+                ->once()
+                ->andReturn(['success' => true, 'type' => 'property']);
+
+            $mock->shouldReceive('askQuestion')
+                ->once()
+                ->andReturn(['success' => true, 'answer' => 'yes']);
+        });
+
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'secret_word' => 'winter',
+        ]);
+
+        $player = Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+            'points' => 10,
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/play/guess/ask', [
+            'question' => 'Is het koud?',
+        ]);
+
+        $response->assertOk();
+        expect($player->fresh()->points)->toBe(0); // 10 - 10 = 0
     });
 
     it('rejects question when game is pending', function () {
@@ -307,7 +339,7 @@ describe('GuessController ask', function () {
             'guessed_word' => 'zomer',
         ]);
 
-        expect($player->fresh()->points)->toBe(47);
+        expect($player->fresh()->points)->toBe(40);
     });
 
     it('rejects multi-guess attempts', function () {

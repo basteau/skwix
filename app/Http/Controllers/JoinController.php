@@ -18,6 +18,16 @@ class JoinController extends Controller
 
         $code = strtoupper(trim($request->code));
 
+        // Check if it's an admin user code first
+        $adminUser = User::where('code', $code)->where('is_admin', true)->first();
+        if ($adminUser) {
+            Auth::login($adminUser);
+
+            return response()->json([
+                'redirect' => '/admin',
+            ]);
+        }
+
         $player = Player::where('invite_code', $code)
             ->whereHas('game', fn ($q) => $q->whereIn('status', ['pending', 'active']))
             ->with('game')

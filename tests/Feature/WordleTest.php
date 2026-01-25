@@ -41,14 +41,15 @@ describe('WordleService', function () {
         }
     });
 
-    it('calculates points correctly', function () {
-        expect($this->wordleService->calculatePoints(1, true))->toBe(6);
-        expect($this->wordleService->calculatePoints(2, true))->toBe(5);
-        expect($this->wordleService->calculatePoints(3, true))->toBe(4);
-        expect($this->wordleService->calculatePoints(4, true))->toBe(3);
-        expect($this->wordleService->calculatePoints(5, true))->toBe(3);
-        expect($this->wordleService->calculatePoints(6, true))->toBe(3);
-        expect($this->wordleService->calculatePoints(6, false))->toBe(3);
+    it('calculates points correctly with new economy', function () {
+        // New point system: tied to guess cost (10 pts) using multipliers
+        expect($this->wordleService->calculatePoints(1, true))->toBe(20);  // 2.0x
+        expect($this->wordleService->calculatePoints(2, true))->toBe(17);  // 1.7x
+        expect($this->wordleService->calculatePoints(3, true))->toBe(15);  // 1.5x
+        expect($this->wordleService->calculatePoints(4, true))->toBe(14);  // 1.4x
+        expect($this->wordleService->calculatePoints(5, true))->toBe(12);  // 1.2x
+        expect($this->wordleService->calculatePoints(6, true))->toBe(10);  // 1.0x
+        expect($this->wordleService->calculatePoints(6, false))->toBe(10); // failed = 1.0x
     });
 });
 
@@ -111,7 +112,7 @@ describe('Wordle Controller', function () {
         $response->assertJson([
             'correct' => true,
             'completed' => true,
-            'points_earned' => 6,
+            'points_earned' => 20, // 1 guess = 2.0x multiplier of guess_cost
         ]);
 
         // Verify database updated
@@ -119,11 +120,52 @@ describe('Wordle Controller', function () {
             'game_id' => $game->id,
             'player_id' => $player->id,
             'completed' => true,
-            'points_earned' => 6,
+            'points_earned' => 20,
         ]);
 
         // Verify player points updated
-        expect($player->fresh()->points)->toBe(6);
+        expect($player->fresh()->points)->toBe(20);
+
+        Carbon::setTestNow();
+    });
+
+    it('awards 17 points for solving in 2 guesses', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::now()->subDays(1),
+            'wordle_words' => ['woord', 'appel'],
+        ]);
+
+        $player = Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+            'points' => 0,
+        ]);
+
+        // First guess (wrong)
+        $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
+            'guess' => 'woord',
+        ]);
+        $response->assertOk();
+        $response->assertJson(['correct' => false, 'completed' => false]);
+
+        // Second guess (correct)
+        $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
+            'guess' => 'appel',
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'correct' => true,
+            'completed' => true,
+            'points_earned' => 17, // 2 guesses = 1.7x multiplier
+        ]);
+
+        expect($player->fresh()->points)->toBe(17);
 
         Carbon::setTestNow();
     });
@@ -176,7 +218,7 @@ describe('Wordle Controller', function () {
             'day_number' => 2,
             'guesses' => [['word' => 'appel', 'result' => []]],
             'completed' => true,
-            'points_earned' => 6,
+            'points_earned' => 20,
         ]);
 
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
