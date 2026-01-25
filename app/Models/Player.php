@@ -19,14 +19,12 @@ class Player extends Model
         'points',
         'invite_code',
         'joined_at',
-        'wordle_guesses',
     ];
 
     protected function casts(): array
     {
         return [
             'joined_at' => 'datetime',
-            'wordle_guesses' => 'array',
             'points' => 'integer',
         ];
     }

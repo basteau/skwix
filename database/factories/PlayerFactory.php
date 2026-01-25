@@ -22,7 +22,6 @@ class PlayerFactory extends Factory
             'points' => 0,
             'invite_code' => Str::random(8),
             'joined_at' => null,
-            'wordle_guesses' => [],
         ];
     }
 

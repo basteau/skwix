@@ -206,7 +206,6 @@ A competitive multiplayer word-guessing game combining daily Wordle puzzles with
 ### Player
 - id, game_id, name, email, avatar_url
 - points, invite_code, joined_at
-- wordle_guesses (JSON tracking daily performance)
 
 ### Question
 - id, game_id, player_id
