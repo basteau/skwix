@@ -1,9 +1,0 @@
-{
-    "agents": [
-        "claude_code"
-    ],
-    "editors": [
-        "claude_code"
-    ],
-    "guidelines": []
-}
