@@ -254,9 +254,9 @@ export default function FortunePage({
                 )}
 
                 {/* Wheel Area */}
-                <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-4">
-                    {/* Wheel Container */}
-                    <div className="relative">
+                <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-4">
+                    {/* Wheel Container - scales to fit available space */}
+                    <div className="relative aspect-square w-full max-w-[320px]" style={{ maxHeight: 'min(320px, 100%)' }}>
                         {/* Icicle pointer */}
                         <div
                             className={cn(
@@ -297,7 +297,7 @@ export default function FortunePage({
                         </div>
 
                         {/* Outer ring with animated lights */}
-                        <div className="absolute inset-0 -m-5">
+                        <div className="absolute inset-0">
                             <div className="relative size-full">
                                 {Array.from({ length: LIGHTS_COUNT }).map((_, i) => {
                                     const angle = (i * 360) / LIGHTS_COUNT;
@@ -330,7 +330,7 @@ export default function FortunePage({
 
                         {/* Metallic outer ring */}
                         <div
-                            className="absolute inset-0 -m-2 rounded-full"
+                            className="absolute inset-0 m-auto size-[93.75%] rounded-full"
                             style={{
                                 background: 'linear-gradient(135deg, oklch(80% 0.02 230), oklch(60% 0.03 235), oklch(75% 0.02 225))',
                                 boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.1)',
@@ -341,7 +341,7 @@ export default function FortunePage({
                         <div
                             data-testid="fortune-wheel"
                             className={cn(
-                                'relative size-[280px] rounded-full transition-transform',
+                                'absolute inset-0 m-auto size-[87.5%] rounded-full transition-transform',
                                 isSpinning && 'wheel-spinning',
                             )}
                             style={{
