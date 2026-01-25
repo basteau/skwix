@@ -82,7 +82,7 @@ class AdminController extends Controller
         }
 
         $game = \DB::transaction(function () use ($request) {
-            $startsAt = Carbon::parse($request->starts_at);
+            $startsAt = Carbon::parse($request->starts_at, 'Europe/Brussels');
             $endsAt = $startsAt->copy()->addDays($request->duration_days);
 
             $game = Game::create([
