@@ -400,12 +400,18 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                 {/* Grid */}
                 <div
                     data-testid="wordle-grid"
-                    className="flex flex-1 flex-col items-center justify-center gap-1 px-4 py-4"
+                    className={cn(
+                        "flex flex-1 flex-col items-center gap-1 px-4 py-4",
+                        isCompleted ? "justify-start pt-8" : "justify-center"
+                    )}
                 >
                     {[...Array(6)].map((_, rowIdx) => {
                         const guess = guesses[rowIdx];
                         const isCurrentRow = rowIdx === guesses.length && !isCompleted;
                         const isRevealing = revealingRow === rowIdx;
+                        const isEmptyRow = !guess && !isCurrentRow;
+
+                        if (isCompleted && isEmptyRow) return null;
 
                         return (
                             <div
@@ -433,7 +439,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                         status = letter ? 'filled' : 'empty';
                                     }
 
-                                    const shouldPop = isCurrentRow && popTile === colIdx && letter;
+                                    const shouldPop = isCurrentRow && popTile === colIdx && !!letter;
 
                                     return (
                                         <Tile
@@ -449,22 +455,25 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                             </div>
                         );
                     })}
-                </div>
 
-                {/* Completed state */}
-                {isCompleted && (
-                    <div className="px-4 pb-4 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
-                        <div className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-success/15 to-success/5 px-6 py-3">
-                            <Sparkles className="size-5 text-success" />
-                            <span className="font-display text-xl font-bold text-success">
-                                +{wordle?.points_earned} punten
-                            </span>
+                    {/* Success state - integrated with grid for cleaner layout */}
+                    {isCompleted && (
+                        <div className="mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
+                            <div className="inline-flex flex-col items-center gap-3">
+                                <div className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-br from-success/20 via-success/10 to-success/5 px-8 py-4 shadow-lg shadow-success/10">
+                                    <Sparkles className="size-6 text-success motion-safe:animate-pulse" />
+                                    <span className="font-display text-3xl font-bold text-success">
+                                        +{wordle?.points_earned}
+                                    </span>
+                                    <span className="text-lg font-medium text-success/80">punten</span>
+                                </div>
+                                <p className="text-base text-muted-foreground">
+                                    Morgen weer een nieuwe 🎯
+                                </p>
+                            </div>
                         </div>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Morgen weer een nieuwe
-                        </p>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {/* Not available state */}
                 {!isAvailable && !isCompleted && (
