@@ -38,9 +38,9 @@ export default function AdminDashboard({ games = [] }: Props) {
                                 <FlaskConical className="size-4" />
                                 Test Mode
                             </Button>
-                            <Link href="/admin/create">
-                                <Button>Nieuw Spel</Button>
-                            </Link>
+                            <Button asChild>
+                                <Link href="/admin/create">Nieuw Spel</Link>
+                            </Button>
                         </div>
                     }
                 />
