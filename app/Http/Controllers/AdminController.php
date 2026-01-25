@@ -43,6 +43,29 @@ class AdminController extends Controller
         ]);
     }
 
+    public function players(): Response
+    {
+        $players = Player::with('game')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn ($player) => [
+                'id' => $player->id,
+                'name' => $player->name,
+                'email' => $player->email,
+                'avatar_url' => $player->avatar_url,
+                'points' => $player->points,
+                'invite_code' => $player->invite_code,
+                'joined_at' => $player->joined_at?->toISOString(),
+                'game_id' => $player->game_id,
+                'game_secret_word' => $player->game->secret_word,
+                'game_status' => $player->game->status,
+            ]);
+
+        return Inertia::render('admin/players', [
+            'players' => $players,
+        ]);
+    }
+
     public function createForm(): Response
     {
         $sampleWords = DutchWordlistSeeder::getRandomWords(20);

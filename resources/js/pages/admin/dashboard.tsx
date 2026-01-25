@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/react';
-import { Clock, FlaskConical, Mail, Play, Trophy, Users } from 'lucide-react';
+import { Clock, FlaskConical, Mail, Play, Trophy, UserSearch, Users } from 'lucide-react';
 
 type GameStatus = 'draft' | 'pending' | 'active' | 'completed';
 
@@ -34,11 +34,21 @@ export default function AdminDashboard({ games = [] }: Props) {
                         <div className="flex gap-2">
                             <Button
                                 variant="outline"
+                                asChild
+                                className="gap-2"
+                            >
+                                <Link href="/admin/players">
+                                    <UserSearch className="size-4" />
+                                    <span className="hidden sm:inline">Spelers</span>
+                                </Link>
+                            </Button>
+                            <Button
+                                variant="outline"
                                 onClick={() => router.post('/test/start')}
                                 className="gap-2"
                             >
                                 <FlaskConical className="size-4" />
-                                Test Mode
+                                <span className="hidden sm:inline">Test Mode</span>
                             </Button>
                             <Button asChild>
                                 <Link href="/admin/create">Nieuw Spel</Link>

@@ -106,6 +106,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/players', [AdminController::class, 'players'])->name('players');
     Route::get('/create', [AdminController::class, 'createForm'])->name('create');
     Route::post('/create', [AdminController::class, 'store'])->name('store');
     Route::get('/random-words', [AdminController::class, 'getRandomWords'])->name('random-words');
