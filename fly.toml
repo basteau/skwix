@@ -48,7 +48,7 @@ console_command = 'php /var/www/html/artisan tinker'
   worker = 'php artisan queue:work --tries=3 --timeout=60'
 
 [deploy]
-  release_command = 'php artisan migrate --force'
+  release_command = 'sh -c "mkdir -p /var/www/html/storage/database && touch /var/www/html/storage/database/database.sqlite && php artisan migrate --force"'
 
 [[vm]]
   memory = '1gb'
