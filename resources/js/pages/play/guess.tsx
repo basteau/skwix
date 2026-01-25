@@ -316,7 +316,7 @@ export default function GuessPage({
     return (
         <PlayLayout>
             <Head title="Vraag" />
-            <div className="relative flex h-full flex-col overflow-hidden">
+            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
                 {testMode?.active && <TestModeBanner />}
 
                 {/* Background snowflakes */}

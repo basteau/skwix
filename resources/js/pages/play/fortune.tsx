@@ -215,7 +215,7 @@ export default function FortunePage({
     return (
         <PlayLayout>
             <Head title="Rad" />
-            <div className="relative flex h-full flex-col overflow-hidden">
+            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
                 {/* Test Mode Banner */}
                 {testMode?.active && <TestModeBanner />}
 

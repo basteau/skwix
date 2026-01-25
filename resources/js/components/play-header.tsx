@@ -32,7 +32,10 @@ export function PlayHeader({
     };
 
     return (
-        <header className="flex items-center justify-between border-b border-border/80 bg-gradient-to-b from-card to-background px-4 py-3 pt-[calc(var(--safe-top)+0.75rem)]">
+        <header
+            data-testid="play-header"
+            className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-border/80 bg-gradient-to-b from-card to-background px-4 py-3 pt-[calc(var(--safe-top)+0.75rem)]"
+        >
             {leftContent ?? (
                 <div className="flex flex-col">
                     <span className="font-display text-xl font-bold tracking-tight text-foreground">

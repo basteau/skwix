@@ -265,7 +265,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
     return (
         <PlayLayout>
             <Head title="Wordle" />
-            <div className="relative flex h-full flex-col overflow-hidden">
+            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (

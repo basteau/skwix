@@ -66,7 +66,7 @@ export default function PlayersPage({ player, game, players = [], error, testMod
     return (
         <PlayLayout>
             <Head title="Spelers" />
-            <div className="flex h-full flex-col">
+            <div className="flex h-full flex-col pt-[calc(var(--header-height)+var(--safe-top))]">
                 {testMode?.active && <TestModeBanner />}
                 <PlayHeader title="Ranglijst" points={player?.points ?? 0} />
 
