@@ -70,8 +70,9 @@ jobs:
         run: ./scripts/smoke-test.sh http://127.0.0.1:8010
 
   e2e:
-    name: E2E Tests
+    name: E2E Browser Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -79,6 +80,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          extensions: sockets
           tools: composer:v2
           coverage: none
 
@@ -101,6 +103,9 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Build Assets
         run: npm run build
 
@@ -111,5 +116,19 @@ jobs:
           touch storage/e2e.sqlite
           php artisan migrate:fresh --env=e2e --force
 
-      - name: Run E2E Tests
-        run: php artisan test --group=e2e --env=e2e
+      - name: Run E2E Browser Tests
+        run: ./vendor/bin/pest tests/Browser --group=e2e
+
+      - name: Upload Screenshots on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: tests/Browser/Screenshots/
+
+      - name: Upload Logs on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-logs
+          path: storage/logs/
