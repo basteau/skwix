@@ -8,6 +8,7 @@ use App\Services\TestGameService;
 use App\Services\WordleService;
 use App\Services\WordlistService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,7 +22,7 @@ class WordleController extends Controller
         private TestGameService $testGameService,
     ) {}
 
-    public function show(Request $request): Response
+    public function show(Request $request): Response|RedirectResponse
     {
         if ($this->testGameService->isTestMode()) {
             return $this->showTestMode();
@@ -31,9 +32,7 @@ class WordleController extends Controller
         $player = $user->activePlayer();
 
         if (! $player) {
-            return Inertia::render('play/wordle', [
-                'error' => 'no_active_game',
-            ]);
+            return redirect('/lobby');
         }
 
         $game = $player->game;

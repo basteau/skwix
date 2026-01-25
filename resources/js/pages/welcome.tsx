@@ -44,13 +44,7 @@ export default function Welcome() {
                     return;
                 }
 
-                // Admin redirect
-                if (data.redirect) {
-                    router.visit(data.redirect);
-                    return;
-                }
-
-                router.visit('/play/wordle');
+                router.visit(data.redirect || '/lobby');
             } catch {
                 setError('Er ging iets mis. Probeer opnieuw.');
                 setIsSubmitting(false);

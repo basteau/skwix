@@ -101,7 +101,7 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
 
             if (remaining <= 0) {
                 clearInterval(interval);
-                router.visit('/play/wordle');
+                router.reload({ only: ['game', 'players'] });
             }
         }, 1000);
 

@@ -54,7 +54,10 @@ class JoinController extends Controller
             $player->update(['joined_at' => now()]);
         }
 
+        $redirect = $player->game->status === 'active' ? '/play/wordle' : '/lobby';
+
         return response()->json([
+            'redirect' => $redirect,
             'player' => [
                 'id' => $player->id,
                 'name' => $player->name,

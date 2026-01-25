@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
+use App\Services\GameService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LobbyController extends Controller
 {
+    public function __construct(
+        private GameService $gameService,
+    ) {}
+
     public function show(Request $request): Response
     {
         $playerId = session('player_id');
@@ -25,7 +30,7 @@ class LobbyController extends Controller
             return Inertia::render('welcome');
         }
 
-        $game = $player->game;
+        $game = $this->gameService->activateGame($player->game);
         $joinedPlayers = $game->players()
             ->whereNotNull('joined_at')
             ->get(['id', 'name', 'avatar_url']);

@@ -92,7 +92,7 @@ class GameService
             return $game;
         }
 
-        $now = Carbon::now();
+        $now = Carbon::now(self::TIMEZONE);
         if ($game->starts_at && $now->gte($game->starts_at)) {
             $game->status = 'active';
             $game->save();
