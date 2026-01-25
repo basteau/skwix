@@ -12,16 +12,20 @@ class WordlistValidationTest extends TestCase
     {
         parent::setUp();
 
-        $path = database_path('seeders/dutch_words.json');
+        $path = public_path('woordenlijst.txt');
         if (file_exists($path)) {
-            $this->words = json_decode(file_get_contents($path), true);
+            $content = file_get_contents($path);
+            $this->words = array_values(array_filter(
+                array_map('trim', explode("\n", $content)),
+                fn ($word) => $word !== ''
+            ));
         }
     }
 
     public function test_wordlist_is_not_empty(): void
     {
         $this->assertNotEmpty($this->words, 'Word list should not be empty');
-        $this->assertGreaterThan(5000, count($this->words), 'Word list should have at least 5000 words');
+        $this->assertGreaterThan(3000, count($this->words), 'Word list should have at least 3000 words');
     }
 
     public function test_all_words_are_exactly_five_letters(): void

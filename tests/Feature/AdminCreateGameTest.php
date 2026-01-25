@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\User;
-use Database\Seeders\DutchWordlistSeeder;
+use App\Services\WordlistService;
 
 beforeEach(function () {
     $this->admin = User::factory()->create(['is_admin' => true]);
-    $this->wordlist = DutchWordlistSeeder::getRandomWords(6);
+    $this->wordlist = app(WordlistService::class)->getRandomWords(6);
 });
 
 it('rejects duplicate emails in player list', function () {

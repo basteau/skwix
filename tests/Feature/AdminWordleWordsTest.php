@@ -2,12 +2,13 @@
 
 use App\Models\Game;
 use App\Models\User;
-use Database\Seeders\DutchWordlistSeeder;
+use App\Services\WordlistService;
 
 beforeEach(function () {
     $this->admin = User::factory()->create(['is_admin' => true]);
-    $this->wordlist = DutchWordlistSeeder::getRandomWords(6);
-    $this->newWordlist = DutchWordlistSeeder::getRandomWords(6);
+    $wordlistService = app(WordlistService::class);
+    $this->wordlist = $wordlistService->getRandomWords(6);
+    $this->newWordlist = $wordlistService->getRandomWords(6);
 });
 
 it('allows wordle word updates for draft games', function () {
@@ -83,7 +84,7 @@ it('rejects wordle word updates for completed games', function () {
 });
 
 it('validates a valid word', function () {
-    $validWord = DutchWordlistSeeder::getRandomWords(1)[0];
+    $validWord = app(WordlistService::class)->getRandomWords(1)[0];
 
     $response = $this->actingAs($this->admin)
         ->get("/admin/validate-word?word={$validWord}");
@@ -156,7 +157,7 @@ it('rejects game creation with invalid wordle words', function () {
 });
 
 it('shows invalid words in error message', function () {
-    $validWords = DutchWordlistSeeder::getRandomWords(4);
+    $validWords = app(WordlistService::class)->getRandomWords(4);
     $mixedWords = array_merge($validWords, ['xxxxx', 'yyyyy']);
 
     $response = $this->actingAs($this->admin)

@@ -15,13 +15,18 @@ class WordlistService
     public function getWords(): Collection
     {
         return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
-            $path = database_path('seeders/dutch_words.json');
+            $path = public_path('woordenlijst.txt');
 
             if (! File::exists($path)) {
                 return collect();
             }
 
-            return collect(json_decode(File::get($path), true));
+            $words = array_filter(
+                array_map('trim', explode("\n", File::get($path))),
+                fn ($word) => $word !== ''
+            );
+
+            return collect($words);
         });
     }
 
