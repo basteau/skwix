@@ -387,7 +387,13 @@ export default function GuessPage({
                     style={{ paddingBottom: inputAreaHeight }}
                 >
                     {questions.length === 0 && !pendingQuestion ? (
-                        <EmptyState questionsRemaining={questionsRemaining} />
+                        <EmptyState
+                            questionsRemaining={questionsRemaining}
+                            onSelectHint={(text) => {
+                                setInput(text);
+                                inputRef.current?.focus();
+                            }}
+                        />
                     ) : (
                         <div data-testid="guess-history" className="px-4 py-4">
                             <div className="space-y-3">
@@ -748,7 +754,13 @@ const Confetti = memo(function Confetti() {
 // HELPER COMPONENTS
 // =============================================================================
 
-function EmptyState({ questionsRemaining }: { questionsRemaining: number }) {
+function EmptyState({
+    questionsRemaining,
+    onSelectHint,
+}: {
+    questionsRemaining: number;
+    onSelectHint?: (text: string) => void;
+}) {
     return (
         <div className="flex h-full flex-col items-center justify-center px-6 py-8">
             {/* Magnifying glass with frost */}
@@ -767,11 +779,11 @@ function EmptyState({ questionsRemaining }: { questionsRemaining: number }) {
                 Stel ja/nee vragen om het woord te ontdekken, of waag een gok!
             </p>
 
-            {/* Example hints */}
+            {/* Example hints - clickable to auto-fill input */}
             <div className="mt-6 space-y-2">
-                <ExampleHint emoji="🐾" text="Is het een dier?" />
-                <ExampleHint emoji="🎯" text="Is het woord 'winter'?" />
-                <ExampleHint emoji="❄️" text="Is het koud?" />
+                <ExampleHint emoji="🐾" text="Is het een dier?" onClick={() => onSelectHint?.('Is het een dier?')} />
+                <ExampleHint emoji="🎯" text="Is het woord 'winter'?" onClick={() => onSelectHint?.("Is het woord 'winter'?")} />
+                <ExampleHint emoji="❄️" text="Is het koud?" onClick={() => onSelectHint?.('Is het koud?')} />
             </div>
 
             {questionsRemaining > 0 && (
@@ -786,12 +798,29 @@ function EmptyState({ questionsRemaining }: { questionsRemaining: number }) {
     );
 }
 
-function ExampleHint({ emoji, text }: { emoji: string; text: string }) {
+function ExampleHint({
+    emoji,
+    text,
+    onClick,
+}: {
+    emoji: string;
+    text: string;
+    onClick?: () => void;
+}) {
     return (
-        <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-4 py-2.5">
+        <button
+            type="button"
+            onClick={onClick}
+            className={cn(
+                'flex w-full items-center gap-2 rounded-lg bg-muted/50 px-4 py-2.5 text-left',
+                'transition-all duration-150',
+                'hover:bg-primary/10 hover:ring-1 hover:ring-primary/20',
+                'active:scale-[0.98] active:bg-primary/15',
+            )}
+        >
             <span className="text-lg">{emoji}</span>
             <span className="text-sm text-muted-foreground italic">"{text}"</span>
-        </div>
+        </button>
     );
 }
 
