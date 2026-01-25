@@ -21,7 +21,7 @@ export function TestModeBanner({ className, onReset }: TestModeBannerProps) {
     return (
         <div
             className={cn(
-                'pointer-events-auto absolute inset-x-0 top-[calc(var(--header-height)+var(--safe-top))] z-40',
+                'pointer-events-auto absolute inset-x-0 top-[calc(var(--header-height)+var(--safe-top)+0.5rem)] z-40',
                 'flex items-center justify-between gap-2 bg-warning/90 px-3 py-1.5 backdrop-blur-sm',
                 className,
             )}

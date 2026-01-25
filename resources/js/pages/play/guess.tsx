@@ -344,7 +344,7 @@ export default function GuessPage({
     return (
         <PlayLayout>
             <Head title="Vraag" />
-            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
+            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top)+0.5rem)]">
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (

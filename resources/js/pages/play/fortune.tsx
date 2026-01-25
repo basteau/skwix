@@ -224,7 +224,7 @@ export default function FortunePage({
     return (
         <PlayLayout>
             <Head title="Rad" />
-            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
+            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top)+0.5rem)]">
                 <PlayHeader
                     title="Rad van Fortuin"
                     points={points}

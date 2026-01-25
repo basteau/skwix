@@ -297,7 +297,7 @@ export default function WordlePage({
     return (
         <PlayLayout>
             <Head title="Wordle" />
-            <div className="fixed inset-x-0 top-[calc(var(--header-height)+var(--safe-top))] bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom))] flex flex-col overflow-hidden">
+            <div className="fixed inset-x-0 top-[calc(var(--header-height)+var(--safe-top)+0.5rem)] bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom))] flex flex-col overflow-hidden">
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (

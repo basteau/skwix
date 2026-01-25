@@ -71,7 +71,7 @@ export default function PlayersPage({
     return (
         <PlayLayout>
             <Head title="Spelers" />
-            <div className="flex h-full flex-col pt-[calc(var(--header-height)+var(--safe-top))]">
+            <div className="flex h-full flex-col pt-[calc(var(--header-height)+var(--safe-top)+0.5rem)]">
                 <PlayHeader
                     title="Ranglijst"
                     points={player?.points ?? 0}
