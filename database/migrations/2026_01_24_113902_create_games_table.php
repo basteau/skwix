@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->string('secret_word', 100);
-            $table->enum('status', ['draft', 'pending', 'active', 'completed'])->default('draft');
+            $table->string('status', 20)->default('draft');
             $table->unsignedBigInteger('winner_id')->nullable();
             $table->timestamp('starts_at');
             $table->timestamp('ends_at')->nullable();
@@ -29,9 +26,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('games');

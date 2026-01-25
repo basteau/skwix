@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('questions', function (Blueprint $table) {
@@ -16,14 +13,11 @@ return new class extends Migration
             $table->foreignId('game_id')->constrained()->cascadeOnDelete();
             $table->foreignId('player_id')->constrained()->cascadeOnDelete();
             $table->text('question_text');
-            $table->enum('answer', ['yes', 'no']);
+            $table->string('answer', 20);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('questions');
