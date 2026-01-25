@@ -8,7 +8,7 @@ import {
 import { getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 
-import { Snowflake } from 'lucide-react';
+import { Snowflake, Target } from 'lucide-react';
 import { type FormEvent, useCallback, useState } from 'react';
 
 export default function Welcome() {
@@ -136,8 +136,9 @@ export default function Welcome() {
                         <h1 className="font-display text-5xl font-extrabold tracking-tight text-foreground">
                             Skwix
                         </h1>
-                        <p className="mt-2 text-lg font-medium text-foreground/70">
-                            Raad het woord, versla je vrienden
+                        <p className="mt-2 flex items-center justify-center gap-2 text-lg font-medium text-foreground/70">
+                            <Target className="size-5 text-primary" />
+                            <span>Raad maar raak!</span>
                         </p>
                     </div>
 
@@ -216,17 +217,14 @@ export default function Welcome() {
                     </form>
 
                     {/* Footer hint */}
-                    <p className="mt-8 text-sm text-muted-foreground">
-                        Geen code?{' '}
-                        <button
-                            type="button"
-                            onClick={() => setShowResendModal(true)}
-                            className="font-medium text-primary underline-offset-4 hover:underline"
-                            data-testid="resend-code-trigger"
-                        >
-                            Code kwijt?
-                        </button>
-                    </p>
+                    <button
+                        type="button"
+                        onClick={() => setShowResendModal(true)}
+                        className="mt-8 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                        data-testid="resend-code-trigger"
+                    >
+                        Code kwijt?
+                    </button>
                 </main>
 
                 <ResendCodeModal
