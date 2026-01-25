@@ -587,7 +587,10 @@ export default function FortunePage({
                     {/* Wager preview on wheel */}
                     {wager > 0 && !isSpinning && !result && (
                         <div className="mt-4 text-center animate-in fade-in duration-200">
-                            <span className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+                            <span 
+                                key={wager}
+                                className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary animate-wager-preview"
+                            >
                                 Inzet: {wager} → Win: {wager * 2}
                             </span>
                         </div>
@@ -610,13 +613,17 @@ export default function FortunePage({
                             {WAGER_PRESETS.filter(p => p <= points).map((preset) => (
                                 <button
                                     key={preset}
-                                    onClick={() => setPresetWager(preset)}
+                                    onClick={() => {
+                                        triggerHaptic('tick');
+                                        setPresetWager(preset);
+                                    }}
                                     disabled={isSpinning || points === 0}
                                     className={cn(
-                                        'flex-1 rounded-full py-2.5 text-sm font-semibold transition-all',
+                                        'flex-1 rounded-full py-2.5 text-sm font-semibold',
                                         'border-2 active:scale-95',
+                                        'transition-all duration-150 ease-out',
                                         wager === preset
-                                            ? 'border-primary bg-primary text-primary-foreground'
+                                            ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30 scale-[1.02] animate-wager-selected'
                                             : 'border-border bg-card text-foreground hover:border-primary/50 hover:bg-primary/5',
                                         'disabled:opacity-50 disabled:cursor-not-allowed',
                                     )}
@@ -625,13 +632,17 @@ export default function FortunePage({
                                 </button>
                             ))}
                             <button
-                                onClick={() => setWager(points)}
+                                onClick={() => {
+                                    triggerHaptic('tick');
+                                    setWager(points);
+                                }}
                                 disabled={isSpinning || points === 0}
                                 className={cn(
-                                    'flex-1 rounded-full py-2.5 text-sm font-semibold transition-all',
+                                    'flex-1 rounded-full py-2.5 text-sm font-semibold',
                                     'border-2 active:scale-95',
+                                    'transition-all duration-150 ease-out',
                                     wager === points && points > 0
-                                        ? 'border-primary bg-primary text-primary-foreground'
+                                        ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30 scale-[1.02] animate-wager-selected'
                                         : 'border-border bg-card text-foreground hover:border-primary/50 hover:bg-primary/5',
                                     'disabled:opacity-50 disabled:cursor-not-allowed',
                                 )}
@@ -643,24 +654,31 @@ export default function FortunePage({
                         {/* Fine adjustment */}
                         <div className="flex items-center gap-3">
                             <button
-                                onClick={() => adjustWager(-10)}
+                                onClick={() => {
+                                    triggerHaptic('tick');
+                                    adjustWager(-10);
+                                }}
                                 disabled={isSpinning || wager < 10}
-                                className="flex size-11 items-center justify-center rounded-full border-2 border-border bg-card text-lg font-bold text-foreground transition-all hover:bg-muted active:scale-95 disabled:opacity-40"
+                                className="flex size-11 items-center justify-center rounded-full border-2 border-border bg-card text-lg font-bold text-foreground transition-all duration-150 hover:bg-muted active:scale-90 disabled:opacity-40"
                             >
                                 −
                             </button>
-                            <div className="flex-1 rounded-lg bg-muted/50 py-3 text-center">
+                            <div className="flex-1 rounded-lg bg-muted/50 py-3 text-center overflow-hidden">
                                 <span
+                                    key={wager}
                                     data-testid="fortune-wager-display"
-                                    className="font-display text-2xl font-bold text-foreground"
+                                    className="inline-block font-display text-2xl font-bold text-foreground animate-wager-preview"
                                 >
                                     {wager}
                                 </span>
                             </div>
                             <button
-                                onClick={() => adjustWager(10)}
+                                onClick={() => {
+                                    triggerHaptic('tick');
+                                    adjustWager(10);
+                                }}
                                 disabled={isSpinning || wager >= points}
-                                className="flex size-11 items-center justify-center rounded-full border-2 border-border bg-card text-lg font-bold text-foreground transition-all hover:bg-muted active:scale-95 disabled:opacity-40"
+                                className="flex size-11 items-center justify-center rounded-full border-2 border-border bg-card text-lg font-bold text-foreground transition-all duration-150 hover:bg-muted active:scale-90 disabled:opacity-40"
                             >
                                 +
                             </button>
