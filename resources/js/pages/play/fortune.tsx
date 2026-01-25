@@ -1,3 +1,5 @@
+import { GameInfoButton } from '@/components/game-info-button';
+import { GameInfoModal, FORTUNE_INFO } from '@/components/game-info-modal';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
@@ -82,6 +84,7 @@ export default function FortunePage({
         pointsRemaining: number;
         spinResult: SpinRecord;
     } | null>(null);
+    const [showInfoModal, setShowInfoModal] = useState(false);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const canSpin = points > 0 && wager >= 1 && wager <= points && !isSpinning && !showSuspense;
@@ -231,6 +234,14 @@ export default function FortunePage({
                     title="Rad van Fortuin"
                     points={points}
                     testId="fortune-points-display"
+                    rightAction={<GameInfoButton onClick={() => setShowInfoModal(true)} />}
+                />
+
+                {/* Game info modal */}
+                <GameInfoModal
+                    open={showInfoModal}
+                    onOpenChange={setShowInfoModal}
+                    content={FORTUNE_INFO}
                 />
 
                 {/* Background snowflakes */}

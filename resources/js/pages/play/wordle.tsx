@@ -1,4 +1,6 @@
 import { getAvatarUrl } from '@/components/avatar-picker';
+import { GameInfoButton } from '@/components/game-info-button';
+import { GameInfoModal, WORDLE_INFO } from '@/components/game-info-modal';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -79,6 +81,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
     const [popTile, setPopTile] = useState<number | null>(null);
     const [showCelebration, setShowCelebration] = useState(false);
     const [displayPoints, setDisplayPoints] = useState(player?.points ?? 0);
+    const [showInfoModal, setShowInfoModal] = useState(false);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const isCompleted = wordle?.completed ?? false;
@@ -344,6 +347,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                     title="Wordle"
                     subtitle={testMode?.active ? `Test Dag ${game?.day_number ?? 1}` : `Dag ${game?.day_number ?? 1}`}
                     points={displayPoints}
+                    rightAction={<GameInfoButton onClick={() => setShowInfoModal(true)} />}
                     leftContent={
                         <div className="flex items-center gap-2.5">
                             <Avatar
@@ -368,6 +372,13 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                             </div>
                         </div>
                     }
+                />
+
+                {/* Game info modal */}
+                <GameInfoModal
+                    open={showInfoModal}
+                    onOpenChange={setShowInfoModal}
+                    content={WORDLE_INFO}
                 />
 
                 {/* Message toast - only show when not in completed state (avoids duplicate with completion section) */}

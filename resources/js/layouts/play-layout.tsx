@@ -3,7 +3,6 @@ import { SkipLink } from '@/components/skip-link';
 import { TutorialModal } from '@/components/tutorial-modal';
 import { cn } from '@/lib/utils';
 import type { PropsWithChildren } from 'react';
-import { useCallback, useState } from 'react';
 
 interface PlayLayoutProps extends PropsWithChildren {
     title?: string;
@@ -11,11 +10,6 @@ interface PlayLayoutProps extends PropsWithChildren {
 }
 
 export default function PlayLayout({ children, hideNav }: PlayLayoutProps) {
-    const [forceOpen, setForceOpen] = useState(false);
-
-    const openTutorial = useCallback(() => setForceOpen(true), []);
-    const closeTutorial = useCallback(() => setForceOpen(false), []);
-
     return (
         <div className="flex min-h-screen flex-col bg-background">
             <SkipLink />
@@ -31,8 +25,8 @@ export default function PlayLayout({ children, hideNav }: PlayLayoutProps) {
             </main>
             {!hideNav && (
                 <nav aria-label="Hoofdnavigatie">
-                    <BottomTabNav onTutorialClick={openTutorial} />
-                    <TutorialModal forceOpen={forceOpen} onClose={closeTutorial} />
+                    <BottomTabNav />
+                    <TutorialModal />
                 </nav>
             )}
         </div>

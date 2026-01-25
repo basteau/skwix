@@ -5,6 +5,7 @@ interface PlayHeaderProps {
     title: string;
     subtitle?: string;
     leftContent?: ReactNode;
+    rightAction?: ReactNode;
     points: number;
     testId?: string;
 }
@@ -13,6 +14,7 @@ export function PlayHeader({
     title,
     subtitle,
     leftContent,
+    rightAction,
     points,
     testId = 'points-header',
 }: PlayHeaderProps) {
@@ -30,14 +32,17 @@ export function PlayHeader({
                     )}
                 </div>
             )}
-            <div
-                data-testid={testId}
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary/15 to-primary/10 px-3.5 py-1.5 shadow-sm ring-1 ring-primary/20"
-            >
-                <Sparkles className="size-3.5 text-primary" />
-                <span className="font-display text-sm font-bold tabular-nums text-primary">
-                    {points}
-                </span>
+            <div className="flex items-center gap-1">
+                <div
+                    data-testid={testId}
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary/15 to-primary/10 px-3.5 py-1.5 shadow-sm ring-1 ring-primary/20"
+                >
+                    <Sparkles className="size-3.5 text-primary" />
+                    <span className="font-display text-sm font-bold tabular-nums text-primary">
+                        {points}
+                    </span>
+                </div>
+                {rightAction}
             </div>
         </header>
     );

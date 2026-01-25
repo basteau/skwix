@@ -1,30 +1,23 @@
 import { cn } from '@/lib/utils';
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Disc3, Grid3x3, HelpCircle, Loader2, Users } from 'lucide-react';
+import { Disc3, Grid3x3, HelpCircle, Loader2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface TabItem {
     label: string;
-    href?: string;
+    href: string;
     icon: React.ComponentType<{ className?: string }>;
-    onClick?: () => void;
 }
 
-interface BottomTabNavProps {
-    onTutorialClick?: () => void;
-}
-
-const createTabs = (onTutorialClick?: () => void): TabItem[] => [
+const tabs: TabItem[] = [
     { label: 'Wordle', href: '/play/wordle', icon: Grid3x3 },
     { label: 'Vraag', href: '/play/guess', icon: HelpCircle },
     { label: 'Rad', href: '/play/fortune', icon: Disc3 },
     { label: 'Spelers', href: '/play/players', icon: Users },
-    { label: 'Uitleg', icon: BookOpen, onClick: onTutorialClick },
 ];
 
-export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
+export function BottomTabNav() {
     const { url } = usePage();
-    const tabs = createTabs(onTutorialClick);
     const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
     useEffect(() => {
@@ -71,27 +64,6 @@ export function BottomTabNav({ onTutorialClick }: BottomTabNavProps) {
                         : isNavigating && !isLoading
                           ? 'text-muted-foreground/50 pointer-events-none'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted/50';
-
-                    if (tab.onClick) {
-                        return (
-                            <button
-                                key={tab.label}
-                                onClick={tab.onClick}
-                                disabled={isNavigating}
-                                className={cn(
-                                    baseClasses,
-                                    isNavigating
-                                        ? 'text-muted-foreground/50 pointer-events-none'
-                                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
-                                )}
-                            >
-                                <Icon className="size-5" />
-                                <span className="text-[10px] leading-tight font-medium">
-                                    {tab.label}
-                                </span>
-                            </button>
-                        );
-                    }
 
                     return (
                         <Link

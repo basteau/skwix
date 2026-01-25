@@ -1,4 +1,6 @@
 import { getPortraitUrl } from '@/components/avatar-picker';
+import { GameInfoButton } from '@/components/game-info-button';
+import { GameInfoModal, GUESS_INFO } from '@/components/game-info-modal';
 import { PlayHeader } from '@/components/play-header';
 import { TestModeBanner } from '@/components/test-mode-banner';
 import { Button } from '@/components/ui/button';
@@ -112,6 +114,7 @@ export default function GuessPage({
         prizeUrl: string;
     } | null>(null);
     const [victoryPhase, setVictoryPhase] = useState<'reveal' | 'celebrate' | 'prize'>('reveal');
+    const [showInfoModal, setShowInfoModal] = useState(false);
 
     const canAsk = points >= QUESTION_COST && input.trim().length >= 3;
 
@@ -352,6 +355,14 @@ export default function GuessPage({
                     title="Mystery Woord"
                     points={points}
                     testId="guess-points-display"
+                    rightAction={<GameInfoButton onClick={() => setShowInfoModal(true)} />}
+                />
+
+                {/* Game info modal */}
+                <GameInfoModal
+                    open={showInfoModal}
+                    onOpenChange={setShowInfoModal}
+                    content={GUESS_INFO}
                 />
 
                 {/* Word length hint */}
