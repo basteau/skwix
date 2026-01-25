@@ -44,6 +44,10 @@ class WordleController extends Controller
             ->where('day_number', $dayNumber)
             ->first();
 
+        $targetWord = $this->gameService->getCurrentWordleWord($game);
+        $lastGuess = ! empty($todayAttempt?->guesses) ? $todayAttempt->guesses[count($todayAttempt->guesses) - 1]['word'] ?? null : null;
+        $wasSuccessful = $todayAttempt?->completed && $lastGuess === $targetWord;
+
         return Inertia::render('play/wordle', [
             'player' => [
                 'id' => $player->id,
@@ -61,6 +65,8 @@ class WordleController extends Controller
                 'completed' => $todayAttempt?->completed ?? false,
                 'guesses' => $todayAttempt?->guesses ?? [],
                 'points_earned' => $todayAttempt?->points_earned ?? 0,
+                'was_successful' => $wasSuccessful,
+                'target_word' => $todayAttempt?->completed ? $targetWord : null,
             ],
         ]);
     }
@@ -70,6 +76,9 @@ class WordleController extends Controller
         $testGame = $this->testGameService->getTestGame();
         $dayNumber = $this->testGameService->getDayNumber();
         $wordleWord = $this->testGameService->getWordleWord($dayNumber);
+        $guesses = $testGame['wordle']['guesses'] ?? [];
+        $lastGuess = ! empty($guesses) ? $guesses[count($guesses) - 1]['word'] ?? null : null;
+        $wasSuccessful = $testGame['wordle']['completed'] && $lastGuess === $wordleWord;
 
         return Inertia::render('play/wordle', [
             'testMode' => [
@@ -85,8 +94,10 @@ class WordleController extends Controller
             'wordle' => [
                 'available' => true,
                 'completed' => $testGame['wordle']['completed'],
-                'guesses' => $testGame['wordle']['guesses'],
+                'guesses' => $guesses,
                 'points_earned' => $testGame['wordle']['points_earned'],
+                'was_successful' => $wasSuccessful,
+                'target_word' => $testGame['wordle']['completed'] ? $wordleWord : null,
             ],
         ]);
     }

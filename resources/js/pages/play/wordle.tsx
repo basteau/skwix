@@ -9,7 +9,7 @@ import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { Snowflake, Sparkles } from 'lucide-react';
+import { Heart, Snowflake, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface GuessResult {
@@ -43,6 +43,8 @@ interface Props {
         completed: boolean;
         guesses: Guess[];
         points_earned: number;
+        was_successful?: boolean;
+        target_word?: string;
     };
     error?: string;
 }
@@ -83,6 +85,7 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
     const [showCelebration, setShowCelebration] = useState(false);
     const [displayPoints, setDisplayPoints] = useState(player?.points ?? 0);
     const [showInfoModal, setShowInfoModal] = useState(false);
+    const [wasSuccessful, setWasSuccessful] = useState<boolean | null>(wordle?.was_successful ?? null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const isCompleted = wordle?.completed ?? false;
@@ -169,13 +172,14 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                 setRevealingRow(null);
 
                 if (data.completed) {
+                    setWasSuccessful(data.correct);
                     if (data.correct) {
                         setShowCelebration(true);
                         setMessage(`Gefeliciteerd! +${data.points_earned} punten`);
                         animatePoints(displayPoints, displayPoints + data.points_earned);
                         setTimeout(() => setShowCelebration(false), 3000);
                     } else {
-                        setMessage(`Helaas! +${data.points_earned} punten`);
+                        setMessage(`Niet gevonden, maar goed geprobeerd! +${data.points_earned} punten`);
                         animatePoints(displayPoints, displayPoints + data.points_earned);
                     }
                     setTimeout(() => router.reload(), 2500);
@@ -445,8 +449,8 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                         );
                     })}
 
-                    {/* Success state - integrated with grid for cleaner layout */}
-                    {isCompleted && (
+                    {/* Completion state - different UI for success vs failure */}
+                    {isCompleted && wasSuccessful && (
                         <div className="mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
                             <div className="inline-flex flex-col items-center gap-3">
                                 <div className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-br from-success/20 via-success/10 to-success/5 px-8 py-4 shadow-lg shadow-success/10">
@@ -458,6 +462,35 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                                 </div>
                                 <p className="text-base text-muted-foreground">
                                     Morgen weer een nieuwe 🎯
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Failed state - encouraging message with distinct styling */}
+                    {isCompleted && wasSuccessful === false && (
+                        <div
+                            data-testid="wordle-failed-state"
+                            className="mt-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500"
+                        >
+                            <div className="inline-flex flex-col items-center gap-3">
+                                <div className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-amber-500/5 px-8 py-4 shadow-lg shadow-amber-500/10">
+                                    <Heart className="size-6 text-amber-500" />
+                                    <span className="font-display text-3xl font-bold text-amber-500">
+                                        +{wordle?.points_earned}
+                                    </span>
+                                    <span className="text-lg font-medium text-amber-500/80">punten</span>
+                                </div>
+                                {wordle?.target_word && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Het woord was:{' '}
+                                        <span className="font-semibold uppercase text-foreground">
+                                            {wordle.target_word}
+                                        </span>
+                                    </p>
+                                )}
+                                <p className="text-base text-muted-foreground">
+                                    Goed geprobeerd! Morgen weer een kans 💪
                                 </p>
                             </div>
                         </div>
