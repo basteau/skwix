@@ -47,6 +47,9 @@ jobs:
       - name: Frontend Lint
         run: npm run lint
 
+      - name: TypeScript Check
+        run: npx tsc --noEmit
+
   test:
     name: Test
     runs-on: ubuntu-latest
