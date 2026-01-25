@@ -20,7 +20,7 @@ class PlayerFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'avatar_url' => 'https://example.com/avatar.png',
             'points' => 0,
-            'invite_code' => Str::random(8),
+            'invite_code' => strtoupper(Str::random(6)),
             'joined_at' => null,
         ];
     }
