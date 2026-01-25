@@ -334,7 +334,6 @@ export default function WordlePage({ testMode, player, game, wordle, error }: Pr
                 {/* Test Mode Banner */}
                 {testMode?.active && (
                     <TestModeBanner
-                        wordleWord={testMode.wordleWord}
                         onReset={() => {
                             setCurrentGuess('');
                             setGuesses([]);

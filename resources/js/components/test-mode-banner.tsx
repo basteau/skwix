@@ -4,12 +4,11 @@ import { router } from '@inertiajs/react';
 import { FlaskConical, RotateCcw, X } from 'lucide-react';
 
 interface TestModeBannerProps {
-    wordleWord?: string;
     className?: string;
     onReset?: () => void;
 }
 
-export function TestModeBanner({ wordleWord, className, onReset }: TestModeBannerProps) {
+export function TestModeBanner({ className, onReset }: TestModeBannerProps) {
     const handleReset = () => {
         onReset?.();
         router.post('/test/reset');
@@ -32,11 +31,6 @@ export function TestModeBanner({ wordleWord, className, onReset }: TestModeBanne
                 <span className="text-xs font-semibold uppercase tracking-wider text-warning">
                     Test Mode
                 </span>
-                {wordleWord && (
-                    <span className="ml-2 rounded bg-warning/20 px-2 py-0.5 font-mono text-xs font-bold uppercase text-warning">
-                        {wordleWord}
-                    </span>
-                )}
             </div>
             <div className="flex items-center gap-1">
                 <Button

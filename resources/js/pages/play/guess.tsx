@@ -328,7 +328,7 @@ export default function GuessPage({
         <PlayLayout>
             <Head title="Vraag" />
             <div className="relative flex h-full flex-col overflow-hidden">
-                {testMode?.active && <TestModeBanner wordleWord={testMode.secretWord} />}
+                {testMode?.active && <TestModeBanner />}
 
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
