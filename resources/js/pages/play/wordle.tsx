@@ -297,7 +297,7 @@ export default function WordlePage({
     return (
         <PlayLayout>
             <Head title="Wordle" />
-            <div className="relative flex h-full flex-col overflow-hidden pt-[calc(var(--header-height)+var(--safe-top))]">
+            <div className="fixed inset-x-0 top-[calc(var(--header-height)+var(--safe-top))] bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom))] flex flex-col overflow-hidden">
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (
@@ -432,8 +432,8 @@ export default function WordlePage({
                 <div
                     data-testid="wordle-grid"
                     className={cn(
-                        'flex flex-1 flex-col items-center gap-1 px-4 py-4',
-                        isCompleted ? 'justify-start pt-8' : 'justify-center',
+                        'flex min-h-0 flex-1 flex-col items-center justify-center gap-1 sm:gap-1.5 px-4 py-4',
+                        isCompleted && 'justify-start pt-4',
                     )}
                 >
                     {[...Array(6)].map((_, rowIdx) => {
@@ -449,7 +449,7 @@ export default function WordlePage({
                             <div
                                 key={rowIdx}
                                 className={cn(
-                                    'flex gap-1',
+                                    'flex gap-1 sm:gap-1.5',
                                     isCurrentRow && shakeRow && 'animate-shake',
                                     isCurrentRow &&
                                         'rounded-lg ring-2 ring-primary/20 ring-offset-2 ring-offset-background',
@@ -565,12 +565,12 @@ export default function WordlePage({
 
                 {/* Keyboard */}
                 {isAvailable && !isCompleted && (
-                    <div className="border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 px-1.5 pt-3 pb-[calc(var(--safe-bottom)+0.75rem)]">
-                        <div className="flex flex-col gap-1.5">
+                    <div className="shrink-0 border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 px-2 pt-3 pb-2">
+                        <div className="mx-auto flex max-w-md flex-col gap-1.5">
                             {KEYBOARD_ROWS.map((row, rowIdx) => (
                                 <div
                                     key={rowIdx}
-                                    className="flex justify-center gap-1"
+                                    className="flex justify-center gap-1.5"
                                 >
                                     {row.map((key) => (
                                         <KeyboardKey
@@ -606,7 +606,7 @@ function Tile({
     testId?: string;
 }) {
     const baseClasses = cn(
-        'flex size-[56px] items-center justify-center rounded-md text-[1.75rem] font-bold uppercase',
+        'flex size-[54px] sm:size-[62px] md:size-[68px] items-center justify-center rounded-md text-[1.65rem] sm:text-[1.85rem] md:text-[2rem] font-bold uppercase',
         'transition-all duration-200',
     );
 
@@ -689,7 +689,7 @@ function KeyboardKey({
                 disabled={disabled}
                 className={cn(
                     baseClasses,
-                    'h-12 min-w-[56px] rounded-md px-2 text-xs',
+                    'h-12 sm:h-[52px] min-w-[58px] sm:min-w-[64px] rounded-xl px-2 text-base',
                     'hover:bg-primary-hover bg-primary text-primary-foreground shadow-sm',
                 )}
             >
@@ -706,7 +706,7 @@ function KeyboardKey({
             disabled={disabled}
             className={cn(
                 baseClasses,
-                'h-12 min-w-[32px] rounded-md text-sm',
+                'h-12 sm:h-[52px] min-w-[32px] sm:min-w-[36px] rounded-xl text-base',
                 stateClasses[state ?? 'default'],
             )}
         >

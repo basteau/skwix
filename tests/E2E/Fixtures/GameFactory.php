@@ -24,7 +24,7 @@ class GameFactory
             'wordle_words' => ['SNEEUW', 'VORST', 'IJZEL'],
             'status' => 'pending',
             'starts_at' => Carbon::now()->addDay(),
-            'question_cost' => 3,
+            'question_cost' => 10,
             'correct_wordle_points' => 5,
         ], $attributes));
     }
@@ -41,7 +41,7 @@ class GameFactory
             'wordle_words' => ['SNEEUW', 'VORST', 'IJZEL'],
             'status' => 'active',
             'starts_at' => Carbon::now()->subDay(),
-            'question_cost' => 3,
+            'question_cost' => 10,
             'correct_wordle_points' => 5,
         ], $attributes));
     }

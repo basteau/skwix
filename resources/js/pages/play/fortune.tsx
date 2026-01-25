@@ -310,8 +310,8 @@ export default function FortunePage({
                 <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-4">
                     {/* Wheel Container - scales to fit available space */}
                     <div
-                        className="relative aspect-square w-full max-w-[320px]"
-                        style={{ maxHeight: 'min(320px, 100%)' }}
+                        className="relative aspect-square w-full max-w-[256px] sm:max-w-[275px] md:max-w-[320px]"
+                        style={{ maxHeight: 'min(256px, 100%)' }}
                     >
                         {/* Icicle pointer */}
                         <div

@@ -59,7 +59,7 @@ interface Props {
     isAdmin?: boolean;
 }
 
-const QUESTION_COST = 3;
+const QUESTION_COST = 10;
 const POLL_INTERVAL = 10_000; // 10 seconds
 
 const SNOWFLAKES = Array.from({ length: 6 }).map((_, i) => ({

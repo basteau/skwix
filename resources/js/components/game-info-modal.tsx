@@ -193,7 +193,7 @@ export const GUESS_INFO: GameInfoContent = {
     description: 'Stel ja/nee vragen over het mystery woord of waag een gok!',
     rules: [
         { text: 'Stel ja/nee vragen over het mystery woord' },
-        { text: 'Elke vraag kost 3 punten' },
+        { text: 'Elke vraag kost 10 punten' },
         { text: 'Raad het woord correct = je wint het spel!' },
         { text: 'Alle spelers zien elkaars vragen' },
     ],

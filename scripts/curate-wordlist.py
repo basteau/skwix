@@ -20,7 +20,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 TMP_DIR = PROJECT_ROOT / "tmp"
-OUTPUT_FILE = PROJECT_ROOT / "database/seeders/dutch_words.json"
+OUTPUT_FILE = PROJECT_ROOT / "public/woordenlijst.txt"
 
 # Load source files
 nl_5words_file = TMP_DIR / "nl_5words.txt"
@@ -527,9 +527,9 @@ def main():
     
     print(f"\n  Final word count: {len(final_words)}")
     
-    # Write output
+    # Write output (one word per line, sorted)
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(final_words, f, ensure_ascii=False, indent=None)
+        f.write('\n'.join(sorted(final_words)))
     
     print(f"\n✅ Wrote {len(final_words)} words to {OUTPUT_FILE}")
     

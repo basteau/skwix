@@ -23,7 +23,7 @@ beforeEach(function () {
     // Create active game with known secret word
     $this->fixture = GameFactory::createGame([
         'secret_word' => 'WINTER',
-        'question_cost' => 3,
+        'question_cost' => 10,
     ]);
     $this->game = $this->fixture['game'];
     $this->players = $this->fixture['players'];

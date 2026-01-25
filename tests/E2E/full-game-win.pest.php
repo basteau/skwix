@@ -27,7 +27,7 @@ beforeEach(function () {
         'invite_code' => 'WINTER24',
         'wordle_words' => ['SNEEUW', 'VORST', 'IJZEL'],
         'secret_word' => 'WINTER',
-        'question_cost' => 3,
+        'question_cost' => 10,
         'correct_wordle_points' => 5,
     ]);
 });

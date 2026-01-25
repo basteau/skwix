@@ -214,25 +214,27 @@ class FortuneController extends Controller
         $rotations = random_int(3, 5);
         $segmentAngle = 360 / self::SEGMENTS;
 
-        // The wheel is drawn with segment 0 at top (-90°). When we rotate clockwise by X degrees total,
-        // the segment at top (under pointer) is: (SEGMENTS - floor(X / segmentAngle) % SEGMENTS) % SEGMENTS
+        // The wheel is drawn with segment 0 starting at top (-90°), meaning the TOP pointer
+        // sits on the BOUNDARY between segment 7 and segment 0 when rotation = 0.
         //
-        // To land on landingSegment after adding spinDegrees to currentRotation:
-        // finalRotation = currentRotation + spinDegrees
-        // We want: (SEGMENTS - floor(finalRotation / segmentAngle) % SEGMENTS) % SEGMENTS = landingSegment
+        // After clockwise rotation by X degrees, the segment under the top pointer is:
+        //   (SEGMENTS - 1 - floor(X / segmentAngle)) % SEGMENTS
         //
-        // Solving: floor(finalRotation / segmentAngle) % SEGMENTS = (SEGMENTS - landingSegment) % SEGMENTS
-        // So finalRotation should be: ((SEGMENTS - landingSegment) % SEGMENTS) * segmentAngle + n*360
+        // To land on landingSegment, we need:
+        //   floor(finalRotation / segmentAngle) % SEGMENTS = (SEGMENTS - 1 - landingSegment) % SEGMENTS
+        //
+        // So the target rotation (mod 360) should put us in the correct segment range.
 
-        $targetSegmentPosition = ((self::SEGMENTS - $landingSegment) % self::SEGMENTS) * $segmentAngle;
+        $targetSegmentIndex = ((self::SEGMENTS - 1 - $landingSegment) + self::SEGMENTS) % self::SEGMENTS;
+        $targetSegmentPosition = $targetSegmentIndex * $segmentAngle;
 
-        // Add random offset within the segment (not too close to edges)
+        // Add random offset within the segment (not too close to edges to avoid ambiguity)
         $offsetWithinSegment = random_int(8, (int) $segmentAngle - 8);
         $targetFinalRotation = $targetSegmentPosition + $offsetWithinSegment;
 
         // Calculate how much we need to spin from current position
-        // We want: currentRotation + spinDegrees ≡ targetFinalRotation (mod 360)
-        // But we also want to add multiple full rotations for visual effect
+        // We want: (currentRotation + spinDegrees) mod 360 = targetFinalRotation
+        // Plus multiple full rotations for visual effect
         $baseRotation = $rotations * 360;
 
         // Normalize current rotation to 0-360

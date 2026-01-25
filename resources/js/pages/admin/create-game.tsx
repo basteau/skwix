@@ -8,49 +8,36 @@ import {
     getDefaultStartDate,
 } from '@/components/ui/date-time-picker';
 import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { getInitials } from '@/hooks/use-initials';
-import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Search, UserPlus, X } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
-interface WordValidation {
-    valid: boolean;
-    message: string;
-    suggestions: string[];
-    loading: boolean;
+interface AvailableUser {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string | null;
+    avatar_url: string | null;
 }
 
 interface Props {
-    sampleWords: string[];
+    availableUsers: AvailableUser[];
 }
 
 interface PlayerRow {
     id: string;
     name: string;
     email: string;
+    userId?: number;
+    avatarUrl?: string | null;
 }
 
-export default function CreateGame({ sampleWords }: Props) {
+export default function CreateGame({ availableUsers }: Props) {
     const [secretWord, setSecretWord] = useState('');
     const [startsAt, setStartsAt] = useState<Date | undefined>(
         getDefaultStartDate(),
     );
-    const [durationDays, setDurationDays] = useState(6);
-    const [wordleWords, setWordleWords] = useState<string[]>(
-        sampleWords.slice(0, 6).map((w) => w.toLowerCase()),
-    );
-    const [wordValidations, setWordValidations] = useState<
-        Record<number, WordValidation>
-    >({});
-    const validationTimers = useRef<Record<number, NodeJS.Timeout>>({});
     const [players, setPlayers] = useState<PlayerRow[]>([
         { id: crypto.randomUUID(), name: '', email: '' },
         { id: crypto.randomUUID(), name: '', email: '' },
@@ -88,96 +75,24 @@ export default function CreateGame({ sampleWords }: Props) {
         [],
     );
 
-    const validateWord = useCallback(async (word: string, index: number) => {
-        if (word.length !== 5) {
-            setWordValidations((prev) => ({
-                ...prev,
-                [index]: {
-                    valid: false,
-                    message: 'Woord moet 5 letters zijn',
-                    suggestions: [],
-                    loading: false,
-                },
-            }));
-            return;
-        }
-
-        setWordValidations((prev) => ({
-            ...prev,
-            [index]: { ...prev[index], loading: true },
-        }));
-
-        try {
-            const res = await fetch(
-                `/admin/validate-word?word=${encodeURIComponent(word)}`,
+    const selectExistingUser = useCallback(
+        (playerId: string, user: AvailableUser) => {
+            setPlayers((prev) =>
+                prev.map((p) =>
+                    p.id === playerId
+                        ? {
+                              ...p,
+                              name: user.name,
+                              email: user.email,
+                              userId: user.id,
+                              avatarUrl: user.avatar_url,
+                          }
+                        : p,
+                ),
             );
-            const data = await res.json();
-            setWordValidations((prev) => ({
-                ...prev,
-                [index]: { ...data, loading: false },
-            }));
-        } catch {
-            setWordValidations((prev) => ({
-                ...prev,
-                [index]: {
-                    valid: false,
-                    message: 'Validatie mislukt',
-                    suggestions: [],
-                    loading: false,
-                },
-            }));
-        }
-    }, []);
-
-    const refreshWordleWords = useCallback(async () => {
-        try {
-            const res = await fetch(
-                `/admin/random-words?count=${durationDays}`,
-            );
-            const data = await res.json();
-            setWordleWords(data.words.map((w: string) => w.toLowerCase()));
-            setWordValidations({});
-        } catch {
-            // ignore
-        }
-    }, [durationDays]);
-
-    const updateWordleWord = useCallback(
-        (index: number, value: string) => {
-            const word = value.toLowerCase();
-            setWordleWords((prev) =>
-                prev.map((w, i) => (i === index ? word : w)),
-            );
-
-            if (validationTimers.current[index]) {
-                clearTimeout(validationTimers.current[index]);
-            }
-
-            if (word.length === 5) {
-                validationTimers.current[index] = setTimeout(() => {
-                    validateWord(word, index);
-                }, 300);
-            } else {
-                setWordValidations((prev) => ({
-                    ...prev,
-                    [index]: {
-                        valid: false,
-                        message: '',
-                        suggestions: [],
-                        loading: false,
-                    },
-                }));
-            }
         },
-        [validateWord],
+        [],
     );
-
-    useEffect(() => {
-        const timers = validationTimers.current;
-        return () => {
-            Object.values(timers).forEach(clearTimeout);
-        };
-    }, []);
 
     const handleSubmit = useCallback(async () => {
         setIsSubmitting(true);
@@ -196,8 +111,6 @@ export default function CreateGame({ sampleWords }: Props) {
         const payload = {
             secret_word: secretWord,
             starts_at: startsAt?.toISOString() ?? '',
-            duration_days: durationDays,
-            wordle_words: wordleWords.slice(0, durationDays),
             players: players.map((p) => ({
                 name: p.name,
                 email: p.email,
@@ -212,7 +125,7 @@ export default function CreateGame({ sampleWords }: Props) {
         } catch {
             setIsSubmitting(false);
         }
-    }, [secretWord, startsAt, durationDays, wordleWords, players]);
+    }, [secretWord, startsAt, players]);
 
     return (
         <>
@@ -252,160 +165,28 @@ export default function CreateGame({ sampleWords }: Props) {
                         {/* Timing */}
                         <section>
                             <h2 className="mb-3 text-lg font-semibold text-foreground">
-                                Planning
+                                Start
                             </h2>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-foreground">
-                                        Start datum & tijd
-                                    </label>
-                                    <DateTimePicker
-                                        value={startsAt}
-                                        onChange={setStartsAt}
-                                        placeholder="Selecteer datum & tijd"
-                                        data-testid="starts-at-picker"
-                                    />
-                                    {errors.starts_at && (
-                                        <p className="mt-1 text-sm text-destructive">
-                                            {errors.starts_at}
-                                        </p>
-                                    )}
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-foreground">
-                                        Duur (dagen)
-                                    </label>
-                                    <Select
-                                        value={String(durationDays)}
-                                        onValueChange={(value) =>
-                                            setDurationDays(parseInt(value, 10))
-                                        }
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="4">
-                                                4 dagen
-                                            </SelectItem>
-                                            <SelectItem value="5">
-                                                5 dagen
-                                            </SelectItem>
-                                            <SelectItem value="6">
-                                                6 dagen
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Wordle Words */}
-                        <section>
-                            <div className="mb-3 flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-foreground">
-                                    Wordle Woorden ({durationDays} nodig)
-                                </h2>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={refreshWordleWords}
-                                >
-                                    Shuffle
-                                </Button>
-                            </div>
-                            <div className="grid gap-3 sm:grid-cols-3">
-                                {wordleWords
-                                    .slice(0, durationDays)
-                                    .map((word, i) => {
-                                        const validation = wordValidations[i];
-                                        const showStatus =
-                                            word.length === 5 && validation;
-                                        return (
-                                            <div key={i}>
-                                                <label className="mb-1 block text-xs text-muted-foreground">
-                                                    Dag {i + 1}
-                                                </label>
-                                                <div className="relative">
-                                                    <Input
-                                                        value={word}
-                                                        onChange={(e) =>
-                                                            updateWordleWord(
-                                                                i,
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        maxLength={5}
-                                                        className={cn(
-                                                            'pr-9 font-mono uppercase',
-                                                            showStatus &&
-                                                                validation.valid &&
-                                                                'border-green-500 focus-visible:ring-green-500',
-                                                            showStatus &&
-                                                                !validation.valid &&
-                                                                !validation.loading &&
-                                                                'border-destructive focus-visible:ring-destructive',
-                                                        )}
-                                                    />
-                                                    {showStatus && (
-                                                        <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                                                            {validation.loading ? (
-                                                                <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                                                            ) : validation.valid ? (
-                                                                <CheckCircle2 className="size-4 text-green-500" />
-                                                            ) : (
-                                                                <XCircle className="size-4 text-destructive" />
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {showStatus &&
-                                                    !validation.valid &&
-                                                    !validation.loading &&
-                                                    validation.suggestions
-                                                        .length > 0 && (
-                                                        <div className="mt-1.5 text-xs">
-                                                            <span className="text-muted-foreground">
-                                                                Suggesties:{' '}
-                                                            </span>
-                                                            {validation.suggestions.map(
-                                                                (s, si) => (
-                                                                    <button
-                                                                        key={s}
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            updateWordleWord(
-                                                                                i,
-                                                                                s,
-                                                                            );
-                                                                            validateWord(
-                                                                                s,
-                                                                                i,
-                                                                            );
-                                                                        }}
-                                                                        className="font-mono text-primary uppercase hover:underline"
-                                                                    >
-                                                                        {s}
-                                                                        {si <
-                                                                            validation
-                                                                                .suggestions
-                                                                                .length -
-                                                                                1 &&
-                                                                            ', '}
-                                                                    </button>
-                                                                ),
-                                                            )}
-                                                        </div>
-                                                    )}
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                            {errors.wordle_words && (
-                                <p className="mt-1 text-sm text-destructive">
-                                    {errors.wordle_words}
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">
+                                    Start datum & tijd
+                                </label>
+                                <DateTimePicker
+                                    value={startsAt}
+                                    onChange={setStartsAt}
+                                    placeholder="Selecteer datum & tijd"
+                                    data-testid="starts-at-picker"
+                                />
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Het spel loopt totdat iemand het mystery
+                                    woord raadt
                                 </p>
-                            )}
+                                {errors.starts_at && (
+                                    <p className="mt-1 text-sm text-destructive">
+                                        {errors.starts_at}
+                                    </p>
+                                )}
+                            </div>
                         </section>
 
                         {/* Players */}
@@ -420,53 +201,48 @@ export default function CreateGame({ sampleWords }: Props) {
                                     onClick={addPlayer}
                                     disabled={players.length >= 8}
                                 >
-                                    + Speler
+                                    <UserPlus className="mr-1 size-4" />
+                                    Speler
                                 </Button>
                             </div>
-                            <div className="divide-y divide-border">
+
+                            {/* Selected Players */}
+                            <div className="mb-4 space-y-2">
                                 {players.map((player, i) => (
                                     <div
                                         key={player.id}
-                                        className="py-4 first:pt-0 last:pb-0"
+                                        className="flex items-center gap-3 rounded-lg border bg-card p-3"
                                     >
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <span className="text-sm font-medium text-foreground">
-                                                Speler {i + 1}
-                                            </span>
-                                            {players.length > 2 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        removePlayer(player.id)
-                                                    }
-                                                    className="text-sm text-destructive hover:underline"
-                                                >
-                                                    Verwijder
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className="flex items-start gap-4">
-                                            <Avatar className="size-14 shrink-0 border-2 border-border">
-                                                <AvatarImage
-                                                    src={getAvatarUrl(
+                                        <Avatar className="size-10 shrink-0 border border-border">
+                                            <AvatarImage
+                                                src={
+                                                    player.avatarUrl ||
+                                                    getAvatarUrl(
                                                         getAvatarForName(
                                                             player.name,
                                                         ),
-                                                    )}
-                                                    alt={
-                                                        player.name || 'Avatar'
-                                                    }
-                                                />
-                                                <AvatarFallback className="bg-primary/10 text-primary">
-                                                    {player.name
-                                                        ? getInitials(
-                                                              player.name,
-                                                          )
-                                                        : '?'}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1">
-                                                <div className="grid gap-3 sm:grid-cols-2">
+                                                    )
+                                                }
+                                                alt={player.name || 'Avatar'}
+                                            />
+                                            <AvatarFallback className="bg-primary/10 text-sm text-primary">
+                                                {player.name
+                                                    ? getInitials(player.name)
+                                                    : '?'}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="min-w-0 flex-1">
+                                            {player.userId ? (
+                                                <div>
+                                                    <p className="truncate font-medium text-foreground">
+                                                        {player.name}
+                                                    </p>
+                                                    <p className="truncate text-sm text-muted-foreground">
+                                                        {player.email}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <div className="grid gap-2 sm:grid-cols-2">
                                                     <Input
                                                         placeholder="Naam"
                                                         value={player.name}
@@ -478,6 +254,7 @@ export default function CreateGame({ sampleWords }: Props) {
                                                                 e.target.value,
                                                             )
                                                         }
+                                                        className="h-8"
                                                     />
                                                     <Input
                                                         type="email"
@@ -491,15 +268,110 @@ export default function CreateGame({ sampleWords }: Props) {
                                                                 e.target.value,
                                                             )
                                                         }
+                                                        className="h-8"
                                                     />
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
+                                        {players.length > 2 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removePlayer(player.id)
+                                                }
+                                                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                            >
+                                                <X className="size-4" />
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Available Users to Add */}
+                            {availableUsers.length > 0 && (
+                                <div>
+                                    <p className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                                        <Search className="size-4" />
+                                        Kies uit bestaande spelers
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                        {availableUsers
+                                            .filter(
+                                                (user) =>
+                                                    !players.some(
+                                                        (p) =>
+                                                            p.email.toLowerCase() ===
+                                                            user.email.toLowerCase(),
+                                                    ),
+                                            )
+                                            .map((user) => (
+                                                <button
+                                                    key={user.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const emptySlot =
+                                                            players.find(
+                                                                (p) =>
+                                                                    !p.name &&
+                                                                    !p.email,
+                                                            );
+                                                        if (emptySlot) {
+                                                            selectExistingUser(
+                                                                emptySlot.id,
+                                                                user,
+                                                            );
+                                                        } else if (
+                                                            players.length < 8
+                                                        ) {
+                                                            setPlayers(
+                                                                (prev) => [
+                                                                    ...prev,
+                                                                    {
+                                                                        id: crypto.randomUUID(),
+                                                                        name: user.name,
+                                                                        email: user.email,
+                                                                        userId: user.id,
+                                                                        avatarUrl:
+                                                                            user.avatar_url,
+                                                                    },
+                                                                ],
+                                                            );
+                                                        }
+                                                    }}
+                                                    disabled={players.length >= 8}
+                                                    className="flex items-center gap-2 rounded-lg border bg-background p-2 text-left transition-colors hover:border-primary hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                    <Avatar className="size-8 shrink-0 border border-border">
+                                                        <AvatarImage
+                                                            src={
+                                                                user.avatar_url ||
+                                                                undefined
+                                                            }
+                                                            alt={user.name}
+                                                        />
+                                                        <AvatarFallback className="bg-primary/10 text-xs text-primary">
+                                                            {getInitials(
+                                                                user.name,
+                                                            )}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="truncate text-sm font-medium">
+                                                            {user.name}
+                                                        </p>
+                                                        <p className="truncate text-xs text-muted-foreground">
+                                                            {user.email}
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {errors.players && (
-                                <p className="mt-1 text-sm text-destructive">
+                                <p className="mt-2 text-sm text-destructive">
                                     {errors.players}
                                 </p>
                             )}

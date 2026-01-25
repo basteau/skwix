@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Services\GameEndedNotificationService;
 use App\Services\WordlistService;
 use Carbon\Carbon;
-use Database\Seeders\DutchWordlistSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -68,10 +67,18 @@ class AdminController extends Controller
 
     public function createForm(): Response
     {
-        $sampleWords = DutchWordlistSeeder::getRandomWords(20);
+        $availableUsers = User::orderBy('name')
+            ->get()
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'avatar' => $user->avatar,
+                'avatar_url' => $user->avatar ? "/images/faces/{$user->avatar}.png" : null,
+            ]);
 
         return Inertia::render('admin/create-game', [
-            'sampleWords' => $sampleWords,
+            'availableUsers' => $availableUsers,
         ]);
     }
 
@@ -80,9 +87,6 @@ class AdminController extends Controller
         $request->validate([
             'secret_word' => 'required|string|min:2|max:50',
             'starts_at' => 'required|date|after:now',
-            'duration_days' => 'required|integer|min:4|max:6',
-            'wordle_words' => 'required|array|min:4|max:6',
-            'wordle_words.*' => 'string|size:5',
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
             'players.*.email' => 'required|email|max:255',
@@ -96,24 +100,15 @@ class AdminController extends Controller
                 ->withErrors(['players' => 'Elke speler moet een uniek e-mailadres hebben']);
         }
 
-        $invalidWords = $this->validateWordleWordsAgainstWordlist($request->wordle_words);
-        if (! empty($invalidWords)) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors(['wordle_words' => 'Onbekende woorden: '.implode(', ', $invalidWords)]);
-        }
-
         $game = \DB::transaction(function () use ($request) {
-            $startsAt = Carbon::parse($request->starts_at, 'Europe/Brussels');
-            $endsAt = $startsAt->copy()->addDays($request->duration_days);
+            $startsAt = Carbon::parse($request->starts_at)->setTimezone('Europe/Brussels');
 
             $game = Game::create([
                 'secret_word' => strtolower(trim($request->secret_word)),
                 'status' => 'draft',
                 'starts_at' => $startsAt,
-                'ends_at' => $endsAt,
-                'wordle_words' => array_map('strtolower', $request->wordle_words),
+                'ends_at' => null,
+                'wordle_words' => $this->wordlistService->getRandomWords(60),
             ]);
 
             foreach ($request->players as $playerData) {
@@ -156,7 +151,7 @@ class AdminController extends Controller
     public function getRandomWords(Request $request)
     {
         $count = min(max((int) $request->get('count', 6), 1), 10);
-        $words = DutchWordlistSeeder::getRandomWords($count);
+        $words = $this->wordlistService->getRandomWords($count);
 
         return response()->json(['words' => $words]);
     }

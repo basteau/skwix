@@ -173,7 +173,7 @@ const steps: TutorialStep[] = [
         title: 'Vragen Stellen',
         description:
             'Stel ja/nee vragen over het mystery-woord om dichter bij het antwoord te komen.',
-        points: { text: '−3 punten', type: 'cost' },
+        points: { text: '−10 punten', type: 'cost' },
         visual: (
             <div className="space-y-2.5 py-4">
                 {/* Chat-style Q&A */}

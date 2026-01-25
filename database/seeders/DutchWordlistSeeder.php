@@ -2,56 +2,50 @@
 
 namespace Database\Seeders;
 
+use App\Services\WordlistService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\File;
 
 class DutchWordlistSeeder extends Seeder
 {
     public function run(): void
     {
-        $path = database_path('seeders/dutch_words.json');
+        $service = new WordlistService;
+        $words = $service->getWords();
 
-        if (! File::exists($path)) {
-            $this->command->error('dutch_words.json not found!');
-
-            return;
-        }
-
-        $words = json_decode(File::get($path), true);
-
-        if (! is_array($words) || count($words) < 2048) {
-            $this->command->error('dutch_words.json must contain at least 2048 words');
+        if ($words->isEmpty()) {
+            $this->command->error('Wordlist not found at public/woordenlijst.txt!');
 
             return;
         }
 
-        $allFiveLetters = collect($words)->every(fn ($word) => mb_strlen($word) === 5);
+        if ($words->count() < 2048) {
+            $this->command->error('Wordlist must contain at least 2048 words');
+
+            return;
+        }
+
+        $allFiveLetters = $words->every(fn ($word) => mb_strlen($word) === 5);
         if (! $allFiveLetters) {
             $this->command->error('All words must be exactly 5 letters');
 
             return;
         }
 
-        $uniqueCount = collect($words)->unique()->count();
-        if ($uniqueCount !== count($words)) {
-            $this->command->warn('Found '.count($words) - $uniqueCount.' duplicate words');
+        $uniqueCount = $words->unique()->count();
+        if ($uniqueCount !== $words->count()) {
+            $this->command->warn('Found '.($words->count() - $uniqueCount).' duplicate words');
         }
 
-        $this->command->info('Dutch wordlist validated: '.count($words).' words');
+        $this->command->info('Dutch wordlist validated: '.$words->count().' words');
     }
 
     public static function getRandomWords(int $count): array
     {
-        $path = database_path('seeders/dutch_words.json');
-        $words = json_decode(File::get($path), true);
-
-        return collect($words)->shuffle()->take($count)->values()->all();
+        return (new WordlistService)->getRandomWords($count);
     }
 
     public static function getWords(): array
     {
-        $path = database_path('seeders/dutch_words.json');
-
-        return json_decode(File::get($path), true);
+        return (new WordlistService)->getWords()->all();
     }
 }
