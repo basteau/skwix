@@ -1,5 +1,6 @@
 import { AdminHeader } from '@/components/admin-header';
 import { getAvatarForName, getAvatarUrl } from '@/components/avatar-picker';
+import { SkipLink } from '@/components/skip-link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -185,6 +186,7 @@ export default function CreateGame({ sampleWords }: Props) {
     return (
         <>
             <Head title="Nieuw Spel - Admin" />
+            <SkipLink />
             <div className="min-h-svh bg-background">
                 <AdminHeader
                     title="Nieuw Spel Aanmaken"
@@ -192,7 +194,7 @@ export default function CreateGame({ sampleWords }: Props) {
                     breadcrumbs={[{ label: 'Nieuw Spel' }]}
                 />
 
-                <main className="pb-safe mx-auto max-w-2xl p-6">
+                <main id="main-content" tabIndex={-1} className="pb-safe mx-auto max-w-2xl p-6 outline-none">
                     <div className="space-y-8">
                         {/* Secret Word */}
                         <section>

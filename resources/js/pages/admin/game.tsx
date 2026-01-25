@@ -1,4 +1,5 @@
 import { AdminHeader } from '@/components/admin-header';
+import { SkipLink } from '@/components/skip-link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -182,6 +183,7 @@ export default function AdminGameDetail({ game, players }: Props) {
     return (
         <>
             <Head title={`Spel: ${game.secret_word} - Admin`} />
+            <SkipLink />
             <div className="min-h-svh bg-background">
                 <AdminHeader
                     title={game.secret_word}
@@ -202,7 +204,7 @@ export default function AdminGameDetail({ game, players }: Props) {
                     }
                 />
 
-                <main className="mx-auto max-w-4xl p-6 pb-[calc(1.5rem+var(--safe-bottom))]">
+                <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl p-6 pb-[calc(1.5rem+var(--safe-bottom))] outline-none">
                     <div className="space-y-8">
                         {/* Invite Players - Only for draft games */}
                         {game.status === 'draft' && (

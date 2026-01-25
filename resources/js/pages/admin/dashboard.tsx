@@ -1,4 +1,5 @@
 import { AdminHeader } from '@/components/admin-header';
+import { SkipLink } from '@/components/skip-link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ export default function AdminDashboard({ games = [] }: Props) {
     return (
         <>
             <Head title="Admin - Skwix" />
+            <SkipLink />
             <div className="min-h-svh bg-background">
                 <AdminHeader
                     title="Admin Dashboard"
@@ -45,7 +47,7 @@ export default function AdminDashboard({ games = [] }: Props) {
                     }
                 />
 
-                <main className="pb-safe p-6">
+                <main id="main-content" tabIndex={-1} className="pb-safe p-6 outline-none">
                     {games.length === 0 ? (
                         <div className="mx-auto max-w-md py-12">
                             <div className="mb-8 flex justify-center">
