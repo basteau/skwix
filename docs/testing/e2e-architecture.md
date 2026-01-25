@@ -75,7 +75,30 @@ E2E_NOW="2026-01-25 09:00:00"
 
 # Disable PWA caching
 PWA_ENABLED=false
+
+# Admin backdoor for testing
+ADMIN_SECRET_TOKEN=local-test-admin-token
 ```
+
+## Admin Backdoor
+
+The `/sudo/{token}` route provides admin access for testing. It:
+1. Validates the token against `ADMIN_SECRET_TOKEN` config
+2. Creates or finds an admin user
+3. Logs them in and redirects to admin dashboard
+
+**Usage in E2E:**
+```bash
+# Navigate to admin area
+agent-browser open http://127.0.0.1:8010/sudo/local-test-admin-token
+
+# This logs you in as admin and redirects to /admin/dashboard
+```
+
+**Security notes:**
+- Returns 404 if token is missing or incorrect (no error leakage)
+- Must set `ADMIN_SECRET_TOKEN` in both `.env` and `.env.e2e`
+- Use a strong random token in production, simple one for testing
 
 ## Data-Testid Selectors
 
