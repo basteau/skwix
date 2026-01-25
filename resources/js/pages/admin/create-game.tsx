@@ -60,10 +60,7 @@ export default function CreateGame({ availableUsers }: Props) {
     }, []);
 
     const removePlayer = useCallback((id: string) => {
-        setPlayers((prev) => {
-            if (prev.length <= 2) return prev;
-            return prev.filter((p) => p.id !== id);
-        });
+        setPlayers((prev) => prev.filter((p) => p.id !== id));
     }, []);
 
     const updatePlayer = useCallback(
@@ -98,7 +95,16 @@ export default function CreateGame({ availableUsers }: Props) {
         setIsSubmitting(true);
         setErrors({});
 
-        const emails = players.map((p) => p.email.toLowerCase().trim());
+        const validPlayers = players.filter((p) => p.name && p.email);
+        if (validPlayers.length < 2) {
+            setErrors({
+                players: 'Minimum 2 spelers vereist',
+            });
+            setIsSubmitting(false);
+            return;
+        }
+
+        const emails = validPlayers.map((p) => p.email.toLowerCase().trim());
         const uniqueEmails = new Set(emails);
         if (emails.length !== uniqueEmails.size) {
             setErrors({
@@ -111,7 +117,7 @@ export default function CreateGame({ availableUsers }: Props) {
         const payload = {
             secret_word: secretWord,
             starts_at: startsAt?.toISOString() ?? '',
-            players: players.map((p) => ({
+            players: validPlayers.map((p) => ({
                 name: p.name,
                 email: p.email,
             })),
@@ -273,17 +279,15 @@ export default function CreateGame({ availableUsers }: Props) {
                                                 </div>
                                             )}
                                         </div>
-                                        {players.length > 2 && (
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    removePlayer(player.id)
-                                                }
-                                                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                                            >
-                                                <X className="size-4" />
-                                            </button>
-                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                removePlayer(player.id)
+                                            }
+                                            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
                                     </div>
                                 ))}
                             </div>

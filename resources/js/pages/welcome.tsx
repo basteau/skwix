@@ -166,6 +166,7 @@ export default function Welcome() {
                                     error ? 'code-error' : undefined
                                 }
                                 inputMode="text"
+                                autoFocus
                             >
                                 <InputOTPGroup>
                                     <InputOTPSlot
