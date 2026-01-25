@@ -39,7 +39,7 @@ export default function CreateGame({ sampleWords }: Props) {
     const [startsAt, setStartsAt] = useState('');
     const [durationDays, setDurationDays] = useState(6);
     const [wordleWords, setWordleWords] = useState<string[]>(
-        sampleWords.slice(0, 6),
+        sampleWords.slice(0, 6).map((w) => w.toLowerCase()),
     );
     const [wordValidations, setWordValidations] = useState<Record<number, WordValidation>>({});
     const validationTimers = useRef<Record<number, NodeJS.Timeout>>({});
@@ -115,7 +115,7 @@ export default function CreateGame({ sampleWords }: Props) {
                 `/admin/random-words?count=${durationDays}`,
             );
             const data = await res.json();
-            setWordleWords(data.words);
+            setWordleWords(data.words.map((w: string) => w.toLowerCase()));
             setWordValidations({});
         } catch {
             // ignore

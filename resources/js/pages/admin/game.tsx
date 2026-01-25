@@ -62,7 +62,9 @@ interface Props {
 }
 
 export default function AdminGameDetail({ game, players }: Props) {
-    const [wordleWords, setWordleWords] = useState<string[]>(game.wordle_words);
+    const [wordleWords, setWordleWords] = useState<string[]>(
+        game.wordle_words.map((w) => w.toLowerCase()),
+    );
     const [wordValidations, setWordValidations] = useState<Record<number, WordValidation>>({});
     const validationTimers = useRef<Record<number, NodeJS.Timeout>>({});
     const [isUpdatingWords, setIsUpdatingWords] = useState(false);
