@@ -23,7 +23,7 @@ import {
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { Mail, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Mail, CheckCircle2, XCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { useCallback, useState, useEffect, useRef } from 'react';
 
 interface WordValidation {
@@ -181,6 +181,15 @@ export default function AdminGameDetail({ game, players }: Props) {
 
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
     const endsAt = game.ends_at ? new Date(game.ends_at) : null;
+
+    const tiedLeaders = (() => {
+        if (players.length < 2) return [];
+        const topScore = players[0]?.points ?? 0;
+        const tied = players.filter((p) => p.points === topScore);
+        return tied.length > 1 ? tied : [];
+    })();
+
+    const showTieWarning = tiedLeaders.length > 1 && !selectedWinnerId;
 
     return (
         <>
@@ -526,9 +535,27 @@ export default function AdminGameDetail({ game, players }: Props) {
                                     Beëindig het spel handmatig. Selecteer
                                     optioneel een winnaar.
                                 </p>
+
+                                {/* Tie warning */}
+                                {showTieWarning && (
+                                    <div className="mb-4 flex items-start gap-3 rounded-md border border-warning/30 bg-warning/10 p-3">
+                                        <AlertTriangle className="mt-0.5 size-5 shrink-0 text-[oklch(50%_0.18_85)]" />
+                                        <div>
+                                            <p className="text-sm font-medium text-foreground">
+                                                Gelijkspel gedetecteerd
+                                            </p>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                {tiedLeaders.map((p) => p.name).join(' en ')}{' '}
+                                                staan gelijk met {tiedLeaders[0]?.points} punten.
+                                                Selecteer een winnaar of beëindig zonder winnaar.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="mb-4">
                                     <label className="mb-2 block text-sm font-medium">
-                                        Winnaar selecteren (optioneel)
+                                        Winnaar selecteren {tiedLeaders.length > 1 ? '(aanbevolen)' : '(optioneel)'}
                                     </label>
                                     <Select
                                         value={
@@ -544,22 +571,28 @@ export default function AdminGameDetail({ game, players }: Props) {
                                             )
                                         }
                                     >
-                                        <SelectTrigger className="max-w-xs">
+                                        <SelectTrigger className={cn(
+                                            'max-w-xs',
+                                            showTieWarning && 'border-warning ring-1 ring-warning/20',
+                                        )}>
                                             <SelectValue placeholder="Geen winnaar" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="none">
                                                 Geen winnaar
                                             </SelectItem>
-                                            {players.map((player) => (
-                                                <SelectItem
-                                                    key={player.id}
-                                                    value={String(player.id)}
-                                                >
-                                                    {player.name} (
-                                                    {player.points} punten)
-                                                </SelectItem>
-                                            ))}
+                                            {players.map((player) => {
+                                                const isTied = tiedLeaders.some((t) => t.id === player.id);
+                                                return (
+                                                    <SelectItem
+                                                        key={player.id}
+                                                        value={String(player.id)}
+                                                    >
+                                                        {player.name} ({player.points} punten)
+                                                        {isTied && ' ⚡'}
+                                                    </SelectItem>
+                                                );
+                                            })}
                                         </SelectContent>
                                     </Select>
                                 </div>
