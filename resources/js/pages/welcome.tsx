@@ -5,6 +5,7 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from '@/components/ui/input-otp';
+import { getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import { REGEXP_ONLY_CHARS } from 'input-otp';
 import { Snowflake } from 'lucide-react';
@@ -29,10 +30,7 @@ export default function Welcome() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-XSRF-TOKEN': document.cookie
-                            .split('; ')
-                            .find((row) => row.startsWith('XSRF-TOKEN='))
-                            ?.split('=')[1]?.replace(/%3D/g, '=') ?? '',
+                        'X-CSRF-TOKEN': getCsrfToken(),
                         Accept: 'application/json',
                     },
                     body: JSON.stringify({ code: code.trim() }),
