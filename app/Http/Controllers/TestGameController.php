@@ -20,6 +20,10 @@ class TestGameController extends Controller
 
     public function exit(): RedirectResponse
     {
+        if (! $this->testGameService->isTestMode()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $this->testGameService->exitTestMode();
 
         return redirect()->route('admin.dashboard');
@@ -27,6 +31,10 @@ class TestGameController extends Controller
 
     public function reset(): RedirectResponse
     {
+        if (! $this->testGameService->isTestMode()) {
+            return redirect()->route('play.wordle');
+        }
+
         $this->testGameService->resetTestGame();
 
         return redirect()->route('play.wordle');
