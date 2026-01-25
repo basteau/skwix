@@ -5,24 +5,16 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 jobs:
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
     concurrency: deploy-group
-    continue-on-error: true  # Don't fail the overall workflow on Fly.io transient errors
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Deploy to Fly.io
-        run: |
-          for i in 1 2 3; do
-            flyctl deploy --remote-only && exit 0
-            echo "Attempt $i failed, retrying in 15s..."
-            sleep 15
-          done
-          echo "::warning::Fly.io deploy failed after 3 attempts. Check https://status.flyio.net"
-          exit 1
+        run: flyctl deploy --remote-only --wait-timeout 5m
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
