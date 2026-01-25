@@ -1,7 +1,4 @@
-# Fly.io deployment using Depot (included free with Fly.io)
-# See https://fly.io/docs/launch/continuous-deployment-with-github-actions/
-
-name: Fly Deploy
+name: Deploy
 on:
   push:
     branches: [main]
@@ -9,31 +6,11 @@ on:
 
 jobs:
   deploy:
-    name: Deploy app
     runs-on: ubuntu-latest
-    concurrency: deploy-group
+    concurrency: deploy
     steps:
       - uses: actions/checkout@v4
-      
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      
-      - name: Deploy to Fly.io
-        run: |
-          for attempt in 1 2 3; do
-            echo "::group::Deployment attempt $attempt"
-            if flyctl deploy --depot; then
-              echo "::endgroup::"
-              echo "✅ Deployment succeeded"
-              exit 0
-            fi
-            echo "::endgroup::"
-            if [ $attempt -lt 3 ]; then
-              echo "⚠️ Attempt $attempt failed, retrying in 20s..."
-              sleep 20
-            fi
-          done
-          echo "❌ Deployment failed after 3 attempts - check https://status.flyio.net"
-          exit 1
+      - run: flyctl deploy
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        timeout-minutes: 20
