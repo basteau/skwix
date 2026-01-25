@@ -2,7 +2,6 @@
 
 use App\Models\Game;
 use App\Models\Player;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

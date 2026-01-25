@@ -1,6 +1,6 @@
 ---
-tags: [testing, e2e, playwright, architecture]
-updated: 2026-01-24
+tags: [testing, e2e, playwright, agent-browser, architecture]
+updated: 2026-01-25
 related: [../SPEC.md]
 ---
 
@@ -143,9 +143,74 @@ composer test:e2e
 7. Players leaderboard updates
 8. Lobby multi-player presence
 
-## Playwright MCP Integration
+## Browser Automation Approaches
 
-**Important:** Tests are designed to be run interactively using the `playwriter` skill.
+### Recommended: agent-browser CLI (stable)
+
+The `agent-browser` CLI is the **recommended approach** for E2E testing. It provides stable Playwright-based automation without browser extension dependencies.
+
+```bash
+# Install (if not already)
+bun i -g agent-browser@latest
+
+# Basic workflow
+agent-browser open http://127.0.0.1:8010/welcome
+agent-browser snapshot -i                              # Get interactive elements with refs
+agent-browser fill @e1 "ABC123"                        # Fill by ref
+agent-browser click @e2                                # Click by ref
+agent-browser screenshot shot.png                      # Capture result
+```
+
+**Advantages:**
+- No browser extension required
+- Stable CDP connection
+- Parallel sessions supported
+- Headless or headed mode
+- Works in CI/CD
+
+### Alternative: Pest Browser Plugin (CI-ready)
+
+For fully automated CI tests, consider Pest's native browser testing:
+
+```bash
+composer require pestphp/pest-plugin-browser --dev
+npm install playwright@latest
+npx playwright install
+```
+
+```php
+// tests/Browser/WordleTest.php
+it('allows player to complete wordle', function () {
+    visit('/welcome')
+        ->onMobile()  // Mobile-first!
+        ->type('[data-testid="invite-code-input"]', 'ABC123')
+        ->press('[data-testid="join-game-button"]')
+        ->assertUrlIs('/wordle')
+        ->assertSee('wordle-grid');
+});
+```
+
+### Legacy: Playwriter MCP (Chrome Extension)
+
+**⚠️ Known Stability Issues:**
+
+The Playwriter MCP approach (Chrome extension + CDP) has frequent disconnection problems:
+
+1. **CDP disconnects after 3-5 commands** — requires `reset` to reconnect
+2. **Page shows `about:blank`** — connection lost, need reset
+3. **Extension state not persisted** — must click extension on each tab
+4. **No auto-reconnect** — manual intervention required
+
+**Workarounds (if you must use Playwriter):**
+- Run `reset` command proactively after navigation
+- Keep commands simple (one action per execute)
+- Check page state frequently with accessibility snapshot
+- Use `agent-browser` instead for reliability
+
+**When to use Playwriter:**
+- Only when inspecting an already-open browser tab
+- Quick one-off interactions
+- When agent-browser isn't available
 
 ### How to Run E2E Tests
 
@@ -154,45 +219,69 @@ composer test:e2e
    php artisan serve --env=e2e --port=8010
    ```
 
-2. **Load the playwriter skill:**
-   Say: "use playwriter" to enable browser automation
+2. **Choose your approach:**
+   - **agent-browser** (recommended): `agent-browser open http://127.0.0.1:8010/welcome`
+   - **Pest browser**: `./vendor/bin/pest tests/Browser --headed`
+   - **playwriter** (legacy): Say "use playwriter"
 
-3. **Run test scenarios manually or via agent:**
-   The agent uses Playwright MCP commands to interact with the browser.
+### agent-browser Commands Reference
 
-### Playwright MCP Commands Reference
-
-| Action | MCP Command |
-|--------|-------------|
-| Navigate | `browser_navigate(url)` |
-| Click | `browser_click(selector)` |
-| Type text | `browser_type(selector, text)` |
-| Press key | `browser_press(key)` (e.g., "Enter", "Backspace") |
-| Wait for element | `browser_wait_for(selector)` |
-| Get text | `browser_get_text(selector)` |
-| Screenshot | `browser_screenshot()` |
-| Get URL | `browser_get_url()` |
+| Action | Command |
+|--------|---------|
+| Navigate | `agent-browser open <url>` |
+| Snapshot | `agent-browser snapshot -i` |
+| Click | `agent-browser click @ref` |
+| Fill input | `agent-browser fill @ref "text"` |
+| Press key | `agent-browser press Enter` |
+| Wait | `agent-browser wait @ref` |
+| Get text | `agent-browser get text @ref` |
+| Screenshot | `agent-browser screenshot path.png` |
+| Get URL | `agent-browser get url` |
+| Mobile view | `agent-browser set device "iPhone 14"` |
 
 ### Selector Pattern
 
-All interactive elements have `data-testid` attributes:
-```
-[data-testid="invite-code-input"]
-[data-testid="join-game-button"]
-[data-testid="wordle-key-enter"]
+All interactive elements have `data-testid` attributes. With agent-browser, use refs from snapshot:
+
+```bash
+# Snapshot shows refs like:
+# textbox "Invite Code" [ref=e1]
+# button "Join Game" [ref=e2]
+
+agent-browser fill @e1 "ABC123"
+agent-browser click @e2
 ```
 
-### Example: Test Wordle Flow
-
+Or use CSS selectors:
+```bash
+agent-browser find text "Join Game" click
+agent-browser eval "document.querySelector('[data-testid=\"invite-code-input\"]').value = 'ABC123'"
 ```
-1. browser_navigate("http://127.0.0.1:8010/welcome")
-2. browser_type("[data-testid='invite-code-input']", "ABC123")
-3. browser_click("[data-testid='join-game-button']")
-4. browser_wait_for("[data-testid='wordle-grid']")
-5. browser_press("s") browser_press("n") browser_press("e") browser_press("e") browser_press("u") browser_press("w")
-6. browser_press("Enter")
-7. browser_wait_for("[data-testid='wordle-message']")
-8. browser_screenshot()
+
+### Example: Test Wordle Flow (agent-browser)
+
+```bash
+# Start with mobile viewport
+agent-browser set device "iPhone 14"
+agent-browser open http://127.0.0.1:8010/welcome
+agent-browser snapshot -i
+# -> textbox "Invite Code" [ref=e1], button "Join" [ref=e2]
+
+agent-browser fill @e1 "ABC123"
+agent-browser click @e2
+agent-browser wait --url "**/wordle"
+agent-browser snapshot -i
+
+# Type word and submit
+agent-browser press s
+agent-browser press n
+agent-browser press e
+agent-browser press e
+agent-browser press u
+agent-browser press w
+agent-browser press Enter
+agent-browser wait "[data-testid='wordle-message']"
+agent-browser screenshot wordle-result.png
 ```
 
 ## Avoiding Flakiness

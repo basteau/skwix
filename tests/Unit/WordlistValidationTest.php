@@ -88,9 +88,9 @@ class WordlistValidationTest extends TestCase
         ];
 
         // Filter to only 5-letter words (in case any slipped through)
-        $commonFiveLetterWords = array_filter($commonFiveLetterWords, fn($w) => mb_strlen($w) === 5);
+        $commonFiveLetterWords = array_filter($commonFiveLetterWords, fn ($w) => mb_strlen($w) === 5);
 
-        $missingWords = array_filter($commonFiveLetterWords, fn($w) => ! in_array($w, $this->words));
+        $missingWords = array_filter($commonFiveLetterWords, fn ($w) => ! in_array($w, $this->words));
 
         // Allow some flexibility - at least 60% of common words should be present
         $threshold = count($commonFiveLetterWords) * 0.6;
@@ -112,7 +112,7 @@ class WordlistValidationTest extends TestCase
             'who', 'boy', 'did', 'get', 'put', 'say', 'she', 'too', 'use',
         ];
 
-        $foundEnglish = array_filter($englishOnlyWords, fn($w) => in_array($w, $this->words));
+        $foundEnglish = array_filter($englishOnlyWords, fn ($w) => in_array($w, $this->words));
 
         // Allow some overlap (some words are valid in both languages)
         $this->assertLessThan(

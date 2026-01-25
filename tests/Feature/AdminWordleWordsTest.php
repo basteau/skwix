@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Game;
-use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\DutchWordlistSeeder;
 

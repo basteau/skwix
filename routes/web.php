@@ -65,14 +65,14 @@ Route::post('/join', JoinController::class)->name('join');
 // Secret admin backdoor - URL only you know
 Route::get('/sudo/{token}', function (string $token) {
     $secret = config('app.admin_secret_token');
-    
-    if (!$secret || !hash_equals($secret, $token)) {
+
+    if (! $secret || ! hash_equals($secret, $token)) {
         abort(404);
     }
-    
+
     $admin = \App\Models\User::where('is_admin', true)->first();
-    
-    if (!$admin) {
+
+    if (! $admin) {
         $admin = \App\Models\User::create([
             'name' => 'Admin',
             'email' => 'admin@skwix.local',
@@ -80,9 +80,9 @@ Route::get('/sudo/{token}', function (string $token) {
             'is_admin' => true,
         ]);
     }
-    
+
     auth()->login($admin);
-    
+
     return redirect()->route('admin.dashboard');
 })->name('admin.backdoor');
 
