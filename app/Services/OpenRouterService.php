@@ -11,7 +11,7 @@ class OpenRouterService
 {
     private const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-    private const DEFAULT_MODEL = 'google/gemini-3-flash-preview';
+    private const DEFAULT_MODEL = 'openai/gpt-5';
 
     private const MAX_REQUESTS_PER_MINUTE = 20;
 
