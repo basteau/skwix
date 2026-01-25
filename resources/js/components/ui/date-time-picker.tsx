@@ -35,7 +35,7 @@ export function DateTimePicker({
         if (value) {
             return format(value, 'HH:mm');
         }
-        return '09:00';
+        return '08:00';
     });
 
     const effectiveMinDate = minDate ?? startOfToday();
@@ -123,6 +123,6 @@ export function DateTimePicker({
 
 export function getDefaultStartDate(): Date {
     const tomorrow = addDays(new Date(), 1);
-    tomorrow.setHours(9, 0, 0, 0);
+    tomorrow.setHours(8, 0, 0, 0);
     return tomorrow;
 }
