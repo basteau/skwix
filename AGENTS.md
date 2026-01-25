@@ -33,7 +33,7 @@ use skills, even if you're not sure you might need them
 - use picasso skill to create assets if needed (favicon / logo / decorations...), use icon libraries for icons.
 
 ## E2E Testing
-- use /admin (via /sudo/local-test-admin-token) mode to easily test any page / game (wordle, rad)
+- use /admin mode (via /sudo/local-test-admin-token) mode to easily test any page / game (wordle, rad van fortuin, word guessing)
 - Read `docs/testing/e2e-architecture.md` before running E2E tests
 - Use `playwriter` skill for browser automation via Playwright MCP
 - Start E2E server: `php artisan serve --env=e2e --port=8010`
