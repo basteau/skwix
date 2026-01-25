@@ -1,0 +1,115 @@
+name: e2e
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Build Assets
+        run: npm run build
+
+      - name: Prepare E2E Environment
+        run: |
+          cp .env.e2e .env
+          php artisan key:generate
+          touch storage/e2e.sqlite
+          php artisan migrate:fresh --env=e2e --force
+
+      - name: Start Server
+        run: php artisan serve --env=e2e --port=8010 &
+
+      - name: Wait for Server
+        run: |
+          echo "Waiting for server to start..."
+          for i in {1..30}; do
+            if curl -sf http://127.0.0.1:8010/up > /dev/null 2>&1; then
+              echo "Server is ready!"
+              exit 0
+            fi
+            echo "Attempt $i/30..."
+            sleep 1
+          done
+          echo "Server failed to start"
+          exit 1
+
+      - name: Run Smoke Tests
+        run: ./scripts/smoke-test.sh http://127.0.0.1:8010
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Build Assets
+        run: npm run build
+
+      - name: Prepare E2E Environment
+        run: |
+          cp .env.e2e .env
+          php artisan key:generate
+          touch storage/e2e.sqlite
+          php artisan migrate:fresh --env=e2e --force
+
+      - name: Run E2E Tests
+        run: php artisan test --group=e2e --env=e2e
