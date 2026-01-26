@@ -60,6 +60,9 @@ class GuessController extends Controller
                 'created_at' => $q->created_at->toISOString(),
             ]);
 
+        // Get revealed sabotaged question IDs for this player
+        $revealedSabotagedIds = $this->sabotageService->getRevealedSabotagedQuestionIds($player);
+
         return Inertia::render('play/guess', [
             'player' => [
                 'id' => $player->id,
@@ -74,6 +77,7 @@ class GuessController extends Controller
             ],
             'questions' => $questions,
             'isAdmin' => $user->is_admin,
+            'revealedSabotagedIds' => $revealedSabotagedIds,
         ]);
     }
 

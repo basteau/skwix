@@ -9,8 +9,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { cn, getCsrfToken } from '@/lib/utils';
-import { Eye, Loader2, Sparkles, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { Eye, Loader2, Sparkles, WifiOff, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface RevealSabotageModalProps {
     open: boolean;
@@ -18,7 +18,7 @@ interface RevealSabotageModalProps {
     cost: number;
     currentPoints: number;
     sabotagedCount: number;
-    onSuccess: (pointsRemaining: number, sabotagedIds: number[]) => void;
+    onSuccess: () => void;
 }
 
 export function RevealSabotageModal({
@@ -31,11 +31,28 @@ export function RevealSabotageModal({
 }: RevealSabotageModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isOnline, setIsOnline] = useState(
+        typeof navigator !== 'undefined' ? navigator.onLine : true,
+    );
+
+    // Track online/offline status
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     const canAfford = currentPoints >= cost;
+    const canSubmit = canAfford && isOnline;
 
     const handleConfirm = useCallback(async () => {
-        if (isSubmitting || !canAfford) return;
+        if (isSubmitting || !canSubmit) return;
 
         setIsSubmitting(true);
         setError(null);
@@ -60,7 +77,7 @@ export function RevealSabotageModal({
                 return;
             }
 
-            onSuccess(data.points_remaining, data.sabotaged_question_ids);
+            onSuccess();
             onOpenChange(false);
 
             // Haptic feedback on success
@@ -72,7 +89,7 @@ export function RevealSabotageModal({
         } finally {
             setIsSubmitting(false);
         }
-    }, [isSubmitting, canAfford, onSuccess, onOpenChange]);
+    }, [isSubmitting, canSubmit, onSuccess, onOpenChange]);
 
     // Reset error when modal closes
     const handleOpenChange = (newOpen: boolean) => {
@@ -138,7 +155,14 @@ export function RevealSabotageModal({
                         </p>
                     )}
 
-                    {!canAfford && !error && (
+                    {!isOnline && !error && (
+                        <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                            <WifiOff className="size-3.5" />
+                            Je bent offline
+                        </p>
+                    )}
+
+                    {!canAfford && isOnline && !error && (
                         <p className="mt-3 text-center text-sm text-destructive">
                             Je hebt {cost} punten nodig
                         </p>
@@ -156,7 +180,7 @@ export function RevealSabotageModal({
                     </Button>
                     <Button
                         onClick={handleConfirm}
-                        disabled={!canAfford || isSubmitting}
+                        disabled={!canSubmit || isSubmitting}
                         className="flex-1 bg-amber-500 text-white hover:bg-amber-600"
                     >
                         {isSubmitting ? (

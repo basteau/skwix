@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { PlayerAvatar } from '@/components/player-avatar';
 import { cn, getCsrfToken } from '@/lib/utils';
-import { Loader2, Skull, Sparkles, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { Loader2, Skull, Sparkles, WifiOff, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface SabotageTarget {
     id: number;
@@ -26,7 +26,7 @@ interface SabotageModalProps {
     target: SabotageTarget | null;
     cost: number;
     currentPoints: number;
-    onSuccess: (pointsRemaining: number) => void;
+    onSuccess: () => void;
 }
 
 export function SabotageModal({
@@ -39,11 +39,28 @@ export function SabotageModal({
 }: SabotageModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isOnline, setIsOnline] = useState(
+        typeof navigator !== 'undefined' ? navigator.onLine : true,
+    );
+
+    // Track online/offline status
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     const canAfford = currentPoints >= cost;
+    const canSubmit = canAfford && isOnline;
 
     const handleConfirm = useCallback(async () => {
-        if (!target || isSubmitting || !canAfford) return;
+        if (!target || isSubmitting || !canSubmit) return;
 
         setIsSubmitting(true);
         setError(null);
@@ -73,7 +90,7 @@ export function SabotageModal({
                 return;
             }
 
-            onSuccess(data.points_remaining);
+            onSuccess();
             onOpenChange(false);
 
             // Haptic feedback on success
@@ -85,7 +102,7 @@ export function SabotageModal({
         } finally {
             setIsSubmitting(false);
         }
-    }, [target, isSubmitting, canAfford, onSuccess, onOpenChange]);
+    }, [target, isSubmitting, canSubmit, onSuccess, onOpenChange]);
 
     // Reset error when modal closes
     const handleOpenChange = (newOpen: boolean) => {
@@ -174,7 +191,14 @@ export function SabotageModal({
                         </p>
                     )}
 
-                    {!canAfford && !error && (
+                    {!isOnline && !error && (
+                        <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                            <WifiOff className="size-3.5" />
+                            Je bent offline
+                        </p>
+                    )}
+
+                    {!canAfford && isOnline && !error && (
                         <p className="mt-3 text-center text-sm text-destructive">
                             Je hebt {cost} punten nodig
                         </p>
@@ -193,7 +217,7 @@ export function SabotageModal({
                     <Button
                         variant="destructive"
                         onClick={handleConfirm}
-                        disabled={!canAfford || isSubmitting}
+                        disabled={!canSubmit || isSubmitting}
                         className="flex-1"
                     >
                         {isSubmitting ? (

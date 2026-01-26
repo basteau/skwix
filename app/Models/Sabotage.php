@@ -16,6 +16,11 @@ class Sabotage extends Model
         'target_id',
         'question_id',
         'status',
+        'revealed_at',
+    ];
+
+    protected $casts = [
+        'revealed_at' => 'datetime',
     ];
 
     public function game(): BelongsTo

@@ -1,11 +1,21 @@
 import { GameInfoButton } from '@/components/game-info-button';
+import type {
+    GameInfoContent} from '@/components/game-info-modal';
+import {
+    GameInfoModal,
+} from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 import { PlayerAvatar } from '@/components/player-avatar';
 import { RevealSabotageModal } from '@/components/reveal-sabotage-modal';
 import { SabotageModal } from '@/components/sabotage-modal';
 import { Button } from '@/components/ui/button';
-import { getInitials } from '@/hooks/use-initials';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -51,7 +61,7 @@ interface Props {
 
 const POLL_INTERVAL = 10_000; // 10 seconds
 
-export const PLAYERS_INFO = {
+const PLAYERS_INFO: GameInfoContent = {
     title: 'Spelers & Sabotage',
     description: 'Bekijk de ranglijst en saboteer je tegenstanders.',
     rules: [
@@ -77,26 +87,31 @@ export default function PlayersPage({
     testMode,
 }: Props) {
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const [currentPoints, setCurrentPoints] = useState(player?.points ?? 0);
     const [sabotageTarget, setSabotageTarget] = useState<PlayerData | null>(
         null,
     );
     const [showRevealModal, setShowRevealModal] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
 
-    // Sync points from server
-    useEffect(() => {
-        if (player?.points !== undefined) {
-            setCurrentPoints(player.points);
-        }
-    }, [player?.points]);
+    // Use player points directly from props - no local state sync needed
+    const currentPoints = player?.points ?? 0;
 
-    // Poll for leaderboard updates
+    // Poll for leaderboard updates (pause when hidden/offline)
     useEffect(() => {
         if (testMode?.active || error || game?.status === 'completed') return;
 
-        pollRef.current = setInterval(() => {
-            router.reload({ only: ['players', 'game', 'player', 'sabotage'] });
-        }, POLL_INTERVAL);
+        const shouldPoll = () =>
+            document.visibilityState === 'visible' && navigator.onLine;
+
+        const poll = () => {
+            if (shouldPoll()) {
+                router.reload({
+                    only: ['players', 'game', 'player', 'sabotage'],
+                });
+            }
+        };
+
+        pollRef.current = setInterval(poll, POLL_INTERVAL);
 
         return () => {
             if (pollRef.current) clearInterval(pollRef.current);
@@ -110,23 +125,14 @@ export default function PlayersPage({
         }
     }, [game?.status]);
 
-    const handleSabotageSuccess = useCallback((pointsRemaining: number) => {
-        setCurrentPoints(pointsRemaining);
+    const handleSabotageSuccess = useCallback(() => {
         router.reload({ only: ['players', 'player', 'sabotage'] });
     }, []);
 
-    const handleRevealSuccess = useCallback(
-        (pointsRemaining: number, sabotagedIds: number[]) => {
-            setCurrentPoints(pointsRemaining);
-            // Store sabotaged IDs in session storage for the Guess page
-            sessionStorage.setItem(
-                'sabotaged_question_ids',
-                JSON.stringify(sabotagedIds),
-            );
-            router.reload({ only: ['player', 'sabotage'] });
-        },
-        [],
-    );
+    const handleRevealSuccess = useCallback(() => {
+        // No more sessionStorage - server tracks revealed state
+        router.reload({ only: ['player', 'sabotage'] });
+    }, []);
 
     if (error === 'no_active_game') {
         return <NoActiveGame title="Spelers" />;
@@ -155,7 +161,9 @@ export default function PlayersPage({
                                     </span>
                                 </Button>
                             )}
-                            <GameInfoButton content={PLAYERS_INFO} />
+                            <GameInfoButton
+                                onClick={() => setShowInfoModal(true)}
+                            />
                         </div>
                     }
                 />
@@ -198,6 +206,13 @@ export default function PlayersPage({
                 sabotagedCount={sabotage?.sabotaged_count ?? 0}
                 onSuccess={handleRevealSuccess}
             />
+
+            {/* Game info modal */}
+            <GameInfoModal
+                open={showInfoModal}
+                onOpenChange={setShowInfoModal}
+                content={PLAYERS_INFO}
+            />
         </PlayLayout>
     );
 }
@@ -209,7 +224,6 @@ interface PlayerCardProps {
 }
 
 function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
-    const initials = getInitials(player.name);
     const medals = ['🥇', '🥈', '🥉'];
     const medal = player.rank <= 3 ? medals[player.rank - 1] : null;
 
@@ -300,25 +314,36 @@ function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
 
             {/* Sabotage button */}
             {showSabotageButton && (
-                <div className="ml-1 shrink-0">
-                    {player.has_pending_sabotage ? (
-                        <div
-                            className="flex size-9 items-center justify-center rounded-full bg-destructive/10 motion-safe:animate-pulse"
-                            title="Sabotage actief - wacht op volgende vraag"
-                        >
-                            <Skull className="size-4 text-destructive" />
-                        </div>
-                    ) : player.can_sabotage && sabotageEnabled ? (
-                        <button
-                            onClick={onSabotage}
-                            className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/50"
-                            aria-label={`Saboteer ${player.name}`}
-                            data-testid={`sabotage-${player.name}`}
-                        >
-                            <Skull className="size-4" />
-                        </button>
-                    ) : null}
-                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="ml-1 shrink-0">
+                                {player.has_pending_sabotage ? (
+                                    <div
+                                        className="flex size-9 items-center justify-center rounded-full bg-destructive/10 motion-safe:animate-pulse"
+                                        aria-label="Sabotage actief"
+                                    >
+                                        <Skull className="size-4 text-destructive" />
+                                    </div>
+                                ) : player.can_sabotage && sabotageEnabled ? (
+                                    <button
+                                        onClick={onSabotage}
+                                        className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/50"
+                                        aria-label={`Saboteer ${player.name}`}
+                                        data-testid={`sabotage-${player.name}`}
+                                    >
+                                        <Skull className="size-4" />
+                                    </button>
+                                ) : null}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                            {player.has_pending_sabotage
+                                ? 'Sabotage actief - wacht op volgende vraag'
+                                : 'Saboteer (10 pts)'}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             )}
         </div>
     );

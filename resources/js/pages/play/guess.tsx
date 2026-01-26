@@ -59,6 +59,7 @@ interface Props {
     error?: string;
     testMode?: { active: boolean; secretWord?: string };
     isAdmin?: boolean;
+    revealedSabotagedIds?: number[];
 }
 
 const QUESTION_COST = 10;
@@ -102,6 +103,7 @@ export default function GuessPage({
     questions: initialQuestions = [],
     error,
     testMode,
+    revealedSabotagedIds = [],
 }: Props) {
     const [questions, setQuestions] =
         useState<QuestionItem[]>(initialQuestions);
@@ -130,27 +132,14 @@ export default function GuessPage({
     >('reveal');
     const [showInfoModal, setShowInfoModal] = useState(false);
 
-    // Sabotage reveal state - load from sessionStorage
-    const [sabotagedQuestionIds, setSabotagedQuestionIds] = useState<number[]>(
-        () => {
-            if (typeof window === 'undefined') return [];
-            const stored = sessionStorage.getItem('sabotaged_question_ids');
-            return stored ? JSON.parse(stored) : [];
-        },
-    );
+    // Sabotage reveal state - from server props (no more sessionStorage!)
+    const [sabotagedQuestionIds, setSabotagedQuestionIds] =
+        useState<number[]>(revealedSabotagedIds);
 
-    // Listen for sabotage reveal updates
+    // Sync revealed sabotage IDs from server (on poll updates)
     useEffect(() => {
-        const handleStorage = () => {
-            const stored = sessionStorage.getItem('sabotaged_question_ids');
-            if (stored) {
-                setSabotagedQuestionIds(JSON.parse(stored));
-            }
-        };
-
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
-    }, []);
+        setSabotagedQuestionIds(revealedSabotagedIds);
+    }, [revealedSabotagedIds]);
 
     const canAsk = points >= QUESTION_COST && input.trim().length >= 3;
 
@@ -195,9 +184,24 @@ export default function GuessPage({
             return;
         }
 
-        pollRef.current = setInterval(() => {
-            router.reload({ only: ['game', 'questions', 'player'] });
-        }, POLL_INTERVAL);
+        // Pause polling when tab is hidden or offline
+        const shouldPoll = () =>
+            document.visibilityState === 'visible' && navigator.onLine;
+
+        const poll = () => {
+            if (shouldPoll()) {
+                router.reload({
+                    only: [
+                        'game',
+                        'questions',
+                        'player',
+                        'revealedSabotagedIds',
+                    ],
+                });
+            }
+        };
+
+        pollRef.current = setInterval(poll, POLL_INTERVAL);
 
         return () => {
             if (pollRef.current) clearInterval(pollRef.current);

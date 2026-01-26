@@ -92,6 +92,7 @@ class SabotageService
 
     /**
      * Reveal sabotages on player's own questions.
+     * Marks all unrevealed sabotages as revealed and returns the question IDs.
      *
      * @return array{success: bool, error?: string, sabotaged_question_ids?: array<int>}
      */
@@ -106,9 +107,17 @@ class SabotageService
         $sabotagedQuestionIds = DB::transaction(function () use ($player, $cost) {
             $player->decrement('points', $cost);
 
+            // Mark all unrevealed sabotages as revealed
+            Sabotage::where('target_id', $player->id)
+                ->where('status', 'applied')
+                ->whereNull('revealed_at')
+                ->update(['revealed_at' => now()]);
+
+            // Return ALL revealed question IDs (including previously revealed)
             return Sabotage::where('target_id', $player->id)
                 ->where('status', 'applied')
                 ->whereNotNull('question_id')
+                ->whereNotNull('revealed_at')
                 ->pluck('question_id')
                 ->toArray();
         });
@@ -117,6 +126,32 @@ class SabotageService
             'success' => true,
             'sabotaged_question_ids' => $sabotagedQuestionIds,
         ];
+    }
+
+    /**
+     * Get question IDs that have been revealed as sabotaged for a player.
+     *
+     * @return array<int>
+     */
+    public function getRevealedSabotagedQuestionIds(Player $player): array
+    {
+        return Sabotage::where('target_id', $player->id)
+            ->where('status', 'applied')
+            ->whereNotNull('question_id')
+            ->whereNotNull('revealed_at')
+            ->pluck('question_id')
+            ->toArray();
+    }
+
+    /**
+     * Check if player has any unrevealed sabotages (can pay to reveal).
+     */
+    public function hasUnrevealedSabotages(Player $player): bool
+    {
+        return Sabotage::where('target_id', $player->id)
+            ->where('status', 'applied')
+            ->whereNull('revealed_at')
+            ->exists();
     }
 
     /**

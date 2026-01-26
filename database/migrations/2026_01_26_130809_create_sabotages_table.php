@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('target_id')->constrained('players')->cascadeOnDelete();
             $table->foreignId('question_id')->nullable()->constrained()->nullOnDelete();
             $table->string('status', 20)->default('pending'); // pending, applied, expired
+            $table->timestamp('revealed_at')->nullable(); // when target paid to reveal
             $table->timestamps();
 
             $table->index(['target_id', 'status']);
