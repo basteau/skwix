@@ -209,7 +209,7 @@ describe('PlayersController show', function () {
             'game_id' => $game->id,
             'email' => 'test@example.com',
             'name' => 'Test Player',
-            'avatar_url' => '/images/faces/1.png',
+            'avatar_url' => 'player09',
             'points' => 50,
         ]);
 
@@ -217,7 +217,7 @@ describe('PlayersController show', function () {
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->where('players.0.avatar_url', '/images/faces/1.png')
+            ->where('players.0.avatar_url', 'player09')
         );
     });
 });

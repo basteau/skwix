@@ -1,4 +1,3 @@
-import { getAvatarUrl, getPortraitUrl } from '@/components/avatar-picker';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -6,7 +5,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getInitials } from '@/hooks/use-initials';
+import { WinnerAvatar } from '@/components/winner-avatar';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import { LogOut, MoreVertical, Snowflake } from 'lucide-react';
@@ -69,9 +68,6 @@ export default function WinPage({ winner, game }: Props) {
             return () => clearTimeout(timer);
         }
     }, [revealedLetters, game.secret_word]);
-
-    const initials = getInitials(winner.name);
-    const portraitUrl = getPortraitUrl(winner.avatar_url);
 
     const handleLogout = () => {
         router.post('/logout');
@@ -265,24 +261,14 @@ export default function WinPage({ winner, game }: Props) {
                                     'radial-gradient(circle, oklch(75% 0.18 80 / 0.4) 0%, transparent 70%)',
                             }}
                         />
-                        {portraitUrl ? (
-                            <img
-                                src={portraitUrl}
-                                alt={winner.name}
-                                data-testid="winner-portrait"
-                                className="relative size-44 rounded-2xl border-4 border-amber-400/80 object-cover shadow-xl"
-                            />
-                        ) : getAvatarUrl(winner.avatar_url) ? (
-                            <img
-                                src={getAvatarUrl(winner.avatar_url)}
-                                alt={winner.name}
-                                className="relative size-28 rounded-full border-4 border-amber-400/80 object-cover shadow-xl"
-                            />
-                        ) : (
-                            <div className="relative flex size-28 items-center justify-center rounded-full border-4 border-amber-400/80 bg-gradient-to-br from-primary/20 to-primary/10 font-display text-3xl font-bold text-primary shadow-xl">
-                                {initials}
-                            </div>
-                        )}
+                        <WinnerAvatar
+                            name={winner.name}
+                            avatarUrl={winner.avatar_url}
+                            portraitClassName="relative size-44 rounded-2xl border-4 border-amber-400/80"
+                            avatarClassName="relative size-28 rounded-full border-4 border-amber-400/80"
+                            fallbackClassName="relative size-28 rounded-full border-4 border-amber-400/80 bg-gradient-to-br from-primary/20 to-primary/10 font-display text-3xl font-bold text-primary"
+                            testId="winner-portrait"
+                        />
                         {/* Crown */}
                         <div className="absolute -top-5 left-1/2 -translate-x-1/2">
                             <svg viewBox="0 0 32 24" className="size-10">

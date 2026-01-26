@@ -2,7 +2,9 @@ const AVAILABLE_AVATARS = [
     'player09',
     'player07',
     'player06',
+    'jane',
     'player08',
+    'john',
     'player05',
     'player04',
     'player01',
@@ -17,6 +19,7 @@ export function getAvatarUrl(
 ): string | undefined {
     if (!avatar) return undefined;
     if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('/')) return avatar;
     return `/images/faces/${avatar}.png`;
 }
 
@@ -27,12 +30,22 @@ export function getAvatarForName(name: string): AvatarName {
 }
 
 export function getPortraitUrl(
-    avatarUrl: string | null | undefined,
+    avatar: string | null | undefined,
 ): string | undefined {
-    if (!avatarUrl) return undefined;
-    const match = avatarUrl.match(/\/images\/faces\/([^/.]+)\.png$/);
-    if (!match) return undefined;
-    const avatarName = match[1];
+    if (!avatar) return undefined;
+
+    let avatarName: string;
+
+    if (avatar.startsWith('/images/faces/')) {
+        const match = avatar.match(/\/images\/faces\/([^/.]+)\.png$/);
+        if (!match) return undefined;
+        avatarName = match[1];
+    } else if (avatar.startsWith('http') || avatar.startsWith('/')) {
+        return undefined;
+    } else {
+        avatarName = avatar;
+    }
+
     if (
         !AVAILABLE_AVATARS.includes(
             avatarName as (typeof AVAILABLE_AVATARS)[number],

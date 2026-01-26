@@ -1,6 +1,6 @@
-import { getAvatarUrl } from '@/components/avatar-picker';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
+import { PlayerAvatar } from '@/components/player-avatar';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
@@ -127,26 +127,18 @@ function PlayerCard({ player }: { player: PlayerData }) {
             )}
 
             {/* Avatar */}
-            {getAvatarUrl(player.avatar_url) ? (
-                <img
-                    src={getAvatarUrl(player.avatar_url)}
-                    alt={player.name}
-                    className={cn(
-                        avatarSize,
-                        'shrink-0 rounded-full border-2 border-background object-cover shadow-sm',
-                    )}
-                />
-            ) : (
-                <div
-                    className={cn(
-                        avatarSize,
-                        'flex shrink-0 items-center justify-center rounded-full border-2 border-background bg-primary-light font-semibold text-primary shadow-sm',
-                        isPodium ? 'text-sm' : 'text-xs',
-                    )}
-                >
-                    {initials}
-                </div>
-            )}
+            <PlayerAvatar
+                name={player.name}
+                avatarUrl={player.avatar_url}
+                className={cn(
+                    avatarSize,
+                    'border-2 border-background shadow-sm',
+                )}
+                fallbackClassName={cn(
+                    'bg-primary-light',
+                    isPodium ? 'text-sm' : 'text-xs',
+                )}
+            />
 
             {/* Info */}
             <div className="min-w-0 flex-1">

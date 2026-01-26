@@ -1,8 +1,9 @@
-import { getAvatarUrl, getPortraitUrl } from '@/components/avatar-picker';
 import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, GUESS_INFO } from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
+import { PlayerAvatar } from '@/components/player-avatar';
+import { WinnerAvatar } from '@/components/winner-avatar';
 
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/hooks/use-initials';
@@ -529,8 +530,6 @@ function VictoryCelebration({
     isOwnVictory: boolean;
 }) {
     const [revealedLetters, setRevealedLetters] = useState(0);
-    const initials = getInitials(winner.name);
-    const portraitUrl = getPortraitUrl(winner.avatar_url);
     const continueButtonRef = useRef<HTMLButtonElement>(null);
 
     // Letter reveal animation
@@ -670,24 +669,11 @@ function VictoryCelebration({
                             {/* Winner Portrait/Avatar & Name */}
                             <div className="mt-6 flex flex-col items-center">
                                 <div className="relative">
-                                    {portraitUrl ? (
-                                        <img
-                                            src={portraitUrl}
-                                            alt={winner.name}
-                                            data-testid="winner-portrait"
-                                            className="size-32 rounded-2xl border-4 border-amber-400/60 object-cover shadow-lg"
-                                        />
-                                    ) : getAvatarUrl(winner.avatar_url) ? (
-                                        <img
-                                            src={getAvatarUrl(winner.avatar_url)}
-                                            alt={winner.name}
-                                            className="size-20 rounded-full border-4 border-amber-400/60 object-cover shadow-lg"
-                                        />
-                                    ) : (
-                                        <div className="flex size-20 items-center justify-center rounded-full border-4 border-amber-400/60 bg-gradient-to-br from-primary/20 to-primary/10 font-display text-2xl font-bold text-primary shadow-lg">
-                                            {initials}
-                                        </div>
-                                    )}
+                                    <WinnerAvatar
+                                        name={winner.name}
+                                        avatarUrl={winner.avatar_url}
+                                        testId="winner-portrait"
+                                    />
                                     {isOwnVictory && (
                                         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                                             <Crown className="size-7 fill-amber-400 text-amber-500" />
@@ -990,20 +976,13 @@ function QuestionBubble({
                 <div className="flex justify-start">
                     <div className="max-w-[85%]">
                         <div className="flex items-end gap-2">
-                            {getAvatarUrl(question.player.avatar_url) ? (
-                                <img
-                                    src={getAvatarUrl(question.player.avatar_url)}
-                                    alt={question.player.name}
-                                    className="size-7 shrink-0 rounded-full object-cover ring-2 ring-background"
-                                />
-                            ) : (
-                                <div
-                                    className="flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                                    style={{ backgroundColor: playerColor }}
-                                >
-                                    {initials}
-                                </div>
-                            )}
+                            <PlayerAvatar
+                                name={question.player.name}
+                                avatarUrl={question.player.avatar_url}
+                                className="size-7 ring-2 ring-background"
+                                fallbackClassName="text-[10px] text-white"
+                                fallbackStyle={{ backgroundColor: playerColor }}
+                            />
                             <div>
                                 <span className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
                                     {question.player.name}

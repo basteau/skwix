@@ -74,7 +74,7 @@ class AdminController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'avatar' => $user->avatar,
-                'avatar_url' => $user->avatar ? "/images/faces/{$user->avatar}.png" : null,
+                'avatar_url' => $user->avatar,
             ]);
 
         return Inertia::render('admin/create-game', [
@@ -120,7 +120,6 @@ class AdminController extends Controller
                 $inviteCode = strtoupper(Str::random(6));
 
                 $avatar = $this->getAvatarForName($playerData['name']);
-                $avatarUrl = $avatar ? "/images/faces/{$avatar}.png" : null;
 
                 $user = User::firstOrCreate(
                     ['email' => $playerData['email']],
@@ -139,7 +138,7 @@ class AdminController extends Controller
                     'game_id' => $game->id,
                     'name' => $playerData['name'],
                     'email' => $playerData['email'],
-                    'avatar_url' => $avatarUrl,
+                    'avatar_url' => $avatar,
                     'points' => $startingPoints,
                     'invite_code' => $inviteCode,
                 ]);
@@ -362,7 +361,9 @@ class AdminController extends Controller
             'player09',
             'player07',
             'player06',
+            'jane',
             'player08',
+            'john',
             'player05',
             'player04',
             'player01',

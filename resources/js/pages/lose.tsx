@@ -1,4 +1,3 @@
-import { getAvatarUrl, getPortraitUrl } from '@/components/avatar-picker';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -6,7 +5,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getInitials } from '@/hooks/use-initials';
+import { WinnerAvatar } from '@/components/winner-avatar';
 import { cn } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/react';
 import { LogOut, MoreVertical, Snowflake } from 'lucide-react';
@@ -42,9 +41,6 @@ const SNOWFLAKES = Array.from({ length: 10 }).map((_, i) => ({
 export default function LosePage({ winner, player, game }: Props) {
     const [countedRank, setCountedRank] = useState(1);
     const [revealedLetters, setRevealedLetters] = useState(0);
-
-    const winnerInitials = getInitials(winner.name);
-    const winnerPortraitUrl = getPortraitUrl(winner.avatar_url);
 
     useEffect(() => {
         if (countedRank < player.rank) {
@@ -275,24 +271,14 @@ export default function LosePage({ winner, player, game }: Props) {
                                 Geraden door
                             </p>
                             <div className="relative">
-                                {winnerPortraitUrl ? (
-                                    <img
-                                        src={winnerPortraitUrl}
-                                        alt={winner.name}
-                                        data-testid="winner-portrait"
-                                        className="size-24 rounded-xl border-2 border-amber-400/60 object-cover shadow-md"
-                                    />
-                                ) : getAvatarUrl(winner.avatar_url) ? (
-                                    <img
-                                        src={getAvatarUrl(winner.avatar_url)}
-                                        alt={winner.name}
-                                        className="size-16 rounded-full border-2 border-border object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
-                                        {winnerInitials}
-                                    </div>
-                                )}
+                                <WinnerAvatar
+                                    name={winner.name}
+                                    avatarUrl={winner.avatar_url}
+                                    portraitClassName="size-24 rounded-xl border-2 border-amber-400/60"
+                                    avatarClassName="size-16 rounded-full border-2 border-border"
+                                    fallbackClassName="size-16 rounded-full border-2 border-border bg-primary/10 text-xl font-semibold text-primary"
+                                    testId="winner-portrait"
+                                />
                                 {/* Mini crown for winner */}
                                 <div className="absolute -top-2 left-1/2 -translate-x-1/2">
                                     <svg
