@@ -193,6 +193,9 @@ export default function FortunePage({
                 ]);
                 setWager(0);
 
+                // Clear result after 5 seconds
+                setTimeout(() => setResult(null), 5000);
+
                 if (data.won) {
                     triggerHaptic('win');
                     setShowCelebration(true);
