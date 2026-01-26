@@ -62,6 +62,11 @@ export function RevealSabotageModal({
 
             onSuccess(data.points_remaining, data.sabotaged_question_ids);
             onOpenChange(false);
+
+            // Haptic feedback on success
+            if ('vibrate' in navigator) {
+                navigator.vibrate([30, 20, 30]);
+            }
         } catch {
             setError('Verbinding mislukt');
         } finally {

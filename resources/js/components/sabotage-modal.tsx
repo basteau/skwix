@@ -75,6 +75,11 @@ export function SabotageModal({
 
             onSuccess(data.points_remaining);
             onOpenChange(false);
+
+            // Haptic feedback on success
+            if ('vibrate' in navigator) {
+                navigator.vibrate([50, 30, 50]);
+            }
         } catch {
             setError('Verbinding mislukt');
         } finally {
