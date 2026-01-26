@@ -370,7 +370,7 @@ export default function GuessPage({
                 </div>
 
                 <PlayHeader
-                    title="Mystery Woord"
+                    title="Rarara"
                     points={points}
                     testId="guess-points-display"
                     testMode={testMode?.active}
