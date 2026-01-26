@@ -372,24 +372,29 @@ export default function WinPage({ winner, game }: Props) {
                                     'linear-gradient(135deg, oklch(85% 0.12 80) 0%, oklch(78% 0.15 75) 50%, oklch(85% 0.12 80) 100%)',
                             }}
                         >
-                            <div className="flex items-center justify-center gap-3">
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    className="size-6 text-amber-900/80"
-                                    fill="currentColor"
-                                >
-                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                                </svg>
-                                <span className="font-display text-xl font-bold tracking-wide text-amber-900">
-                                    Eeuwige Roem
+                            <div className="flex flex-col items-center justify-center gap-1">
+                                <span className="text-sm font-medium text-amber-800/80">
+                                    Je hebt gewonnen:
                                 </span>
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    className="size-6 text-amber-900/80"
-                                    fill="currentColor"
-                                >
-                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                                </svg>
+                                <div className="flex items-center gap-3">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        className="size-6 text-amber-900/80"
+                                        fill="currentColor"
+                                    >
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                                    </svg>
+                                    <span className="font-display text-xl font-bold tracking-wide text-amber-900">
+                                        Eeuwige Roem
+                                    </span>
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        className="size-6 text-amber-900/80"
+                                        fill="currentColor"
+                                    >
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     </div>
