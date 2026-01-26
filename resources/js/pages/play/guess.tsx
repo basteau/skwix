@@ -135,7 +135,12 @@ export default function GuessPage({
     useEffect(() => {
         if (testMode?.active || error) return;
         if (game?.status === 'completed') {
-            router.visit('/game/end');
+            // If current player is the winner, go to /win, otherwise /lose
+            if (game?.winner_id === player?.id) {
+                router.visit('/win');
+            } else {
+                router.visit('/lose');
+            }
             return;
         }
 
