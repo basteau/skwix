@@ -139,6 +139,22 @@
                         </td>
                     </tr>
 
+                    <!-- Ski Family Photo -->
+                    <tr>
+                        <td style="padding: 0 28px 28px;">
+                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td align="center">
+                                        <p class="text-secondary" style="margin: 0 0 16px; font-size: 15px; color: #475569; font-weight: 500;">
+                                            Geniet nog van de skireis! ⛷️
+                                        </p>
+                                        <img src="{{ url('/images/ski_group_family.png') }}" alt="Ski groepsfoto" style="max-width: 100%; height: auto; border-radius: 12px; display: block;">
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
                     <!-- Footer -->
                     <tr>
                         <td class="footer-bg" style="padding: 20px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
