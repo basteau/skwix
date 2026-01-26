@@ -163,11 +163,34 @@ class GuessController extends Controller
         // Regular property question - proceed with normal Q&A flow
         $result = $this->openRouterService->askQuestion($game->secret_word, $question, $game->word_description);
 
+        // If AI fails, save question with 'failed' status (no points deducted)
         if (! $result['success']) {
+            $failedQuestion = Question::create([
+                'game_id' => $game->id,
+                'player_id' => $player->id,
+                'question_text' => $question,
+                'answer' => 'failed',
+                'wit' => null,
+            ]);
+
             return response()->json([
-                'error' => 'ai_error',
-                'message' => $result['error'] ?? 'Er ging iets mis met de AI',
-            ], 500);
+                'success' => true,
+                'question' => [
+                    'id' => $failedQuestion->id,
+                    'question' => $failedQuestion->question_text,
+                    'answer' => 'failed',
+                    'wit' => null,
+                    'player' => [
+                        'id' => $player->id,
+                        'name' => $player->name,
+                        'avatar_url' => $player->avatar_url,
+                    ],
+                    'created_at' => $failedQuestion->created_at->toISOString(),
+                ],
+                'points_remaining' => $player->points,
+                'ai_failed' => true,
+                'error_message' => $result['error'] ?? 'Er ging iets mis met de AI',
+            ]);
         }
 
         $answer = $result['answer'];
@@ -220,6 +243,98 @@ class GuessController extends Controller
                     'avatar_url' => $player->avatar_url,
                 ],
                 'created_at' => $savedQuestion->created_at->toISOString(),
+            ],
+            'points_remaining' => $player->points,
+        ]);
+    }
+
+    /**
+     * Retry a failed question (AI error).
+     * Points are only deducted on successful retry.
+     */
+    public function retry(Request $request, Question $question): JsonResponse
+    {
+        $user = $request->user();
+        $player = $user->activePlayer();
+
+        if (! $player) {
+            return response()->json(['error' => 'no_active_game'], 403);
+        }
+
+        // Verify question belongs to player and is in failed state
+        if ($question->player_id !== $player->id) {
+            return response()->json(['error' => 'unauthorized'], 403);
+        }
+
+        if ($question->answer !== 'failed') {
+            return response()->json(['error' => 'question_not_failed'], 400);
+        }
+
+        $game = $player->game;
+
+        // Check if player has enough points
+        if ($player->points < config('game.guess_cost')) {
+            return response()->json([
+                'error' => 'insufficient_points',
+                'message' => 'Niet genoeg punten',
+            ], 400);
+        }
+
+        // Retry the AI call
+        $result = $this->openRouterService->askQuestion($game->secret_word, $question->question_text, $game->word_description);
+
+        if (! $result['success']) {
+            return response()->json([
+                'success' => false,
+                'error' => 'ai_error',
+                'message' => $result['error'] ?? 'Er ging iets mis met de AI',
+            ]);
+        }
+
+        $answer = $result['answer'];
+        $wit = $result['wit'] ?? null;
+
+        // Success! Deduct points and update question
+        $wasSabotaged = false;
+        \DB::transaction(function () use ($player, $question, $answer, $wit, &$wasSabotaged) {
+            $player->decrement('points', config('game.guess_cost'));
+
+            $question->update([
+                'answer' => $answer,
+                'wit' => $wit,
+            ]);
+
+            // Apply sabotage only to yes/no answers
+            if (in_array($answer, ['yes', 'no'])) {
+                $sabotage = $this->sabotageService->consumePendingSabotage($player, $question);
+                if ($sabotage) {
+                    $flippedAnswer = $this->sabotageService->flipAnswer($answer);
+                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question->question_text);
+                    $question->update([
+                        'answer' => $flippedAnswer,
+                        'wit' => $flippedWit ?? $wit,
+                    ]);
+                    $wasSabotaged = true;
+                }
+            }
+        });
+
+        $player->refresh();
+        $question->refresh();
+
+        return response()->json([
+            'success' => true,
+            'question' => [
+                'id' => $question->id,
+                'question' => $question->question_text,
+                'answer' => $question->answer,
+                'wit' => $question->wit,
+                'player' => [
+                    'id' => $player->id,
+                    'name' => $player->name,
+                    'avatar_url' => $player->avatar_url,
+                ],
+                'created_at' => $question->created_at->toISOString(),
             ],
             'points_remaining' => $player->points,
         ]);

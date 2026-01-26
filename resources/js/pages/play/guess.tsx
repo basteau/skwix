@@ -11,8 +11,10 @@ import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import {
+    AlertTriangle,
     Check,
     Crown,
+    RefreshCw,
     Search,
     Skull,
     Snowflake,
@@ -26,7 +28,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 interface QuestionItem {
     id: number;
     question: string;
-    answer: 'yes' | 'no' | 'winner' | 'unclear' | 'unknown';
+    answer: 'yes' | 'no' | 'winner' | 'unclear' | 'unknown' | 'failed';
     wit?: string;
     player: {
         id: number;
@@ -135,6 +137,9 @@ export default function GuessPage({
     // Sabotage reveal state - from server props (no more sessionStorage!)
     const [sabotagedQuestionIds, setSabotagedQuestionIds] =
         useState<number[]>(revealedSabotagedIds);
+
+    // Track which questions are being retried
+    const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
 
     // Sync revealed sabotage IDs from server (on poll updates)
     useEffect(() => {
@@ -348,6 +353,48 @@ export default function GuessPage({
         }
     };
 
+    const handleRetry = useCallback(async (questionId: number) => {
+        if (retryingIds.has(questionId)) return;
+
+        setRetryingIds((prev) => new Set(prev).add(questionId));
+
+        try {
+            const res = await fetch(`/play/guess/retry/${questionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+
+            const data = await res.json();
+
+            if (data.success && data.question) {
+                setQuestions((prev) =>
+                    prev.map((q) =>
+                        q.id === questionId ? (data.question as QuestionItem) : q,
+                    ),
+                );
+                setPoints(data.points_remaining as number);
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: data.message || 'Retry mislukt',
+                });
+                setTimeout(() => setMessage(null), 3000);
+            }
+        } catch {
+            setMessage({ type: 'error', text: 'Verbinding mislukt' });
+            setTimeout(() => setMessage(null), 3000);
+        } finally {
+            setRetryingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(questionId);
+                return next;
+            });
+        }
+    }, [retryingIds]);
+
     if (error === 'no_active_game') {
         return <NoActiveGame title="Vraag" />;
     }
@@ -462,6 +509,8 @@ export default function GuessPage({
                                         isSabotaged={sabotagedQuestionIds.includes(
                                             q.id,
                                         )}
+                                        onRetry={q.answer === 'failed' && q.player.id === player?.id ? () => handleRetry(q.id) : undefined}
+                                        isRetrying={retryingIds.has(q.id)}
                                     />
                                 ))}
                                 {pendingQuestion && player && (
@@ -965,17 +1014,22 @@ function QuestionBubble({
     isNew,
     playerColorIdx,
     isSabotaged = false,
+    onRetry,
+    isRetrying = false,
 }: {
     question: QuestionItem;
     isOwn: boolean;
     isNew: boolean;
     playerColorIdx: number;
     isSabotaged?: boolean;
+    onRetry?: () => void;
+    isRetrying?: boolean;
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
     const isUnclear = question.answer === 'unclear' || question.answer === 'unknown';
     const isWinner = question.answer === 'winner';
+    const isFailed = question.answer === 'failed';
     const playerColor = PLAYER_COLORS[playerColorIdx];
 
     return (
@@ -1030,6 +1084,8 @@ function QuestionBubble({
                 <div className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-muted to-muted/60">
                     {isWinner ? (
                         <Trophy className="size-4 text-amber-500" />
+                    ) : isFailed ? (
+                        <AlertTriangle className="size-4 text-amber-500" />
                     ) : (
                         <Snowflake className="size-4 text-primary/60" />
                     )}
@@ -1041,11 +1097,13 @@ function QuestionBubble({
                         isSabotaged && 'ring-2 ring-destructive/50',
                         isWinner
                             ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600 dark:text-amber-400'
-                            : isYes
-                              ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
-                              : isUnclear
-                                ? 'bg-gradient-to-r from-muted/60 to-muted/40 text-muted-foreground'
-                                : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
+                            : isFailed
+                              ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/10 text-amber-600 dark:text-amber-400'
+                              : isYes
+                                ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
+                                : isUnclear
+                                  ? 'bg-gradient-to-r from-muted/60 to-muted/40 text-muted-foreground'
+                                  : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
                     )}
                 >
                     {isSabotaged && (
@@ -1056,6 +1114,8 @@ function QuestionBubble({
                     )}
                     {isWinner ? (
                         <Trophy className="size-4 shrink-0" />
+                    ) : isFailed ? (
+                        <AlertTriangle className="size-4 shrink-0" />
                     ) : isYes ? (
                         <Check className="size-4 shrink-0" />
                     ) : isUnclear ? (
@@ -1066,9 +1126,28 @@ function QuestionBubble({
                     <span>
                         {isWinner
                             ? 'Correct! 🎉'
-                            : question.wit || (isYes ? 'Ja' : isUnclear ? 'Onduidelijk' : 'Nee')}
+                            : isFailed
+                              ? 'AI fout'
+                              : question.wit || (isYes ? 'Ja' : isUnclear ? 'Onduidelijk' : 'Nee')}
                     </span>
                 </div>
+                {/* Retry button for failed questions */}
+                {isFailed && onRetry && (
+                    <button
+                        onClick={onRetry}
+                        disabled={isRetrying}
+                        className={cn(
+                            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+                            'border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                            'transition-all duration-150 ease-out',
+                            'hover:bg-amber-500/20 hover:border-amber-500/60 active:scale-95',
+                            'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
+                        )}
+                    >
+                        <RefreshCw className={cn('size-3', isRetrying && 'animate-spin')} />
+                        {isRetrying ? 'Bezig...' : 'Opnieuw'}
+                    </button>
+                )}
             </div>
         </div>
     );

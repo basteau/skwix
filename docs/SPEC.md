@@ -72,7 +72,7 @@ A competitive multiplayer word-guessing game combining daily Wordle puzzles with
 - Yes/No question input for the mystery word
 - Costs 3 points per question
 - Full history of all questions asked (by all players)
-- AI responses via GPT-5.2 mini (OpenRouter)
+- AI responses via Gemini 3 Flash (OpenRouter)
 - Disabled when insufficient points
 
 #### Fortune Tab (/play/fortune)
@@ -135,7 +135,7 @@ A competitive multiplayer word-guessing game combining daily Wordle puzzles with
 ### Mystery Word Guessing
 - Players ask yes/no questions about the secret word
 - Cost: 3 points per question
-- AI (GPT-5.2 mini via OpenRouter) answers
+- AI (Gemini 3 Flash via OpenRouter) answers
 - Response style: Normal - yes/no with minor phrasing (certainly, nope, indeed)
 - AI prompt strictly forbids revealing extra info
 - All questions visible to all players (shared history)
@@ -184,7 +184,7 @@ A competitive multiplayer word-guessing game combining daily Wordle puzzles with
 - **Laravel Queues** for email sending
 
 ### AI Integration
-- **OpenRouter API** with GPT-5.2 mini
+- **OpenRouter API** with Gemini 3 Flash
 - Strict prompt engineering for yes/no responses
 
 ### Deployment

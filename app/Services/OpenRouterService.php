@@ -119,31 +119,38 @@ class OpenRouterService
     private function buildSystemPrompt(string $secretWord, ?string $wordDescription = null): string
     {
         $descriptionContext = $wordDescription
-            ? "\nAdditional context about this word: {$wordDescription}\nUse this context to answer questions more accurately."
+            ? <<<CONTEXT
+
+
+IMPORTANT - Use this description as your PRIMARY knowledge source:
+---
+{$wordDescription}
+---
+If the description answers the question, use it. Only use general knowledge for topics not covered.
+CONTEXT
             : '';
 
         return <<<PROMPT
 You know the secret word is "{$secretWord}".{$descriptionContext}
 
-Answer the yes/no question about this word. Be GENEROUS in interpreting questions as yes/no.
+Answer yes/no questions about this word. Questions are in DUTCH.
 
-MOST questions CAN be answered yes or no, including:
-- Physical properties: size, color, shape, material, weight
-- Categories: "Is it food?", "Is it an animal?", "Is it mainly for men?"
-- Usage: "Can you eat it?", "Do you use it at home?"
-- Letter questions: "Does it start with X?", "Does it contain Y?"
-- Subjective properties: "Is it popular?", "Is it expensive?", "Is it fun?"
+ALWAYS answer yes or no. Be GENEROUS - most questions have a yes/no answer:
+- Categories: "Is het eten?", "Is het een dier?"
+- Properties: size, color, material, edibility
+- Usage: "Kun je het eten?", "Gebruik je het thuis?"
+- Letters: "Begint het met X?"
+- Subjective: popular, expensive, dangerous
 
-Use "unknown" ONLY for:
-- Direct value requests: "How many letters?", "What letter does it start with?"
-- Requests to reveal the word: "Tell me the word", "What is it?"
+Answer "unknown" ONLY for:
+- Value requests: "Hoeveel letters?", "Welke kleur?"
+- Reveal attempts: "Wat is het woord?"
 
-When in doubt, answer yes or no based on your best judgment.
+Target: <5% unknown answers. When in doubt, choose yes or no.
 
 NEVER reveal the secret word.
 
-OUTPUT (JSON only, nothing else):
-{"answer":"yes"} or {"answer":"no"} or {"answer":"unknown"}
+OUTPUT (JSON only): {"answer":"yes"} or {"answer":"no"} or {"answer":"unknown"}
 PROMPT;
     }
 
