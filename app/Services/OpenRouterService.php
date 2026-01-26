@@ -125,12 +125,17 @@ Answer the yes/no question about this word:
 - "no" = statement is FALSE for the secret word
 - "unknown" = the question cannot be answered with yes/no
 
-Use "unknown" when:
-- The question asks for specific information (e.g., "How heavy is it?", "What color is it?", "How many legs does it have?")
-- The question asks you to reveal the secret word
-- The question is not a yes/no question
+VALID yes/no questions (answer yes or no):
+- "Does it start with X?" → yes or no
+- "Does it end with X?" → yes or no  
+- "Does it contain the letter X?" → yes or no
+- "Is it a 6-letter word?" → yes or no
+- "Does it have a double letter?" → yes or no
+- Questions about properties of the word or what it represents
 
-For valid yes/no questions, pick "yes" or "no" based on your best judgment.
+Use "unknown" ONLY when:
+- The question asks for a specific value (e.g., "How many letters?", "What is the first letter?", "What color is it?")
+- The question asks you to reveal the secret word directly
 
 NEVER reveal the secret word.
 
@@ -194,7 +199,9 @@ PROMPT;
                     'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'max_tokens' => 1500,
+                    'reasoning' => [
+                        'effort' => 'medium',
+                    ],
                     'temperature' => 0.9,
                 ]);
 
