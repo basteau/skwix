@@ -97,7 +97,7 @@ Using database driver (works without Redis):
 | Variable | Purpose | Value |
 |----------|---------|-------|
 | `OPENROUTER_API_KEY` | OpenRouter API key | `sk-or-v1-xxx...` |
-| `OPENROUTER_MODEL` | AI model to use | `openai/gpt-5` |
+| `OPENROUTER_MODEL` | AI model to use | `openai/gpt-5.2-chat` |
 
 ### Admin Access
 

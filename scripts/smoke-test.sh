@@ -27,8 +27,8 @@ else
     fail "Health endpoint (/up)"
 fi
 
-# Welcome page loads and contains expected content
-if curl -sf "$BASE_URL/" 2>/dev/null | grep -qi "skwix"; then
+# Welcome page loads and contains expected content (follow redirects)
+if curl -sfL "$BASE_URL/" 2>/dev/null | grep -qi "skwix"; then
     pass "Welcome page loads"
 else
     fail "Welcome page loads"

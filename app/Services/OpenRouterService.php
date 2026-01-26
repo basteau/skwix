@@ -11,20 +11,19 @@ class OpenRouterService
 {
     private const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-    private const DEFAULT_MODEL = 'openai/gpt-5.2-chat';
-
-    private const WIT_MODEL = 'openai/gpt-5.2-chat';
-
     private const MAX_REQUESTS_PER_MINUTE = 20;
 
     private string $apiKey;
 
     private string $model;
 
+    private string $witModel;
+
     public function __construct()
     {
         $this->apiKey = config('services.openrouter.api_key', '');
-        $this->model = config('services.openrouter.model', self::DEFAULT_MODEL);
+        $this->model = config('services.openrouter.model');
+        $this->witModel = config('services.openrouter.wit_model') ?? $this->model;
     }
 
     public function askQuestion(string $secretWord, string $question): array
@@ -197,7 +196,7 @@ PROMPT;
                     'X-Title' => 'Skwix',
                 ])
                 ->post(self::API_URL, [
-                    'model' => self::WIT_MODEL,
+                    'model' => $this->witModel,
                     'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
