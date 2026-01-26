@@ -65,7 +65,16 @@ export default function LosePage({ winner, player, game }: Props) {
     return (
         <>
             <Head title="Einde Spel" />
-            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-muted/20 to-background px-4 py-10">
+            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
+                {/* Subtle gradient overlay */}
+                <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                        background:
+                            'linear-gradient(to bottom, oklch(100% 0 0) 0%, oklch(97% 0.01 250) 50%, oklch(100% 0 0) 100%)',
+                    }}
+                />
+
                 {/* Background snowflakes */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     {SNOWFLAKES.map((flake, i) => (
@@ -162,8 +171,11 @@ export default function LosePage({ winner, player, game }: Props) {
                         data-testid="lose-title"
                         className="font-display text-3xl font-bold text-foreground motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
                     >
-                        Goed gespeeld!
+                        Loser!
                     </h1>
+                    <p className="mt-1 text-sm text-muted-foreground motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in">
+                        Meer geluk volgende keer
+                    </p>
 
                     {/* Rank display */}
                     <div className="mt-5 motion-safe:animate-in motion-safe:delay-100 motion-safe:duration-700 motion-safe:fade-in">
@@ -324,10 +336,7 @@ export default function LosePage({ winner, player, game }: Props) {
                         </Button>
                     </div>
 
-                    {/* Encouragement */}
-                    <p className="mt-5 text-sm text-muted-foreground motion-safe:animate-in motion-safe:delay-500 motion-safe:duration-700 motion-safe:fade-in">
-                        Bedankt voor het meespelen! 🎮
-                    </p>
+
                 </div>
             </div>
         </>

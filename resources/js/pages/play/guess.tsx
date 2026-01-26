@@ -572,7 +572,7 @@ function VictoryCelebration({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="victory-title"
-                className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden overscroll-contain bg-gradient-to-b from-background via-primary/5 to-background pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden overscroll-contain bg-background pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
             >
                 {/* Screen reader announcement */}
                 <div className="sr-only" aria-live="assertive">
@@ -584,15 +584,24 @@ function VictoryCelebration({
                 {/* Confetti - only in celebrate phase, hidden for reduced motion */}
                 {phase !== 'reveal' && <Confetti />}
 
+                {/* Subtle gradient overlay */}
+                <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                        background:
+                            'linear-gradient(to bottom, oklch(100% 0 0) 0%, oklch(97% 0.02 230) 50%, oklch(100% 0 0) 100%)',
+                    }}
+                />
+
                 {/* Golden glow backdrop */}
                 <div
                     className={cn(
-                        'absolute inset-0 transition-opacity duration-1000',
+                        'pointer-events-none absolute inset-0 transition-opacity duration-1000',
                         phase === 'reveal' ? 'opacity-0' : 'opacity-100',
                     )}
                     style={{
                         background:
-                            'radial-gradient(ellipse at center, oklch(80% 0.15 80 / 0.15) 0%, transparent 60%)',
+                            'radial-gradient(ellipse at center, oklch(85% 0.12 80 / 0.25) 0%, transparent 60%)',
                     }}
                 />
 

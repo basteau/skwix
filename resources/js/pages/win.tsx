@@ -71,7 +71,25 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
     return (
         <>
             <Head title="Gewonnen!" />
-            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-primary/5 to-background px-4 py-10">
+            <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
+                {/* Subtle gradient overlay */}
+                <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                        background:
+                            'linear-gradient(to bottom, oklch(100% 0 0) 0%, oklch(97% 0.02 230) 50%, oklch(100% 0 0) 100%)',
+                    }}
+                />
+
+                {/* Golden celebration glow */}
+                <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                        background:
+                            'radial-gradient(ellipse at center top, oklch(85% 0.12 80 / 0.2) 0%, transparent 50%)',
+                    }}
+                />
+
                 {/* Confetti */}
                 {showConfetti && <Confetti />}
 
