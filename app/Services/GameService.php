@@ -50,6 +50,10 @@ class GameService
             return $unlockOnStartDay;
         }
 
+        if ($gameStart->hour === $hour) {
+            return $gameStart;
+        }
+
         return $unlockOnStartDay->copy()->addDay();
     }
 
@@ -65,7 +69,11 @@ class GameService
 
         $startDayUnlock = $gameStart->copy()->setTime($hour, 0, 0);
         if ($gameStart->gt($startDayUnlock)) {
-            $startDayUnlock->addDay();
+            if ($gameStart->hour === $hour) {
+                $startDayUnlock = $gameStart->copy();
+            } else {
+                $startDayUnlock->addDay();
+            }
         }
 
         $todayUnlock = $now->copy()->setTime($hour, 0, 0);

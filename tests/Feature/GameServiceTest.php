@@ -226,6 +226,17 @@ describe('getFirstWordleUnlockTime', function () {
 
         expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-24 23:00');
     });
+
+    it('unlocks immediately when game starts at same hour as wordle_hour', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 2, 40, 0, 'Europe/Brussels'),
+            'wordle_hour' => 2,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-24 02:40');
+    });
 });
 
 describe('getNextWordleUnlockTime', function () {
