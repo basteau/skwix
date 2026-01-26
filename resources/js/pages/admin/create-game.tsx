@@ -162,7 +162,7 @@ export default function CreateGame({ availableUsers }: Props) {
                         {/* Secret Word */}
                         <section>
                             <h2 className="mb-3 text-lg font-semibold text-foreground">
-                                Mystery Woord
+                                Rarara
                             </h2>
                             <Input
                                 value={secretWord}
