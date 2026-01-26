@@ -10,7 +10,7 @@ import {
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { AlertCircle, Crown, LogOut, MoreVertical, Snowflake } from 'lucide-react';
+import { AlertCircle, LogOut, MoreVertical, Snowflake } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface Player {
@@ -254,7 +254,6 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                             >
                                 {players.map((p, index) => {
                                     const isCurrentPlayer = p.id === player?.id;
-                                    const isHost = index === 0;
 
                                     return (
                                         <div
@@ -263,34 +262,21 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
                                             className={cn(
                                                 'relative flex items-center gap-3 rounded-xl border bg-card/80 p-3 transition-all',
                                                 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
-                                                isCurrentPlayer &&
-                                                    'border-primary/40 bg-primary/5 shadow-md ring-1 ring-primary/20',
-                                                isHost &&
-                                                    !isCurrentPlayer &&
-                                                    'border-amber-400/30 bg-amber-50/30 dark:bg-amber-950/10',
-                                                !isCurrentPlayer &&
-                                                    !isHost &&
-                                                    'border-border/60',
+                                                isCurrentPlayer
+                                                    ? 'border-primary/40 bg-primary/5 shadow-md ring-1 ring-primary/20'
+                                                    : 'border-border/60',
                                             )}
                                             style={{
                                                 animationDelay: `${index * 80}ms`,
                                                 animationFillMode: 'backwards',
                                             }}
                                         >
-                                            {isHost && (
-                                                <Crown
-                                                    className="absolute -top-2 -right-2 size-5 text-amber-500 drop-shadow"
-                                                    aria-label="Host"
-                                                />
-                                            )}
                                             <Avatar
                                                 className={cn(
                                                     'size-11 border-2 shadow-sm',
                                                     isCurrentPlayer
                                                         ? 'border-primary'
-                                                        : isHost
-                                                          ? 'border-amber-400/60'
-                                                          : 'border-border',
+                                                        : 'border-border',
                                                 )}
                                             >
                                                 <AvatarImage
