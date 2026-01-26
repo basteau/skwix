@@ -134,7 +134,7 @@
                             </table>
 
                             <p class="text-muted" style="margin: 0; font-size: 13px; line-height: 1.6; color: #94a3b8; text-align: center;">
-                                Ga naar skwix.be en voer je code in
+                                Ga naar skwix.example en voer je code in
                             </p>
                         </td>
                     </tr>
