@@ -105,7 +105,7 @@ const steps: TutorialStep[] = [
         title: 'Wordle',
         description:
             'Raad het 5-letter woord in 6 pogingen. Kleuren tonen hoe dichtbij je bent.',
-        points: { text: '10–20 punten', type: 'earn' },
+        points: { text: '7–20 punten', type: 'earn' },
         visual: (
             <div className="space-y-3 py-4">
                 {/* Mini wordle grid */}

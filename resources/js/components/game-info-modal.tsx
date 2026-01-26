@@ -153,7 +153,7 @@ export const WORDLE_INFO: GameInfoContent = {
             text: 'Grijs = letter zit niet in woord',
         },
     ],
-    pointsInfo: '10–20 punten (minder pogingen = meer punten)',
+    pointsInfo: '7–20 punten (minder pogingen = meer punten)',
     footer: (
         <p className="mt-4 text-[10px] text-muted-foreground/60">
             Woordenlijst gebaseerd op{' '}

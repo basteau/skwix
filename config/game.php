@@ -25,7 +25,7 @@ return [
     | - 4 guesses: 1.4x = 14 points
     | - 5 guesses: 1.2x = 12 points
     | - 6 guesses: 1.0x = 10 points
-    | - Failed (word not found): 0.8x = 8 points
+    | - Failed (word not found): 0.7x = 7 points
     |
     */
     'wordle_rewards' => [
@@ -35,7 +35,7 @@ return [
         4 => 14,
         5 => 12,
         6 => 10,
-        'failed' => 8,
+        'failed' => 7,
     ],
 
     /*
