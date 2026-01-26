@@ -13,6 +13,8 @@ class OpenRouterService
 
     private const DEFAULT_MODEL = 'openai/gpt-5';
 
+    private const WIT_MODEL = 'openai/gpt-5-mini';
+
     private const MAX_REQUESTS_PER_MINUTE = 20;
 
     private string $apiKey;
@@ -79,12 +81,17 @@ class OpenRouterService
             }
 
             $data = $response->json();
-            $answer = $data['choices'][0]['message']['content'] ?? '';
+            $rawContent = $data['choices'][0]['message']['content'] ?? '';
+            $answer = $this->parseAnswer($rawContent);
+
+            // Generate Boma-style wit in a separate call
+            $wit = $this->generateBomaWit($answer);
 
             return [
                 'success' => true,
-                'answer' => $this->parseAnswer($answer),
-                'raw_answer' => $answer,
+                'answer' => $answer,
+                'wit' => $wit,
+                'raw_answer' => $rawContent,
             ];
 
         } catch (RequestException $e) {
@@ -112,25 +119,135 @@ class OpenRouterService
     {
         return <<<PROMPT
 You know the secret word is "{$secretWord}".
-Answer yes/no questions about it.
-Never reveal the word or give extra information.
-Only respond with variations of yes or no (e.g., "Yes", "No", "Certainly", "Nope", "Indeed", "Not at all").
-Keep responses under 5 words.
+
+Answer the yes/no question about this word:
+- "yes" = statement is TRUE for the secret word
+- "no" = statement is FALSE for the secret word
+
+ALWAYS choose "yes" or "no" - even if uncertain, pick the most likely answer.
+
+ONLY use "unknown" if the question explicitly asks you to reveal the secret word (e.g., "what is the word?", "tell me the answer").
+
+For ALL other questions, pick "yes" or "no" based on your best judgment.
+
+NEVER reveal the secret word.
+
+OUTPUT (JSON only, nothing else):
+{"answer":"yes"} or {"answer":"no"} or {"answer":"unknown"}
 PROMPT;
     }
 
+    /**
+     * Generate a Boma-style witty response based on the answer type.
+     */
+    public function generateBomaWit(string $answerType): ?string
+    {
+        if (empty($this->apiKey)) {
+            return null;
+        }
+
+        $isWinner = $answerType === 'winner';
+
+        $scriptLine = match ($answerType) {
+            'yes' => 'ja, dat is juist',
+            'no' => 'nee, dat is fout',
+            'unknown' => 'onduidelijk',
+            'winner' => 'GEWONNEN! Het woord is geraden!',
+            default => 'ja, dat is juist',
+        };
+
+        $extraInstruction = $isWinner
+            ? ' Wees SUPER enthousiast, dit is een groot moment! Gebruik uitroeptekens!'
+            : '';
+
+        $prompt = <<<PROMPT
+Stel je bent Balthazar Boma van FC De Kampioenen en er staat "{$scriptLine}" in het script. Hoe zou je dit in eigen woorden en stijl verwoorden?{$extraInstruction} Gebruik een korte one-liner (max 50 karakters). Antwoord ALLEEN met de one-liner, geen aanhalingstekens of uitleg.
+PROMPT;
+
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders([
+                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'Content-Type' => 'application/json',
+                    'HTTP-Referer' => config('app.url'),
+                    'X-Title' => 'Skwix',
+                ])
+                ->post(self::API_URL, [
+                    'model' => self::WIT_MODEL,
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                    'max_tokens' => 60,
+                    'temperature' => 0.9,
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $wit = trim($data['choices'][0]['message']['content'] ?? '');
+                $wit = trim($wit, '"\'');
+
+                if (mb_strlen($wit) > 0 && mb_strlen($wit) <= 80) {
+                    return $wit;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Boma wit generation failed', ['error' => $e->getMessage()]);
+        }
+
+        return $this->getFallbackWit($answerType);
+    }
+
+    private const FALLBACK_WITS = [
+        'yes' => 'Ja',
+        'no' => 'Nee',
+        'unknown' => 'Onduidelijk',
+        'winner' => 'Correct, goed geraden!',
+    ];
+
     private function parseAnswer(string $rawAnswer): string
+    {
+        $cleaned = trim($rawAnswer);
+
+        // Try to extract JSON from the response
+        if (preg_match('/\{[^{}]*"answer"[^{}]*\}/s', $cleaned, $matches)) {
+            $cleaned = $matches[0];
+        } elseif (preg_match('/\{.*\}/s', $cleaned, $matches)) {
+            $cleaned = $matches[0];
+        }
+
+        try {
+            $parsed = json_decode($cleaned, true, 512, JSON_THROW_ON_ERROR);
+
+            if (isset($parsed['answer'])) {
+                $answer = strtolower(trim($parsed['answer']));
+
+                if (in_array($answer, ['yes', 'no', 'unknown'], true)) {
+                    return $answer;
+                }
+            }
+        } catch (\JsonException $e) {
+            // Fall through to legacy parsing
+        }
+
+        // Legacy fallback: pattern matching for non-JSON responses
+        return $this->parseAnswerLegacy($rawAnswer);
+    }
+
+    private function parseAnswerLegacy(string $rawAnswer): string
     {
         $normalized = strtolower(trim($rawAnswer));
 
-        $yesPatterns = ['yes', 'ja', 'certainly', 'indeed', 'correct', 'absolutely', 'yep', 'sure', 'definitely', 'that\'s right'];
-        $noPatterns = ['no', 'nee', 'nope', 'not', 'negative', 'incorrect', 'wrong', 'definitely not', 'not at all'];
+        $noPatterns = [
+            'definitely not', 'not at all', 'absolutely not', 'certainly not',
+            'no', 'nee', 'nope', 'negative', 'incorrect', 'wrong', 'niet', 'neen',
+            'false', 'never', 'nooit',
+        ];
 
-        foreach ($yesPatterns as $pattern) {
-            if (str_contains($normalized, $pattern)) {
-                return 'yes';
-            }
-        }
+        $yesPatterns = [
+            'yes', 'ja', 'certainly', 'indeed', 'correct', 'absolutely', 'yep',
+            'sure', 'definitely', 'that\'s right', 'true', 'zeker', 'klopt',
+            'inderdaad', 'jawel', 'jazeker', 'absoluut',
+        ];
 
         foreach ($noPatterns as $pattern) {
             if (str_contains($normalized, $pattern)) {
@@ -138,7 +255,20 @@ PROMPT;
             }
         }
 
-        return 'unclear';
+        foreach ($yesPatterns as $pattern) {
+            if (str_contains($normalized, $pattern)) {
+                return 'yes';
+            }
+        }
+
+        Log::warning('Unparseable AI response', ['raw' => $rawAnswer]);
+
+        return 'unknown';
+    }
+
+    private function getFallbackWit(string $answer): string
+    {
+        return self::FALLBACK_WITS[$answer] ?? self::FALLBACK_WITS['unknown'];
     }
 
     /**

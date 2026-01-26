@@ -66,8 +66,8 @@ class GameService
 
     public function checkWin(Game $game, Player $player, string $guess): bool
     {
-        $secretWord = strtolower(trim($game->secret_word));
-        $guessWord = strtolower(trim($guess));
+        $secretWord = strtolower(preg_replace('/\s+/', '', $game->secret_word));
+        $guessWord = strtolower(preg_replace('/\s+/', '', $guess));
 
         return $secretWord === $guessWord;
     }

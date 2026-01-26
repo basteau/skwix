@@ -25,7 +25,8 @@ import QRCode from 'react-qr-code';
 interface QuestionItem {
     id: number;
     question: string;
-    answer: 'yes' | 'no' | 'winner' | 'unclear';
+    answer: 'yes' | 'no' | 'winner' | 'unclear' | 'unknown';
+    wit?: string;
     player: {
         id: number;
         name: string;
@@ -933,10 +934,7 @@ function PendingBubble({
                     />
                 </div>
                 <div className="rounded-2xl rounded-bl-sm bg-muted/80 px-4 py-2.5 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                        <span>Denkt na</span>
-                        <ThinkingDots />
-                    </span>
+                    <ThinkingDots />
                 </div>
             </div>
         </div>
@@ -956,7 +954,7 @@ function QuestionBubble({
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
-    const isUnclear = question.answer === 'unclear';
+    const isUnclear = question.answer === 'unclear' || question.answer === 'unknown';
     const isWinner = question.answer === 'winner';
     const playerColor = PLAYER_COLORS[playerColorIdx];
 
@@ -1037,25 +1035,21 @@ function QuestionBubble({
                     )}
                 >
                     {isWinner ? (
-                        <>
-                            <Trophy className="size-4" />
-                            <span>Correct! 🎉</span>
-                        </>
+                        <Trophy className="size-4 shrink-0" />
                     ) : isYes ? (
-                        <>
-                            <Check className="size-4" />
-                            <span>Ja</span>
-                        </>
+                        <Check className="size-4 shrink-0" />
                     ) : isUnclear ? (
-                        <>
-                            <Snowflake className="size-4" />
-                            <span>Onduidelijk</span>
-                        </>
+                        <Snowflake className="size-4 shrink-0" />
                     ) : (
-                        <>
-                            <X className="size-4" />
-                            <span>Nee</span>
-                        </>
+                        <X className="size-4 shrink-0" />
+                    )}
+                    <span>
+                        {isWinner
+                            ? 'Correct! 🎉'
+                            : question.wit || (isYes ? 'Ja' : isUnclear ? 'Onduidelijk' : 'Nee')}
+                    </span>
+                    {isUnclear && (
+                        <span className="ml-1 text-xs opacity-60">(gratis)</span>
                     )}
                 </div>
             </div>

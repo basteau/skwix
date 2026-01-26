@@ -49,6 +49,7 @@ class GuessController extends Controller
                 'id' => $q->id,
                 'question' => $q->question_text,
                 'answer' => $q->answer,
+                'wit' => $q->wit,
                 'player' => [
                     'id' => $q->player->id,
                     'name' => $q->player->name,
@@ -90,6 +91,7 @@ class GuessController extends Controller
                 'id' => $idx + 1,
                 'question' => $q['question'],
                 'answer' => $q['answer'],
+                'wit' => $q['wit'] ?? null,
                 'player' => [
                     'id' => $testGame['player']['id'],
                     'name' => $testGame['player']['name'],
@@ -162,14 +164,22 @@ class GuessController extends Controller
             ], 500);
         }
 
-        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $result) {
-            $player->decrement('points', config('game.guess_cost'));
+        $answer = $result['answer'];
+        $wit = $result['wit'] ?? null;
+        $isUnknown = $answer === 'unknown';
+
+        // Don't deduct points for unknown responses - save question for tracking but no cost
+        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit, $isUnknown) {
+            if (! $isUnknown) {
+                $player->decrement('points', config('game.guess_cost'));
+            }
 
             return Question::create([
                 'game_id' => $game->id,
                 'player_id' => $player->id,
                 'question_text' => $question,
-                'answer' => $result['answer'],
+                'answer' => $answer,
+                'wit' => $wit,
             ]);
         });
 
@@ -181,6 +191,7 @@ class GuessController extends Controller
                 'id' => $savedQuestion->id,
                 'question' => $savedQuestion->question_text,
                 'answer' => $savedQuestion->answer,
+                'wit' => $savedQuestion->wit,
                 'player' => [
                     'id' => $player->id,
                     'name' => $player->name,
@@ -189,22 +200,28 @@ class GuessController extends Controller
                 'created_at' => $savedQuestion->created_at->toISOString(),
             ],
             'points_remaining' => $player->points,
+            'free_question' => $isUnknown,
         ]);
     }
 
     private function handleDirectGuess($game, $player, string $question, string $guessedWord): JsonResponse
     {
         $isCorrect = $this->gameService->checkWin($game, $player, $guessedWord);
+        $answerType = $isCorrect ? 'winner' : 'no';
+
+        // Generate Boma-style wit for the guess result
+        $wit = $this->openRouterService->generateBomaWit($answerType);
 
         // Deduct points and save the question
-        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $isCorrect, $guessedWord) {
+        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answerType, $guessedWord, $wit) {
             $player->decrement('points', config('game.guess_cost'));
 
             return Question::create([
                 'game_id' => $game->id,
                 'player_id' => $player->id,
                 'question_text' => $question,
-                'answer' => $isCorrect ? 'winner' : 'no',
+                'answer' => $answerType,
+                'wit' => $wit,
                 'guessed_word' => $guessedWord,
             ]);
         });
@@ -222,6 +239,7 @@ class GuessController extends Controller
                     'id' => $savedQuestion->id,
                     'question' => $savedQuestion->question_text,
                     'answer' => 'winner',
+                    'wit' => $savedQuestion->wit,
                     'player' => [
                         'id' => $player->id,
                         'name' => $player->name,
@@ -251,6 +269,7 @@ class GuessController extends Controller
                 'id' => $savedQuestion->id,
                 'question' => $savedQuestion->question_text,
                 'answer' => 'no',
+                'wit' => $savedQuestion->wit,
                 'player' => [
                     'id' => $player->id,
                     'name' => $player->name,
