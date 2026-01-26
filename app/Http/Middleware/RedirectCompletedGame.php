@@ -16,6 +16,8 @@ class RedirectCompletedGame
         'logout',
         'password.*',
         'admin.*',
+        'welcome',
+        'join',
     ];
 
     public function __construct(
@@ -33,15 +35,25 @@ class RedirectCompletedGame
             return $next($request);
         }
 
-        $player = $user->players()
+        $hasActiveGame = $user->players()
+            ->whereHas('game', fn ($q) => $q->whereIn('status', ['pending', 'active']))
+            ->exists();
+
+        if ($hasActiveGame) {
+            return $next($request);
+        }
+
+        $completedPlayer = $user->players()
             ->whereHas('game', fn ($q) => $q->where('status', 'completed'))
             ->with(['game.winner'])
             ->latest('players.created_at')
             ->first();
 
-        if (! $player || ! $player->game->winner) {
+        if (! $completedPlayer || ! $completedPlayer->game->winner) {
             return $next($request);
         }
+
+        $player = $completedPlayer;
 
         $isWinner = (int) $player->game->winner->id === (int) $player->id;
         $route = $isWinner ? 'win' : 'lose';

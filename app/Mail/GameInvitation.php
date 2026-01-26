@@ -39,7 +39,7 @@ class GameInvitation extends Mailable implements ShouldQueue
             with: [
                 'playerName' => $this->player->name,
                 'inviteCode' => $this->player->invite_code,
-                'loginUrl' => url('/lobby'),
+                'loginUrl' => url('/welcome'),
                 'startsAt' => $this->game->starts_at?->locale('nl')->isoFormat('D MMMM YYYY [om] HH:mm'),
                 'avatarUrl' => $avatarUrl,
             ],

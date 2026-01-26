@@ -37,7 +37,7 @@ it('contains login url with cta', function () {
 
     $mailable = new GameInvitation($player, $game);
 
-    $mailable->assertSeeInHtml(url('/lobby'));
+    $mailable->assertSeeInHtml(url('/welcome'));
     $mailable->assertSeeInHtml('Spelen!');
 });
 
@@ -82,7 +82,7 @@ it('passes correct data to view', function () {
     expect($rendered)
         ->toContain('Jan Test')
         ->toContain('XYZ789')
-        ->toContain(url('/lobby'));
+        ->toContain(url('/welcome'));
 });
 
 it('includes player avatar when available', function () {
