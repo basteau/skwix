@@ -6,7 +6,7 @@ import '../css/app.css';
 import { TooltipProvider } from './components/ui/tooltip';
 import { initializeTheme } from './hooks/use-appearance';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Skwix';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
