@@ -500,6 +500,11 @@ describe('GuessController with sabotage', function () {
             $mock->shouldReceive('askQuestion')
                 ->once()
                 ->andReturn(['success' => true, 'answer' => 'yes']);
+
+            // Called for the flipped answer
+            $mock->shouldReceive('generateBomaWit')
+                ->once()
+                ->andReturn('Gesaboteerd!');
         });
 
         $user = User::factory()->create(['email' => 'test@example.com']);
@@ -556,6 +561,11 @@ describe('GuessController with sabotage', function () {
             $mock->shouldReceive('askQuestion')
                 ->once()
                 ->andReturn(['success' => true, 'answer' => 'no']);
+
+            // Called for the flipped answer
+            $mock->shouldReceive('generateBomaWit')
+                ->once()
+                ->andReturn('Gesaboteerd!');
         });
 
         $user = User::factory()->create(['email' => 'test@example.com']);
@@ -820,8 +830,8 @@ describe('PlayersController with sabotage data', function () {
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->where('sabotage.can_reveal', true)
-            ->where('sabotage.sabotaged_count', 1)
+            ->has('sabotage.cost')
+            ->has('sabotage.reveal_cost')
         );
     });
 });

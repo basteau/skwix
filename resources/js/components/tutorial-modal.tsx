@@ -386,7 +386,7 @@ const steps: TutorialStep[] = [
                     Eerste = Winnaar
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Scan de QR-code voor je prijs
+                    Win een prijs!
                 </p>
             </div>
         ),
