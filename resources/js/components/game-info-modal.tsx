@@ -158,7 +158,7 @@ export const WORDLE_INFO: GameInfoContent = {
         <p className="mt-4 text-[10px] text-muted-foreground/60">
             Woordenlijst gebaseerd op{' '}
             <a
-                href="https://gist.github.com/cfreshman/a03ef2cba789d8cf00c08f767e0fad7b"
+                href="/woordenlijst.txt?v=2"
                 target="_blank"
                 rel="noopener"
                 className="underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
