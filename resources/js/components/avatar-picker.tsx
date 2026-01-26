@@ -20,7 +20,8 @@ export function getAvatarUrl(
     if (!avatar) return undefined;
     if (avatar.startsWith('http')) return avatar;
     if (avatar.startsWith('/')) return avatar;
-    return `/images/faces/${avatar}.png`;
+    const name = avatar.endsWith('.png') ? avatar.slice(0, -4) : avatar;
+    return `/images/faces/${name}.png`;
 }
 
 export function getAvatarForName(name: string): AvatarName {

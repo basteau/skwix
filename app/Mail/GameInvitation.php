@@ -52,7 +52,8 @@ class GameInvitation extends Mailable implements ShouldQueue
         if (str_starts_with($avatar, '/')) {
             return url($avatar);
         }
+        $name = str_ends_with($avatar, '.png') ? substr($avatar, 0, -4) : $avatar;
 
-        return url("/images/faces/{$avatar}.png");
+        return url("/images/faces/{$name}.png");
     }
 }
