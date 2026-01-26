@@ -64,7 +64,9 @@ class OpenRouterService
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user', 'content' => $question],
                     ],
-                    'max_tokens' => 50,
+                    'reasoning' => [
+                        'effort' => 'medium',
+                    ],
                     'temperature' => 0.3,
                 ]);
 
@@ -347,7 +349,9 @@ PROMPT;
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user', 'content' => $question],
                     ],
-                    'max_tokens' => 100,
+                    'reasoning' => [
+                        'effort' => 'medium',
+                    ],
                     'temperature' => 0.1,
                 ]);
 
