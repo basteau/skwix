@@ -44,6 +44,7 @@ export default function CreateGame({ availableUsers }: Props) {
         getDefaultStartDate(),
     );
     const [wordleHour, setWordleHour] = useState(8);
+    const [wordleAtStart, setWordleAtStart] = useState(false);
     const [startingPoints, setStartingPoints] = useState(0);
     const [players, setPlayers] = useState<PlayerRow[]>([
         { id: crypto.randomUUID(), name: '', email: '' },
@@ -121,10 +122,14 @@ export default function CreateGame({ availableUsers }: Props) {
             return;
         }
 
+        const effectiveWordleHour = wordleAtStart && startsAt
+            ? startsAt.getHours()
+            : wordleHour;
+
         const payload = {
             secret_word: secretWord,
             starts_at: startsAt?.toISOString() ?? '',
-            wordle_hour: wordleHour,
+            wordle_hour: effectiveWordleHour,
             starting_points: startingPoints,
             players: validPlayers.map((p) => ({
                 name: p.name,
@@ -140,7 +145,7 @@ export default function CreateGame({ availableUsers }: Props) {
         } catch {
             setIsSubmitting(false);
         }
-    }, [secretWord, startsAt, wordleHour, startingPoints, players]);
+    }, [secretWord, startsAt, wordleHour, wordleAtStart, startingPoints, players]);
 
     return (
         <>
@@ -207,25 +212,46 @@ export default function CreateGame({ availableUsers }: Props) {
                                     <label className="mb-1 block text-sm font-medium text-foreground">
                                         Wordle beschikbaar om (Brussel)
                                     </label>
-                                    <select
-                                        value={wordleHour}
-                                        onChange={(e) =>
-                                            setWordleHour(
-                                                parseInt(e.target.value, 10),
-                                            )
-                                        }
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                        data-testid="wordle-hour-picker"
-                                    >
-                                        {WORDLE_HOURS.map((h) => (
-                                            <option key={h.value} value={h.value}>
-                                                {h.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="wordle-at-start"
+                                            checked={wordleAtStart}
+                                            onChange={(e) =>
+                                                setWordleAtStart(e.target.checked)
+                                            }
+                                            className="size-4 rounded border-input"
+                                            data-testid="wordle-at-start-checkbox"
+                                        />
+                                        <label
+                                            htmlFor="wordle-at-start"
+                                            className="text-sm text-foreground"
+                                        >
+                                            Direct beschikbaar bij start
+                                        </label>
+                                    </div>
+                                    {!wordleAtStart && (
+                                        <select
+                                            value={wordleHour}
+                                            onChange={(e) =>
+                                                setWordleHour(
+                                                    parseInt(e.target.value, 10),
+                                                )
+                                            }
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                            data-testid="wordle-hour-picker"
+                                        >
+                                            {WORDLE_HOURS.map((h) => (
+                                                <option key={h.value} value={h.value}>
+                                                    {h.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        Elke dag wordt een nieuwe Wordle
-                                        ontgrendeld op dit uur
+                                        {wordleAtStart
+                                            ? 'Wordle is direct beschikbaar zodra het spel start'
+                                            : 'Elke dag wordt een nieuwe Wordle ontgrendeld op dit uur'}
                                     </p>
                                     {errors.wordle_hour && (
                                         <p className="mt-1 text-sm text-destructive">

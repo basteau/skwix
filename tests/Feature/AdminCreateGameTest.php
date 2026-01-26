@@ -129,3 +129,43 @@ it('gives starting points to players with existing user accounts', function () {
     expect($existingPlayer->points)->toBe(250);
     expect($newPlayer->points)->toBe(250);
 });
+
+it('sets wordle hour from start time when wordle at start is enabled', function () {
+    $startTime = now()->addDay()->setHour(14)->setMinute(30);
+
+    $response = $this->actingAs($this->admin)
+        ->post('/admin/create', [
+            'secret_word' => 'geheim',
+            'starts_at' => $startTime->toDateTimeString(),
+            'wordle_hour' => 14, // Frontend sends the extracted hour
+            'players' => [
+                ['name' => 'John', 'email' => 'john@example.com'],
+                ['name' => 'Jane', 'email' => 'jane@example.com'],
+            ],
+        ]);
+
+    $response->assertRedirect('/admin');
+
+    $game = \App\Models\Game::latest()->first();
+    expect($game->wordle_hour)->toBe(14);
+});
+
+it('uses custom wordle hour when not using start time', function () {
+    $startTime = now()->addDay()->setHour(14)->setMinute(30);
+
+    $response = $this->actingAs($this->admin)
+        ->post('/admin/create', [
+            'secret_word' => 'geheim',
+            'starts_at' => $startTime->toDateTimeString(),
+            'wordle_hour' => 9, // Custom hour different from start time
+            'players' => [
+                ['name' => 'John', 'email' => 'john@example.com'],
+                ['name' => 'Jane', 'email' => 'jane@example.com'],
+            ],
+        ]);
+
+    $response->assertRedirect('/admin');
+
+    $game = \App\Models\Game::latest()->first();
+    expect($game->wordle_hour)->toBe(9);
+});
