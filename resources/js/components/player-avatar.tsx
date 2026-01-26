@@ -1,7 +1,8 @@
 import { getAvatarUrl } from '@/components/avatar-picker';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { CSSProperties, useState } from 'react';
+import type { CSSProperties} from 'react';
+import { useState } from 'react';
 
 interface PlayerAvatarProps {
     name: string;

@@ -331,7 +331,6 @@ export default function GuessPage({
             <VictoryCelebration
                 winner={victoryData.winner}
                 secretWord={victoryData.secretWord}
-                prizeUrl={victoryData.prizeUrl}
                 phase={victoryPhase}
                 isOwnVictory={victoryData.winner.id === player?.id}
             />
@@ -519,13 +518,11 @@ export default function GuessPage({
 function VictoryCelebration({
     winner,
     secretWord,
-    prizeUrl,
     phase,
     isOwnVictory,
 }: {
     winner: WinnerData;
     secretWord: string;
-    prizeUrl: string;
     phase: 'reveal' | 'celebrate' | 'prize';
     isOwnVictory: boolean;
 }) {

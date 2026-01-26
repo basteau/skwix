@@ -1,7 +1,6 @@
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 import { PlayerAvatar } from '@/components/player-avatar';
-import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -94,7 +93,6 @@ export default function PlayersPage({
 }
 
 function PlayerCard({ player }: { player: PlayerData }) {
-    const initials = getInitials(player.name);
     const medals = ['🥇', '🥈', '🥉'];
     const medal = player.rank <= 3 ? medals[player.rank - 1] : null;
 
