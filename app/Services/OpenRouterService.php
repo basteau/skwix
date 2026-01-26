@@ -11,9 +11,9 @@ class OpenRouterService
 {
     private const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-    private const DEFAULT_MODEL = 'openai/gpt-5';
+    private const DEFAULT_MODEL = 'openai/gpt-5.2-chat';
 
-    private const WIT_MODEL = 'openai/gpt-5-mini';
+    private const WIT_MODEL = 'openai/gpt-5.2-chat';
 
     private const MAX_REQUESTS_PER_MINUTE = 20;
 
@@ -85,7 +85,7 @@ class OpenRouterService
             $answer = $this->parseAnswer($rawContent);
 
             // Generate Boma-style wit in a separate call
-            $wit = $this->generateBomaWit($answer);
+            $wit = $this->generateBomaWit($answer, $question);
 
             return [
                 'success' => true,
@@ -140,7 +140,7 @@ PROMPT;
     /**
      * Generate a Boma-style witty response based on the answer type.
      */
-    public function generateBomaWit(string $answerType): ?string
+    public function generateBomaWit(string $answerType, ?string $question = null): ?string
     {
         if (empty($this->apiKey)) {
             return null;
@@ -148,20 +148,35 @@ PROMPT;
 
         $isWinner = $answerType === 'winner';
 
-        $scriptLine = match ($answerType) {
-            'yes' => 'ja, dat is juist',
-            'no' => 'nee, dat is fout',
-            'unknown' => 'onduidelijk',
-            'winner' => 'GEWONNEN! Het woord is geraden!',
-            default => 'ja, dat is juist',
+        $answerMeaning = match ($answerType) {
+            'yes' => 'JA (de speler heeft gelijk)',
+            'no' => 'NEE (de speler heeft ongelijk)',
+            'unknown' => 'ONDUIDELIJK (ge kunt daar geen ja of nee op antwoorden)',
+            'winner' => 'GEWONNEN (de speler heeft het woord geraden!)',
+            default => 'JA (de speler heeft gelijk)',
         };
 
+        $questionContext = $question ? "De speler vroeg: \"{$question}\"" : 'De speler stelde een vraag';
+
         $extraInstruction = $isWinner
-            ? ' Wees SUPER enthousiast, dit is een groot moment! Gebruik uitroeptekens!'
-            : '';
+            ? 'Wees SUPER enthousiast, dit is een groot moment! Gebruik uitroeptekens!'
+            : 'Wees gevat en grappig.';
 
         $prompt = <<<PROMPT
-Stel je bent Balthazar Boma van FC De Kampioenen en er staat "{$scriptLine}" in het script. Hoe zou je dit in eigen woorden en stijl verwoorden?{$extraInstruction} Gebruik een korte one-liner (max 50 karakters). Antwoord ALLEEN met de one-liner, geen aanhalingstekens of uitleg.
+Gij zijt Balthazar Boma van FC De Kampioenen. Ge speelt een raadspelletje waar spelers een geheim woord moeten raden door ja/nee vragen te stellen.
+
+{$questionContext}
+Het antwoord is: {$answerMeaning}
+
+Geef een kort, gevat en grappig antwoord in uw typische Boma-stijl. Ge spreekt rechtstreeks tegen de speler (gebruik "gij/ge", niet "ik").
+
+{$extraInstruction}
+
+Regels:
+- Maximum 50 karakters
+- Geen aanhalingstekens
+- Alleen de one-liner, geen uitleg
+- Verklap NOOIT het geheime woord
 PROMPT;
 
         try {
@@ -177,7 +192,7 @@ PROMPT;
                     'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'max_tokens' => 60,
+                    'max_tokens' => 1500,
                     'temperature' => 0.9,
                 ]);
 

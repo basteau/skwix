@@ -210,7 +210,7 @@ class GuessController extends Controller
         $answerType = $isCorrect ? 'winner' : 'no';
 
         // Generate Boma-style wit for the guess result
-        $wit = $this->openRouterService->generateBomaWit($answerType);
+        $wit = $this->openRouterService->generateBomaWit($answerType, $question);
 
         // Deduct points and save the question
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answerType, $guessedWord, $wit) {
