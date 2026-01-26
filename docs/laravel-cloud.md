@@ -214,7 +214,7 @@ php artisan tinker
    - Go to [cloud.laravel.com](https://cloud.laravel.com)
    - Click **Create Application**
    - Connect your GitHub account
-   - Select `basteau/skwix` repository
+   - Select `SebastiaanWouters/skwix` repository
 
 2. **Configure Application**
    - Name: `skwix`
