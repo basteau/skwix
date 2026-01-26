@@ -49,7 +49,7 @@ describe('WordleService', function () {
         expect($this->wordleService->calculatePoints(4, true))->toBe(14);  // 1.4x
         expect($this->wordleService->calculatePoints(5, true))->toBe(12);  // 1.2x
         expect($this->wordleService->calculatePoints(6, true))->toBe(10);  // 1.0x
-        expect($this->wordleService->calculatePoints(6, false))->toBe(8);  // failed = 0.8x
+        expect($this->wordleService->calculatePoints(6, false))->toBe(7);  // failed = 0.7x
     });
 });
 

@@ -138,7 +138,7 @@ export function GameInfoModal({
 // Pre-defined content for each game
 export const WORDLE_INFO: GameInfoContent = {
     title: 'Wordle',
-    description: 'Raad het 5-letter woord in 6 pogingen.',
+    description: 'Raad het 5-letterige Engelse woord in 6 pogingen.',
     rules: [
         {
             icon: <span className="size-3 rounded-sm bg-wordle-correct" />,
@@ -158,12 +158,12 @@ export const WORDLE_INFO: GameInfoContent = {
         <p className="mt-4 text-[10px] text-muted-foreground/60">
             Woordenlijst gebaseerd op{' '}
             <a
-                href="/woordenlijst.txt"
+                href="https://gist.github.com/cfreshman/a03ef2cba789d8cf00c08f767e0fad7b"
                 target="_blank"
                 rel="noopener"
                 className="underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
             >
-                OpenTaal
+                originele Wordle woordenlijst
             </a>
         </p>
     ),

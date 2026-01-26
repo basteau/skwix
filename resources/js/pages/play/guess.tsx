@@ -16,6 +16,7 @@ import {
     Search,
     Skull,
     Snowflake,
+    Sparkles,
     Trophy,
     X,
 } from 'lucide-react';
@@ -160,7 +161,7 @@ export default function GuessPage({
         return () => {
             if (pollRef.current) clearInterval(pollRef.current);
         };
-    }, [testMode?.active, error, game?.status, showVictory]);
+    }, [testMode?.active, error, game?.status]);
 
     // Sync questions from props (for polling updates)
     useEffect(() => {
