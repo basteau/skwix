@@ -7,7 +7,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Snowflake, X } from 'lucide-react';
+import { Skull, Snowflake, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 const TUTORIAL_SEEN_KEY = 'skwix_tutorial_seen';
@@ -197,6 +197,52 @@ const steps: TutorialStep[] = [
                         NEE
                     </div>
                 </div>
+            </div>
+        ),
+    },
+    {
+        icon: <Skull className="size-5" />,
+        title: 'Sabotage',
+        description:
+            'Saboteer anderen via de Spelers tab. Hun volgende ja/nee antwoord wordt omgedraaid!',
+        points: { text: '−10 punten', type: 'cost' },
+        visual: (
+            <div className="space-y-3 py-4">
+                {/* Sabotage illustration */}
+                <div className="flex items-center justify-center gap-4">
+                    <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex size-10 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+                            <Skull className="size-5" />
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                            Saboteer
+                        </span>
+                    </div>
+                    <svg
+                        viewBox="0 0 24 24"
+                        className="size-5 text-muted-foreground/50"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                    >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                    <div className="flex flex-col items-center gap-1.5">
+                        <div className="relative">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-success/15 text-xs font-bold text-success line-through decoration-destructive decoration-2">
+                                JA
+                            </div>
+                        </div>
+                        <span className="text-xs text-destructive font-medium">
+                            → NEE
+                        </span>
+                    </div>
+                </div>
+                {/* Reveal hint */}
+                <p className="text-center text-xs text-muted-foreground">
+                    Betaal 12 punten om te zien welke antwoorden gesaboteerd
+                    zijn
+                </p>
             </div>
         ),
     },

@@ -14,6 +14,7 @@ import {
     Check,
     Crown,
     Search,
+    Skull,
     Snowflake,
     Sparkles,
     Star,
@@ -58,6 +59,7 @@ interface Props {
     error?: string;
     testMode?: { active: boolean; secretWord?: string };
     isAdmin?: boolean;
+    revealedSabotagedIds?: number[];
 }
 
 const QUESTION_COST = 10;
@@ -101,6 +103,7 @@ export default function GuessPage({
     questions: initialQuestions = [],
     error,
     testMode,
+    revealedSabotagedIds = [],
 }: Props) {
     const [questions, setQuestions] =
         useState<QuestionItem[]>(initialQuestions);
@@ -128,6 +131,15 @@ export default function GuessPage({
         'reveal' | 'celebrate' | 'prize'
     >('reveal');
     const [showInfoModal, setShowInfoModal] = useState(false);
+
+    // Sabotage reveal state - from server props (no more sessionStorage!)
+    const [sabotagedQuestionIds, setSabotagedQuestionIds] =
+        useState<number[]>(revealedSabotagedIds);
+
+    // Sync revealed sabotage IDs from server (on poll updates)
+    useEffect(() => {
+        setSabotagedQuestionIds(revealedSabotagedIds);
+    }, [revealedSabotagedIds]);
 
     const canAsk = points >= QUESTION_COST && input.trim().length >= 3;
 
@@ -172,9 +184,24 @@ export default function GuessPage({
             return;
         }
 
-        pollRef.current = setInterval(() => {
-            router.reload({ only: ['game', 'questions', 'player'] });
-        }, POLL_INTERVAL);
+        // Pause polling when tab is hidden or offline
+        const shouldPoll = () =>
+            document.visibilityState === 'visible' && navigator.onLine;
+
+        const poll = () => {
+            if (shouldPoll()) {
+                router.reload({
+                    only: [
+                        'game',
+                        'questions',
+                        'player',
+                        'revealedSabotagedIds',
+                    ],
+                });
+            }
+        };
+
+        pollRef.current = setInterval(poll, POLL_INTERVAL);
 
         return () => {
             if (pollRef.current) clearInterval(pollRef.current);
@@ -432,6 +459,9 @@ export default function GuessPage({
                                         playerColorIdx={
                                             q.player.id % PLAYER_COLORS.length
                                         }
+                                        isSabotaged={sabotagedQuestionIds.includes(
+                                            q.id,
+                                        )}
                                     />
                                 ))}
                                 {pendingQuestion && player && (
@@ -934,11 +964,13 @@ function QuestionBubble({
     isOwn,
     isNew,
     playerColorIdx,
+    isSabotaged = false,
 }: {
     question: QuestionItem;
     isOwn: boolean;
     isNew: boolean;
     playerColorIdx: number;
+    isSabotaged?: boolean;
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
@@ -1006,6 +1038,7 @@ function QuestionBubble({
                     className={cn(
                         'inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm px-4 py-2 text-sm font-semibold shadow-sm',
                         'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in',
+                        isSabotaged && 'ring-2 ring-destructive/50',
                         isWinner
                             ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600 dark:text-amber-400'
                             : isYes
@@ -1015,6 +1048,12 @@ function QuestionBubble({
                                 : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
                     )}
                 >
+                    {isSabotaged && (
+                        <span className="mr-0.5 flex items-center gap-1 rounded bg-destructive/20 px-1.5 py-0.5 text-[10px] font-bold text-destructive uppercase">
+                            <Skull className="size-3" />
+                            Gesaboteerd
+                        </span>
+                    )}
                     {isWinner ? (
                         <Trophy className="size-4 shrink-0" />
                     ) : isYes ? (

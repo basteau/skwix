@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Question;
 use App\Services\GameService;
 use App\Services\OpenRouterService;
+use App\Services\SabotageService;
 use App\Services\TestGameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class GuessController extends Controller
     public function __construct(
         private GameService $gameService,
         private OpenRouterService $openRouterService,
+        private SabotageService $sabotageService,
         private TestGameService $testGameService,
     ) {}
 
@@ -58,6 +60,9 @@ class GuessController extends Controller
                 'created_at' => $q->created_at->toISOString(),
             ]);
 
+        // Get revealed sabotaged question IDs for this player
+        $revealedSabotagedIds = $this->sabotageService->getRevealedSabotagedQuestionIds($player);
+
         return Inertia::render('play/guess', [
             'player' => [
                 'id' => $player->id,
@@ -72,6 +77,7 @@ class GuessController extends Controller
             ],
             'questions' => $questions,
             'isAdmin' => $user->is_admin,
+            'revealedSabotagedIds' => $revealedSabotagedIds,
         ]);
     }
 
@@ -168,16 +174,30 @@ class GuessController extends Controller
         $wit = $result['wit'] ?? null;
 
         // All questions cost points - no refunds for unknown answers
-        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit) {
+        // Check and apply sabotage only for yes/no answers
+        $wasSabotaged = false;
+        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit, &$wasSabotaged) {
             $player->decrement('points', config('game.guess_cost'));
 
-            return Question::create([
+            $questionRecord = Question::create([
                 'game_id' => $game->id,
                 'player_id' => $player->id,
                 'question_text' => $question,
                 'answer' => $answer,
                 'wit' => $wit,
             ]);
+
+            // Apply sabotage only to yes/no answers
+            if (in_array($answer, ['yes', 'no'])) {
+                $sabotage = $this->sabotageService->consumePendingSabotage($player, $questionRecord);
+                if ($sabotage) {
+                    $flippedAnswer = $this->sabotageService->flipAnswer($answer);
+                    $questionRecord->update(['answer' => $flippedAnswer]);
+                    $wasSabotaged = true;
+                }
+            }
+
+            return $questionRecord;
         });
 
         $player->refresh();

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Question extends Model
 {
@@ -27,5 +28,10 @@ class Question extends Model
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);
+    }
+
+    public function sabotage(): HasOne
+    {
+        return $this->hasOne(Sabotage::class);
     }
 }

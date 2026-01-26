@@ -48,4 +48,20 @@ class Player extends Model
     {
         return $this->hasMany(SpinResult::class);
     }
+
+    public function sabotagesPlaced(): HasMany
+    {
+        return $this->hasMany(Sabotage::class, 'saboteur_id');
+    }
+
+    public function sabotagesReceived(): HasMany
+    {
+        return $this->hasMany(Sabotage::class, 'target_id');
+    }
+
+    public function pendingSabotagesAgainst(): HasMany
+    {
+        return $this->hasMany(Sabotage::class, 'target_id')
+            ->where('status', 'pending');
+    }
 }

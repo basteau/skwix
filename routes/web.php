@@ -7,6 +7,7 @@ use App\Http\Controllers\GuessController;
 use App\Http\Controllers\JoinController;
 use App\Http\Controllers\LobbyController;
 use App\Http\Controllers\PlayersController;
+use App\Http\Controllers\SabotageController;
 use App\Http\Controllers\WordleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -101,6 +102,8 @@ Route::middleware('auth')->group(function () {
         Route::get('fortune', [FortuneController::class, 'show'])->name('fortune');
         Route::post('fortune/spin', [FortuneController::class, 'spin'])->name('fortune.spin');
         Route::get('players', [PlayersController::class, 'show'])->name('players');
+        Route::post('sabotage', [SabotageController::class, 'place'])->name('sabotage.place');
+        Route::post('sabotage/reveal', [SabotageController::class, 'reveal'])->name('sabotage.reveal');
     });
 });
 
