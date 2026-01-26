@@ -84,7 +84,10 @@ describe('isWordleAvailable', function () {
     it('returns false before 8:00 AM Brussels time', function () {
         Carbon::setTestNow(Carbon::create(2026, 1, 24, 7, 59, 0, 'Europe/Brussels'));
 
-        $game = Game::factory()->create(['status' => 'active']);
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::create(2026, 1, 23, 10, 0, 0, 'Europe/Brussels'),
+        ]);
 
         expect($this->gameService->isWordleAvailable($game))->toBeFalse();
     });
@@ -92,7 +95,10 @@ describe('isWordleAvailable', function () {
     it('returns true after 8:00 AM Brussels time for active game', function () {
         Carbon::setTestNow(Carbon::create(2026, 1, 24, 8, 1, 0, 'Europe/Brussels'));
 
-        $game = Game::factory()->create(['status' => 'active']);
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::create(2026, 1, 23, 10, 0, 0, 'Europe/Brussels'),
+        ]);
 
         expect($this->gameService->isWordleAvailable($game))->toBeTrue();
     });
@@ -103,6 +109,163 @@ describe('isWordleAvailable', function () {
         $game = Game::factory()->create(['status' => 'pending']);
 
         expect($this->gameService->isWordleAvailable($game))->toBeFalse();
+    });
+
+    it('returns false before first unlock when game started after wordle hour', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::create(2026, 1, 24, 9, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        expect($this->gameService->isWordleAvailable($game))->toBeFalse();
+    });
+
+    it('returns true at first unlock when game started after wordle hour', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 8, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::create(2026, 1, 24, 9, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        expect($this->gameService->isWordleAvailable($game))->toBeTrue();
+    });
+
+    it('returns true at first unlock when game started before wordle hour', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::create(2026, 1, 24, 6, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        expect($this->gameService->isWordleAvailable($game))->toBeTrue();
+    });
+
+    it('returns false just before first unlock when game started before wordle hour', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 7, 59, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::create(2026, 1, 24, 6, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        expect($this->gameService->isWordleAvailable($game))->toBeFalse();
+    });
+});
+
+describe('getFirstWordleUnlockTime', function () {
+    it('returns same day unlock when game starts before wordle hour', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 6, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-24 08:00');
+    });
+
+    it('returns next day unlock when game starts after wordle hour', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-25 08:00');
+    });
+
+    it('returns same day unlock when game starts exactly at wordle hour', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 8, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-24 08:00');
+    });
+
+    it('works with custom wordle hour', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 14,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-24 14:00');
+    });
+
+    it('handles midnight wordle hour correctly', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 1, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 0,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-25 00:00');
+    });
+
+    it('handles 23:00 wordle hour correctly', function () {
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 22, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 23,
+        ]);
+
+        $firstUnlock = $this->gameService->getFirstWordleUnlockTime($game);
+
+        expect($firstUnlock->format('Y-m-d H:i'))->toBe('2026-01-24 23:00');
+    });
+});
+
+describe('getNextWordleUnlockTime', function () {
+    it('returns first unlock time when before first unlock', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 9, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        $nextUnlock = $this->gameService->getNextWordleUnlockTime($game);
+
+        expect($nextUnlock->format('Y-m-d H:i'))->toBe('2026-01-25 08:00');
+    });
+
+    it('returns today unlock when before wordle hour but after first unlock', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 7, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 6, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        $nextUnlock = $this->gameService->getNextWordleUnlockTime($game);
+
+        expect($nextUnlock->format('Y-m-d H:i'))->toBe('2026-01-25 08:00');
+    });
+
+    it('returns tomorrow unlock when after wordle hour', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 25, 10, 0, 0, 'Europe/Brussels'));
+
+        $game = Game::factory()->create([
+            'starts_at' => Carbon::create(2026, 1, 24, 6, 0, 0, 'Europe/Brussels'),
+            'wordle_hour' => 8,
+        ]);
+
+        $nextUnlock = $this->gameService->getNextWordleUnlockTime($game);
+
+        expect($nextUnlock->format('Y-m-d H:i'))->toBe('2026-01-26 08:00');
     });
 });
 

@@ -18,15 +18,39 @@ class GameService
 
     public function isWordleAvailable(Game $game): bool
     {
-        $now = Carbon::now(self::TIMEZONE);
-        $hour = $game->wordle_hour ?? 8;
-        $unlockTime = $now->copy()->setTime($hour, 0, 0);
-
-        if ($now->lt($unlockTime)) {
+        if ($game->status !== 'active') {
             return false;
         }
 
-        return $game->status === 'active';
+        $hour = $game->wordle_hour ?? 8;
+        $now = Carbon::now(self::TIMEZONE);
+        $todayUnlock = $now->copy()->setTime($hour, 0, 0);
+
+        if ($now->lt($todayUnlock)) {
+            return false;
+        }
+
+        $firstUnlock = $this->getFirstWordleUnlockTime($game);
+
+        return $now->gte($firstUnlock);
+    }
+
+    public function getFirstWordleUnlockTime(Game $game): Carbon
+    {
+        $hour = $game->wordle_hour ?? 8;
+
+        if (! $game->starts_at) {
+            return Carbon::now(self::TIMEZONE)->setTime($hour, 0, 0);
+        }
+
+        $gameStart = Carbon::parse($game->starts_at)->setTimezone(self::TIMEZONE);
+        $unlockOnStartDay = $gameStart->copy()->setTime($hour, 0, 0);
+
+        if ($gameStart->lte($unlockOnStartDay)) {
+            return $unlockOnStartDay;
+        }
+
+        return $unlockOnStartDay->copy()->addDay();
     }
 
     public function getDayNumber(Game $game): int
@@ -58,6 +82,12 @@ class GameService
     {
         $hour = $game->wordle_hour ?? 8;
         $now = Carbon::now(self::TIMEZONE);
+        $firstUnlock = $this->getFirstWordleUnlockTime($game);
+
+        if ($now->lt($firstUnlock)) {
+            return $firstUnlock;
+        }
+
         $todayUnlock = $now->copy()->setTime($hour, 0, 0);
 
         if ($now->lt($todayUnlock)) {
