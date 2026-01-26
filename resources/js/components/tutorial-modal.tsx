@@ -591,12 +591,12 @@ export function TutorialModal({
                     </div>
 
                     {/* Progress dots */}
-                    <div className="flex justify-center gap-0.5">
+                    <div className="flex justify-center">
                         {steps.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => handleStepClick(i)}
-                                className="group flex size-7 items-center justify-center"
+                                className="group flex size-5 items-center justify-center"
                                 aria-label={`Stap ${i + 1} van ${steps.length}`}
                                 aria-current={
                                     i === currentStep ? 'step' : undefined
