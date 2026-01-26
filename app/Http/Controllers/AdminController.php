@@ -312,6 +312,15 @@ class AdminController extends Controller
             ->with('success', $game->players->count().' uitnodigingen verstuurd');
     }
 
+    public function deleteGame(Game $game): RedirectResponse
+    {
+        $game->delete();
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', 'Spel verwijderd en spelers uitgelogd');
+    }
+
     private function validateWordleWordsAgainstWordlist(array $words): array
     {
         $invalidWords = [];

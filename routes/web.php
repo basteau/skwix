@@ -115,6 +115,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/game/{game}/wordle-words', [AdminController::class, 'updateWordleWords'])->name('game.wordle-words');
     Route::post('/game/{game}/invite', [AdminController::class, 'invitePlayers'])->name('game.invite');
     Route::post('/game/{game}/end', [AdminController::class, 'endGame'])->name('game.end');
+    Route::delete('/game/{game}', [AdminController::class, 'deleteGame'])->name('game.delete');
 });
 
 // Test Game Mode (admin only, ephemeral)
