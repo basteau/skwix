@@ -39,7 +39,7 @@ describe('SabotageService placeSabotage', function () {
 
         expect($result['success'])->toBeTrue();
         expect($result['sabotage'])->toBeInstanceOf(Sabotage::class);
-        expect($saboteur->fresh()->points)->toBe(40); // 50 - 10 (sabotage_cost)
+        expect($saboteur->fresh()->points)->toBe(42); // 50 - 8 (sabotage_cost)
         expect(Sabotage::where('saboteur_id', $saboteur->id)->count())->toBe(1);
     });
 
@@ -64,7 +64,7 @@ describe('SabotageService placeSabotage', function () {
 
         $saboteur = Player::factory()->create([
             'game_id' => $game->id,
-            'points' => 5, // Less than 10 (sabotage_cost)
+            'points' => 5, // Less than 8 (sabotage_cost)
         ]);
 
         $target = Player::factory()->create([
@@ -297,7 +297,7 @@ describe('SabotageService revealSabotages', function () {
 
         expect($result['success'])->toBeTrue();
         expect($result['sabotaged_question_ids'])->toBe([$question1->id]);
-        expect($player->fresh()->points)->toBe(38); // 50 - 12 (reveal_cost)
+        expect($player->fresh()->points)->toBe(40); // 50 - 10 (reveal_cost)
     });
 
     it('fails with insufficient points', function () {
@@ -305,7 +305,7 @@ describe('SabotageService revealSabotages', function () {
 
         $player = Player::factory()->create([
             'game_id' => $game->id,
-            'points' => 5, // Less than 12 (reveal_cost)
+            'points' => 5, // Less than 10 (reveal_cost)
         ]);
 
         $service = app(SabotageService::class);
@@ -340,7 +340,7 @@ describe('SabotageController place', function () {
         $response->assertOk();
         $response->assertJson([
             'success' => true,
-            'points_remaining' => 40,
+            'points_remaining' => 42, // 50 - 8 (sabotage_cost)
         ]);
 
         expect(Sabotage::where('saboteur_id', $player->id)->exists())->toBeTrue();
@@ -467,7 +467,7 @@ describe('SabotageController reveal', function () {
         $response->assertOk();
         $response->assertJson([
             'success' => true,
-            'points_remaining' => 38,
+            'points_remaining' => 40, // 50 - 10 (reveal_cost)
         ]);
         $response->assertJsonStructure(['sabotaged_question_ids']);
     });
@@ -712,8 +712,8 @@ describe('PlayersController with sabotage data', function () {
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->has('sabotage')
-            ->where('sabotage.cost', 10)
-            ->where('sabotage.reveal_cost', 12)
+            ->where('sabotage.cost', 8)
+            ->where('sabotage.reveal_cost', 10)
         );
     });
 

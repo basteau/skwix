@@ -48,6 +48,6 @@ return [
     | - reveal_cost: Cost to reveal which of your questions were sabotaged
     |
     */
-    'sabotage_cost' => 10,
-    'reveal_cost' => 12,
+    'sabotage_cost' => 8,
+    'reveal_cost' => 10,
 ];

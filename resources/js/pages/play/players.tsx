@@ -176,7 +176,7 @@ export default function PlayersPage({
                             onSabotage={() => setSabotageTarget(p)}
                             sabotageEnabled={
                                 game?.status === 'active' &&
-                                currentPoints >= (sabotage?.cost ?? 10)
+                                currentPoints >= (sabotage?.cost ?? 8)
                             }
                         />
                     ))}
@@ -188,7 +188,7 @@ export default function PlayersPage({
                 open={sabotageTarget !== null}
                 onOpenChange={(open) => !open && setSabotageTarget(null)}
                 target={sabotageTarget}
-                cost={sabotage?.cost ?? 10}
+                cost={sabotage?.cost ?? 8}
                 currentPoints={currentPoints}
                 onSuccess={handleSabotageSuccess}
             />
@@ -197,7 +197,7 @@ export default function PlayersPage({
             <RevealSabotageModal
                 open={showRevealModal}
                 onOpenChange={setShowRevealModal}
-                cost={sabotage?.reveal_cost ?? 12}
+                cost={sabotage?.reveal_cost ?? 10}
                 currentPoints={currentPoints}
                 onSuccess={handleRevealSuccess}
             />

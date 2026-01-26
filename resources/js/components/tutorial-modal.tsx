@@ -205,7 +205,7 @@ const steps: TutorialStep[] = [
         title: 'Sabotage',
         description:
             'Saboteer anderen via de Spelers tab. Hun volgende ja/nee antwoord wordt omgedraaid!',
-        points: { text: '−10 punten', type: 'cost' },
+        points: { text: '−8 punten', type: 'cost' },
         visual: (
             <div className="space-y-3 py-4">
                 {/* Sabotage illustration */}
@@ -240,7 +240,7 @@ const steps: TutorialStep[] = [
                 </div>
                 {/* Reveal hint */}
                 <p className="text-center text-xs text-muted-foreground">
-                    Betaal 12 punten om te zien welke antwoorden gesaboteerd
+                    Betaal 10 punten om te zien welke antwoorden gesaboteerd
                     zijn
                 </p>
             </div>
