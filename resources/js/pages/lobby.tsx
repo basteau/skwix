@@ -1,9 +1,16 @@
 import { getAvatarUrl } from '@/components/avatar-picker';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { AlertCircle, Crown, Snowflake } from 'lucide-react';
+import { AlertCircle, Crown, LogOut, MoreVertical, Snowflake } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface Player {
@@ -108,10 +115,36 @@ export default function Lobby({ player, game, players = [] }: LobbyProps) {
         return () => clearInterval(interval);
     }, [game?.starts_at]);
 
+    const handleLogout = () => {
+        router.post('/logout');
+    };
+
     return (
         <>
             <Head title="Lobby - Skwix" />
             <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-primary/[0.02] to-background px-6 py-12">
+                {/* Menu dropdown */}
+                <div className="absolute top-4 right-4 z-20">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-9 text-muted-foreground hover:text-foreground"
+                            >
+                                <MoreVertical className="size-5" />
+                                <span className="sr-only">Menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={handleLogout}>
+                                <LogOut className="mr-2 size-4" />
+                                Uitloggen
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
                 {/* Animated snowflake decorations */}
                 <div
                     className="pointer-events-none absolute inset-0 overflow-hidden"

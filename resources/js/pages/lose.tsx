@@ -1,9 +1,15 @@
 import { getPortraitUrl } from '@/components/avatar-picker';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { getInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { Head, Link } from '@inertiajs/react';
-import { Snowflake } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { LogOut, MoreVertical, Snowflake } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -62,10 +68,36 @@ export default function LosePage({ winner, player, game }: Props) {
         }
     }, [revealedLetters, game.secret_word]);
 
+    const handleLogout = () => {
+        router.post('/logout');
+    };
+
     return (
         <>
             <Head title="Einde Spel" />
             <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
+                {/* Menu dropdown */}
+                <div className="absolute top-4 right-4 z-20">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-9 text-muted-foreground hover:text-foreground"
+                            >
+                                <MoreVertical className="size-5" />
+                                <span className="sr-only">Menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={handleLogout}>
+                                <LogOut className="mr-2 size-4" />
+                                Uitloggen
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
                 {/* Subtle gradient overlay */}
                 <div
                     className="pointer-events-none absolute inset-0"
