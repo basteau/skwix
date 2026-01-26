@@ -273,6 +273,7 @@ describe('GuessController ask', function () {
                     'type' => 'direct_guess',
                     'guessed_word' => 'winter',
                 ]);
+            $mock->shouldReceive('generateBomaWit')->andReturn('Test wit');
         });
 
         $user = User::factory()->create(['email' => 'test@example.com']);
@@ -312,6 +313,7 @@ describe('GuessController ask', function () {
                     'type' => 'direct_guess',
                     'guessed_word' => 'zomer',
                 ]);
+            $mock->shouldReceive('generateBomaWit')->andReturn('Test wit');
         });
 
         $user = User::factory()->create(['email' => 'test@example.com']);

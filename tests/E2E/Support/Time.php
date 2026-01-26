@@ -14,12 +14,13 @@ use Carbon\Carbon;
 class Time
 {
     /**
-     * Freeze time to tomorrow 9:00 AM Brussels (after wordle unlock).
+     * Freeze time to tomorrow (wordle_hour + 1):00 AM Brussels (after wordle unlock).
      * Always uses a future date to avoid 419 cookie errors.
      */
-    public static function freeze(): void
+    public static function freeze(int $wordleHour = 8): void
     {
-        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime(9, 0, 0);
+        $afterHour = ($wordleHour + 1) % 24;
+        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime($afterHour, 0, 0);
         Carbon::setTestNow($tomorrow);
     }
 
@@ -49,22 +50,30 @@ class Time
     }
 
     /**
-     * Set time to before Wordle unlock (8:00 Brussels time).
-     * Uses tomorrow 7:30 AM - before the 8:00 cutoff.
+     * Set time to before Wordle unlock (default 8:00 Brussels time).
+     * Uses tomorrow (wordle_hour - 0.5):00 - before the cutoff.
      */
-    public static function beforeWordleUnlock(): void
+    public static function beforeWordleUnlock(int $wordleHour = 8): void
     {
-        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime(7, 30, 0);
+        $beforeMinutes = $wordleHour * 60 - 30;
+        $beforeHour = (int) floor($beforeMinutes / 60);
+        $beforeMinute = $beforeMinutes % 60;
+        if ($beforeHour < 0) {
+            $beforeHour = 23;
+            $beforeMinute = 30;
+        }
+        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime($beforeHour, $beforeMinute, 0);
         Carbon::setTestNow($tomorrow);
     }
 
     /**
-     * Set time to after Wordle unlock (8:00 Brussels time).
-     * Uses tomorrow 9:00 AM - after the 8:00 cutoff.
+     * Set time to after Wordle unlock (default 8:00 Brussels time).
+     * Uses tomorrow (wordle_hour + 1):00 - after the cutoff.
      */
-    public static function afterWordleUnlock(): void
+    public static function afterWordleUnlock(int $wordleHour = 8): void
     {
-        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime(9, 0, 0);
+        $afterHour = ($wordleHour + 1) % 24;
+        $tomorrow = Carbon::tomorrow('Europe/Brussels')->setTime($afterHour, 0, 0);
         Carbon::setTestNow($tomorrow);
     }
 }

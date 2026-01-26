@@ -14,6 +14,7 @@ it('rejects duplicate emails in player list', function () {
             'secret_word' => 'geheim',
             'starts_at' => now()->addDay()->toDateTimeString(),
             'duration_days' => 6,
+            'wordle_hour' => 8,
             'wordle_words' => $this->wordlist,
             'players' => [
                 ['name' => 'John', 'email' => 'john@example.com', 'avatar' => null],
@@ -31,6 +32,7 @@ it('rejects duplicate emails case-insensitively', function () {
             'secret_word' => 'geheim',
             'starts_at' => now()->addDay()->toDateTimeString(),
             'duration_days' => 6,
+            'wordle_hour' => 8,
             'wordle_words' => $this->wordlist,
             'players' => [
                 ['name' => 'John', 'email' => 'JOHN@example.com', 'avatar' => null],
@@ -48,6 +50,7 @@ it('allows unique emails in player list', function () {
             'secret_word' => 'geheim',
             'starts_at' => now()->addDay()->toDateTimeString(),
             'duration_days' => 6,
+            'wordle_hour' => 8,
             'wordle_words' => $this->wordlist,
             'players' => [
                 ['name' => 'John', 'email' => 'john@example.com', 'avatar' => null],

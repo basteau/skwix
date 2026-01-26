@@ -13,9 +13,9 @@ Schedule::command('game:activate-pending')
     ->description('Activate games that have reached their start time');
 
 Schedule::command('game:notify-wordle')
-    ->dailyAt('08:00')
+    ->everyMinute()
     ->timezone('Europe/Brussels')
-    ->description('Daily Wordle notification at 8:00 AM Brussels time');
+    ->description('Wordle notification (runs every minute, fires at each game\'s configured hour)');
 
 Schedule::command('game:end-expired')
     ->everyMinute()

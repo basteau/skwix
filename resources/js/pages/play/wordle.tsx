@@ -45,6 +45,7 @@ interface Props {
         points_earned: number;
         was_successful?: boolean;
         target_word?: string;
+        next_unlock_at?: string;
     };
     error?: string;
 }
@@ -557,7 +558,15 @@ export default function WordlePage({
                         <div className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2">
                             <Snowflake className="size-4 text-primary" />
                             <span className="text-sm font-medium text-primary">
-                                Wordle beschikbaar om 8:00
+                                Wordle beschikbaar om{' '}
+                                {wordle?.next_unlock_at
+                                    ? new Date(
+                                          wordle.next_unlock_at,
+                                      ).toLocaleTimeString('nl-BE', {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                      })
+                                    : '08:00'}
                             </span>
                         </div>
                     </div>

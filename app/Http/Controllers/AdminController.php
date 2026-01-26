@@ -87,6 +87,7 @@ class AdminController extends Controller
         $request->validate([
             'secret_word' => 'required|string|min:2|max:50',
             'starts_at' => 'required|date|after:now',
+            'wordle_hour' => 'required|integer|min:0|max:23',
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
             'players.*.email' => 'required|email|max:255',
@@ -109,6 +110,7 @@ class AdminController extends Controller
                 'starts_at' => $startsAt,
                 'ends_at' => null,
                 'wordle_words' => $this->wordlistService->getRandomWords(60),
+                'wordle_hour' => (int) $request->wordle_hour,
             ]);
 
             foreach ($request->players as $playerData) {
@@ -221,6 +223,7 @@ class AdminController extends Controller
                 'starts_at' => $game->starts_at?->toISOString(),
                 'ends_at' => $game->ends_at?->toISOString(),
                 'wordle_words' => $game->wordle_words ?? [],
+                'wordle_hour' => $game->wordle_hour ?? 8,
                 'winner' => $game->winner ? [
                     'id' => $game->winner->id,
                     'name' => $game->winner->name,

@@ -33,11 +33,17 @@ interface PlayerRow {
     avatarUrl?: string | null;
 }
 
+const WORDLE_HOURS = Array.from({ length: 24 }, (_, i) => ({
+    value: i,
+    label: `${i.toString().padStart(2, '0')}:00`,
+}));
+
 export default function CreateGame({ availableUsers }: Props) {
     const [secretWord, setSecretWord] = useState('');
     const [startsAt, setStartsAt] = useState<Date | undefined>(
         getDefaultStartDate(),
     );
+    const [wordleHour, setWordleHour] = useState(8);
     const [players, setPlayers] = useState<PlayerRow[]>([
         { id: crypto.randomUUID(), name: '', email: '' },
         { id: crypto.randomUUID(), name: '', email: '' },
@@ -117,6 +123,7 @@ export default function CreateGame({ availableUsers }: Props) {
         const payload = {
             secret_word: secretWord,
             starts_at: startsAt?.toISOString() ?? '',
+            wordle_hour: wordleHour,
             players: validPlayers.map((p) => ({
                 name: p.name,
                 email: p.email,
@@ -131,7 +138,7 @@ export default function CreateGame({ availableUsers }: Props) {
         } catch {
             setIsSubmitting(false);
         }
-    }, [secretWord, startsAt, players]);
+    }, [secretWord, startsAt, wordleHour, players]);
 
     return (
         <>
@@ -171,27 +178,59 @@ export default function CreateGame({ availableUsers }: Props) {
                         {/* Timing */}
                         <section>
                             <h2 className="mb-3 text-lg font-semibold text-foreground">
-                                Start
+                                Timing
                             </h2>
-                            <div>
-                                <label className="mb-1 block text-sm font-medium text-foreground">
-                                    Start datum & tijd
-                                </label>
-                                <DateTimePicker
-                                    value={startsAt}
-                                    onChange={setStartsAt}
-                                    placeholder="Selecteer datum & tijd"
-                                    data-testid="starts-at-picker"
-                                />
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Het spel loopt totdat iemand het mystery
-                                    woord raadt
-                                </p>
-                                {errors.starts_at && (
-                                    <p className="mt-1 text-sm text-destructive">
-                                        {errors.starts_at}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">
+                                        Start datum & tijd
+                                    </label>
+                                    <DateTimePicker
+                                        value={startsAt}
+                                        onChange={setStartsAt}
+                                        placeholder="Selecteer datum & tijd"
+                                        data-testid="starts-at-picker"
+                                    />
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Het spel loopt totdat iemand het mystery
+                                        woord raadt
                                     </p>
-                                )}
+                                    {errors.starts_at && (
+                                        <p className="mt-1 text-sm text-destructive">
+                                            {errors.starts_at}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">
+                                        Wordle beschikbaar om (Brussel)
+                                    </label>
+                                    <select
+                                        value={wordleHour}
+                                        onChange={(e) =>
+                                            setWordleHour(
+                                                parseInt(e.target.value, 10),
+                                            )
+                                        }
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        data-testid="wordle-hour-picker"
+                                    >
+                                        {WORDLE_HOURS.map((h) => (
+                                            <option key={h.value} value={h.value}>
+                                                {h.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Elke dag wordt een nieuwe Wordle
+                                        ontgrendeld op dit uur
+                                    </p>
+                                    {errors.wordle_hour && (
+                                        <p className="mt-1 text-sm text-destructive">
+                                            {errors.wordle_hour}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </section>
 

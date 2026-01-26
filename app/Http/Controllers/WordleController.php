@@ -47,6 +47,8 @@ class WordleController extends Controller
         $lastGuess = ! empty($todayAttempt?->guesses) ? $todayAttempt->guesses[count($todayAttempt->guesses) - 1]['word'] ?? null : null;
         $wasSuccessful = $todayAttempt?->completed && $lastGuess === $targetWord;
 
+        $isAvailable = $this->gameService->isWordleAvailable($game);
+
         return Inertia::render('play/wordle', [
             'player' => [
                 'id' => $player->id,
@@ -60,12 +62,13 @@ class WordleController extends Controller
                 'status' => $game->status,
             ],
             'wordle' => [
-                'available' => $this->gameService->isWordleAvailable($game),
+                'available' => $isAvailable,
                 'completed' => $todayAttempt?->completed ?? false,
                 'guesses' => $todayAttempt?->guesses ?? [],
                 'points_earned' => $todayAttempt?->points_earned ?? 0,
                 'was_successful' => $wasSuccessful,
                 'target_word' => $todayAttempt?->completed ? $targetWord : null,
+                'next_unlock_at' => ! $isAvailable ? $this->gameService->getNextWordleUnlockTime($game)->toISOString() : null,
             ],
         ]);
     }

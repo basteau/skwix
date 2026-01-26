@@ -19,7 +19,8 @@ class GameService
     public function isWordleAvailable(Game $game): bool
     {
         $now = Carbon::now(self::TIMEZONE);
-        $unlockTime = $now->copy()->setTime(8, 0, 0);
+        $hour = $game->wordle_hour ?? 8;
+        $unlockTime = $now->copy()->setTime($hour, 0, 0);
 
         if ($now->lt($unlockTime)) {
             return false;
@@ -34,22 +35,36 @@ class GameService
             return 0;
         }
 
+        $hour = $game->wordle_hour ?? 8;
         $now = Carbon::now(self::TIMEZONE);
         $gameStart = $game->starts_at->copy()->setTimezone(self::TIMEZONE);
 
-        $startDay8am = $gameStart->copy()->setTime(8, 0, 0);
-        if ($gameStart->gt($startDay8am)) {
-            $startDay8am->addDay();
+        $startDayUnlock = $gameStart->copy()->setTime($hour, 0, 0);
+        if ($gameStart->gt($startDayUnlock)) {
+            $startDayUnlock->addDay();
         }
 
-        $today8am = $now->copy()->setTime(8, 0, 0);
-        if ($now->lt($today8am)) {
-            $today8am->subDay();
+        $todayUnlock = $now->copy()->setTime($hour, 0, 0);
+        if ($now->lt($todayUnlock)) {
+            $todayUnlock->subDay();
         }
 
-        $daysDiff = (int) $startDay8am->startOfDay()->diffInDays($today8am->startOfDay());
+        $daysDiff = (int) $startDayUnlock->startOfDay()->diffInDays($todayUnlock->startOfDay());
 
         return max(1, $daysDiff + 1);
+    }
+
+    public function getNextWordleUnlockTime(Game $game): Carbon
+    {
+        $hour = $game->wordle_hour ?? 8;
+        $now = Carbon::now(self::TIMEZONE);
+        $todayUnlock = $now->copy()->setTime($hour, 0, 0);
+
+        if ($now->lt($todayUnlock)) {
+            return $todayUnlock;
+        }
+
+        return $todayUnlock->addDay();
     }
 
     public function getCurrentWordleWord(Game $game): ?string
