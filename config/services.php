@@ -38,7 +38,7 @@ return [
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
         'model' => env('OPENROUTER_MODEL', 'google/gemini-3-flash-preview'),
-        'wit_model' => env('OPENROUTER_WIT_MODEL'),
+        'wit_model' => env('OPENROUTER_WIT_MODEL', 'openai/gpt-5.2-chat'),
     ],
 
 ];
