@@ -10,20 +10,20 @@ class TestUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'person-c7cc634778@example.invalid'],
+            ['code' => 'JOHNDOE1'],
             [
                 'name' => 'John Doe',
-                'code' => 'JOHNDOE1',
+                'email' => 'person-c7cc634778@example.invalid',
                 'is_admin' => false,
                 'avatar' => null,
             ]
         );
 
         User::updateOrCreate(
-            ['email' => 'person-e28a5d2715@example.invalid'],
+            ['code' => 'JANEDOE1'],
             [
                 'name' => 'Jane Doe',
-                'code' => 'JANEDOE1',
+                'email' => 'person-e28a5d2715@example.invalid',
                 'is_admin' => false,
                 'avatar' => null,
             ]
