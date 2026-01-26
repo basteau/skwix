@@ -1,4 +1,4 @@
-import { getPortraitUrl } from '@/components/avatar-picker';
+import { getAvatarUrl, getPortraitUrl } from '@/components/avatar-picker';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -272,9 +272,9 @@ export default function WinPage({ winner, game }: Props) {
                                 data-testid="winner-portrait"
                                 className="relative size-44 rounded-2xl border-4 border-amber-400/80 object-cover shadow-xl"
                             />
-                        ) : winner.avatar_url ? (
+                        ) : getAvatarUrl(winner.avatar_url) ? (
                             <img
-                                src={winner.avatar_url}
+                                src={getAvatarUrl(winner.avatar_url)}
                                 alt={winner.name}
                                 className="relative size-28 rounded-full border-4 border-amber-400/80 object-cover shadow-xl"
                             />

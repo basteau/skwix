@@ -167,7 +167,7 @@ export default function CreateGame({ availableUsers }: Props) {
                         {/* Secret Word */}
                         <section>
                             <h2 className="mb-3 text-lg font-semibold text-foreground">
-                                Rarara
+                                Gezocht woord
                             </h2>
                             <Input
                                 value={secretWord}
@@ -441,10 +441,9 @@ export default function CreateGame({ availableUsers }: Props) {
                                                 >
                                                     <Avatar className="size-8 shrink-0 border border-border">
                                                         <AvatarImage
-                                                            src={
-                                                                user.avatar_url ||
-                                                                undefined
-                                                            }
+                                                            src={getAvatarUrl(
+                                                                user.avatar_url,
+                                                            )}
                                                             alt={user.name}
                                                         />
                                                         <AvatarFallback className="bg-primary/10 text-xs text-primary">

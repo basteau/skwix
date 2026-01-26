@@ -1,4 +1,5 @@
 import { AdminHeader } from '@/components/admin-header';
+import { getAvatarUrl } from '@/components/avatar-picker';
 import { SkipLink } from '@/components/skip-link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -546,10 +547,9 @@ export default function AdminGameDetail({ game, players }: Props) {
                                                 <div className="relative">
                                                     <Avatar className="size-10 border-2 border-border">
                                                         <AvatarImage
-                                                            src={
-                                                                player.avatar_url ||
-                                                                undefined
-                                                            }
+                                                            src={getAvatarUrl(
+                                                                player.avatar_url,
+                                                            )}
                                                             alt={player.name}
                                                         />
                                                         <AvatarFallback className="bg-primary/10 text-primary">

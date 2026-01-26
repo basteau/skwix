@@ -1,4 +1,4 @@
-import { getPortraitUrl } from '@/components/avatar-picker';
+import { getAvatarUrl, getPortraitUrl } from '@/components/avatar-picker';
 import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, GUESS_INFO } from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
@@ -677,9 +677,9 @@ function VictoryCelebration({
                                             data-testid="winner-portrait"
                                             className="size-32 rounded-2xl border-4 border-amber-400/60 object-cover shadow-lg"
                                         />
-                                    ) : winner.avatar_url ? (
+                                    ) : getAvatarUrl(winner.avatar_url) ? (
                                         <img
-                                            src={winner.avatar_url}
+                                            src={getAvatarUrl(winner.avatar_url)}
                                             alt={winner.name}
                                             className="size-20 rounded-full border-4 border-amber-400/60 object-cover shadow-lg"
                                         />
@@ -990,9 +990,9 @@ function QuestionBubble({
                 <div className="flex justify-start">
                     <div className="max-w-[85%]">
                         <div className="flex items-end gap-2">
-                            {question.player.avatar_url ? (
+                            {getAvatarUrl(question.player.avatar_url) ? (
                                 <img
-                                    src={question.player.avatar_url}
+                                    src={getAvatarUrl(question.player.avatar_url)}
                                     alt={question.player.name}
                                     className="size-7 shrink-0 rounded-full object-cover ring-2 ring-background"
                                 />

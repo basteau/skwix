@@ -1,4 +1,4 @@
-import { getPortraitUrl } from '@/components/avatar-picker';
+import { getAvatarUrl, getPortraitUrl } from '@/components/avatar-picker';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -282,9 +282,9 @@ export default function LosePage({ winner, player, game }: Props) {
                                         data-testid="winner-portrait"
                                         className="size-24 rounded-xl border-2 border-amber-400/60 object-cover shadow-md"
                                     />
-                                ) : winner.avatar_url ? (
+                                ) : getAvatarUrl(winner.avatar_url) ? (
                                     <img
-                                        src={winner.avatar_url}
+                                        src={getAvatarUrl(winner.avatar_url)}
                                         alt={winner.name}
                                         className="size-16 rounded-full border-2 border-border object-cover"
                                     />

@@ -1,3 +1,4 @@
+import { getAvatarUrl } from '@/components/avatar-picker';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 import { getInitials } from '@/hooks/use-initials';
@@ -126,9 +127,9 @@ function PlayerCard({ player }: { player: PlayerData }) {
             )}
 
             {/* Avatar */}
-            {player.avatar_url ? (
+            {getAvatarUrl(player.avatar_url) ? (
                 <img
-                    src={player.avatar_url}
+                    src={getAvatarUrl(player.avatar_url)}
                     alt={player.name}
                     className={cn(
                         avatarSize,
