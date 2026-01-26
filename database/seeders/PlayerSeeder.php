@@ -55,7 +55,6 @@ class PlayerSeeder extends Seeder
 
         foreach ($players as $player) {
             $code = strtoupper(Str::random(6));
-            $avatarPath = "assets/players/portraits/{$player['avatar']}.png";
 
             User::updateOrCreate(
                 ['email' => $player['email']],
@@ -63,7 +62,7 @@ class PlayerSeeder extends Seeder
                     'name' => $player['name'],
                     'code' => $code,
                     'is_admin' => false,
-                    'avatar' => $avatarPath,
+                    'avatar' => $player['avatar'],
                 ]
             );
         }
