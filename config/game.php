@@ -37,4 +37,17 @@ return [
         6 => 10,
         'failed' => 8,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sabotage Costs
+    |--------------------------------------------------------------------------
+    |
+    | Points required for sabotage-related actions:
+    | - sabotage_cost: Cost to sabotage another player's next question
+    | - reveal_cost: Cost to reveal which of your questions were sabotaged
+    |
+    */
+    'sabotage_cost' => 10,
+    'reveal_cost' => 12,
 ];

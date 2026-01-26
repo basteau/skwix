@@ -193,6 +193,7 @@ export const GUESS_INFO: GameInfoContent = {
         { text: 'Elke vraag kost 10 punten' },
         { text: 'Iedereen ziet elkaars vragen' },
         { text: 'Raad correct = win de hoofdprijs!' },
+        { text: 'Let op: andere spelers kunnen je saboteren!' },
     ],
-    pointsInfo: 'Tip: wees specifiek',
+    pointsInfo: 'Tip: wees specifiek. Check de Spelers tab voor sabotage.',
 };
