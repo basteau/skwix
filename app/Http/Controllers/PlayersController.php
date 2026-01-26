@@ -68,10 +68,6 @@ class PlayersController extends Controller
                 ];
             });
 
-        // Get sabotage stats for current player
-        $hasUnrevealedSabotages = $this->sabotageService->hasUnrevealedSabotages($player);
-        $sabotagedQuestionsCount = $this->sabotageService->getAppliedSabotageCount($player);
-
         return Inertia::render('play/players', [
             'player' => [
                 'id' => $player->id,
@@ -86,8 +82,6 @@ class PlayersController extends Controller
             'sabotage' => [
                 'cost' => config('game.sabotage_cost'),
                 'reveal_cost' => config('game.reveal_cost'),
-                'can_reveal' => $hasUnrevealedSabotages, // Only show if unrevealed sabotages exist
-                'sabotaged_count' => $sabotagedQuestionsCount,
             ],
         ]);
     }
@@ -117,8 +111,6 @@ class PlayersController extends Controller
             ];
         });
 
-        $sabotagedCount = count($testGame['sabotaged_question_ids'] ?? []);
-
         return Inertia::render('play/players', [
             'testMode' => ['active' => true],
             'player' => $testGame['player'],
@@ -130,8 +122,6 @@ class PlayersController extends Controller
             'sabotage' => [
                 'cost' => config('game.sabotage_cost'),
                 'reveal_cost' => config('game.reveal_cost'),
-                'can_reveal' => $sabotagedCount > 0,
-                'sabotaged_count' => $sabotagedCount,
             ],
         ]);
     }

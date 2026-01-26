@@ -39,8 +39,6 @@ interface PlayerData {
 interface SabotageInfo {
     cost: number;
     reveal_cost: number;
-    can_reveal: boolean;
-    sabotaged_count: number;
 }
 
 interface Props {
@@ -71,7 +69,7 @@ const PLAYERS_INFO: GameInfoContent = {
         },
         {
             icon: <Eye className="size-3 text-amber-500" />,
-            text: 'Onthullen (12 pts): ontdek welke vragen gesaboteerd zijn',
+            text: 'Onthullen (12 pts): check of je gesaboteerd bent',
         },
         { text: 'Je kunt dezelfde speler pas opnieuw saboteren na gebruik' },
     ],
@@ -148,19 +146,17 @@ export default function PlayersPage({
                     testMode={testMode?.active}
                     rightAction={
                         <div className="flex items-center gap-2">
-                            {sabotage?.can_reveal && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setShowRevealModal(true)}
-                                    className="h-9 gap-1.5 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400"
-                                >
-                                    <Eye className="size-4" />
-                                    <span className="hidden sm:inline">
-                                        Onthullen
-                                    </span>
-                                </Button>
-                            )}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowRevealModal(true)}
+                                className="h-9 gap-1.5 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400"
+                            >
+                                <Eye className="size-4" />
+                                <span className="hidden sm:inline">
+                                    Onthullen
+                                </span>
+                            </Button>
                             <GameInfoButton
                                 onClick={() => setShowInfoModal(true)}
                             />
@@ -203,7 +199,6 @@ export default function PlayersPage({
                 onOpenChange={setShowRevealModal}
                 cost={sabotage?.reveal_cost ?? 12}
                 currentPoints={currentPoints}
-                sabotagedCount={sabotage?.sabotaged_count ?? 0}
                 onSuccess={handleRevealSuccess}
             />
 

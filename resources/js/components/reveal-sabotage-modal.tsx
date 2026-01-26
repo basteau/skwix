@@ -17,7 +17,6 @@ interface RevealSabotageModalProps {
     onOpenChange: (open: boolean) => void;
     cost: number;
     currentPoints: number;
-    sabotagedCount: number;
     onSuccess: () => void;
 }
 
@@ -26,7 +25,6 @@ export function RevealSabotageModal({
     onOpenChange,
     cost,
     currentPoints,
-    sabotagedCount,
     onSuccess,
 }: RevealSabotageModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,13 +123,11 @@ export function RevealSabotageModal({
                 <div className="px-6 pb-4">
                     <div className="rounded-lg bg-amber-500/5 p-3 text-sm">
                         <p className="font-medium text-amber-600 dark:text-amber-400">
-                            {sabotagedCount > 0
-                                ? `${sabotagedCount} vraag${sabotagedCount > 1 ? 'en' : ''} gesaboteerd`
-                                : 'Mogelijk gesaboteerd'}
+                            Ben je gesaboteerd?
                         </p>
                         <p className="mt-1 text-muted-foreground">
                             Na betaling zie je bij Vragen Stellen welke
-                            antwoorden zijn omgedraaid door sabotage.
+                            antwoorden omgedraaid zijn (als die er zijn).
                         </p>
                     </div>
 

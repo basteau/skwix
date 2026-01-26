@@ -192,7 +192,12 @@ class GuessController extends Controller
                 $sabotage = $this->sabotageService->consumePendingSabotage($player, $questionRecord);
                 if ($sabotage) {
                     $flippedAnswer = $this->sabotageService->flipAnswer($answer);
-                    $questionRecord->update(['answer' => $flippedAnswer]);
+                    // Regenerate wit based on the flipped answer
+                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question);
+                    $questionRecord->update([
+                        'answer' => $flippedAnswer,
+                        'wit' => $flippedWit ?? $wit,
+                    ]);
                     $wasSabotaged = true;
                 }
             }

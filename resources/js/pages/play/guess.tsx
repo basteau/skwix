@@ -1068,9 +1068,6 @@ function QuestionBubble({
                             ? 'Correct! 🎉'
                             : question.wit || (isYes ? 'Ja' : isUnclear ? 'Onduidelijk' : 'Nee')}
                     </span>
-                    {isUnclear && (
-                        <span className="ml-1 text-xs opacity-60">(gratis)</span>
-                    )}
                 </div>
             </div>
         </div>

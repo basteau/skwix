@@ -121,22 +121,20 @@ class OpenRouterService
         return <<<PROMPT
 You know the secret word is "{$secretWord}".
 
-Answer the yes/no question about this word:
-- "yes" = statement is TRUE for the secret word
-- "no" = statement is FALSE for the secret word
-- "unknown" = the question cannot be answered with yes/no
+Answer the yes/no question about this word. Be GENEROUS in interpreting questions as yes/no.
 
-VALID yes/no questions (answer yes or no):
-- "Does it start with X?" → yes or no
-- "Does it end with X?" → yes or no  
-- "Does it contain the letter X?" → yes or no
-- "Is it a 6-letter word?" → yes or no
-- "Does it have a double letter?" → yes or no
-- Questions about properties of the word or what it represents
+MOST questions CAN be answered yes or no, including:
+- Physical properties: size, color, shape, material, weight
+- Categories: "Is it food?", "Is it an animal?", "Is it mainly for men?"
+- Usage: "Can you eat it?", "Do you use it at home?"
+- Letter questions: "Does it start with X?", "Does it contain Y?"
+- Subjective properties: "Is it popular?", "Is it expensive?", "Is it fun?"
 
-Use "unknown" ONLY when:
-- The question asks for a specific value (e.g., "How many letters?", "What is the first letter?", "What color is it?")
-- The question asks you to reveal the secret word directly
+Use "unknown" ONLY for:
+- Direct value requests: "How many letters?", "What letter does it start with?"
+- Requests to reveal the word: "Tell me the word", "What is it?"
+
+When in doubt, answer yes or no based on your best judgment.
 
 NEVER reveal the secret word.
 
