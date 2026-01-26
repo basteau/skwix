@@ -137,24 +137,23 @@ export function GameInfoModal({
 
 // Pre-defined content for each game
 export const WORDLE_INFO: GameInfoContent = {
-    title: 'Hoe werkt Wordle?',
-    description:
-        'Raad het woord in 6 pogingen. Elke gok moet een geldig 5-letter woord zijn.',
+    title: 'Wordle',
+    description: 'Raad het 5-letter woord in 6 pogingen.',
     rules: [
         {
             icon: <span className="size-3 rounded-sm bg-wordle-correct" />,
-            text: 'Groen = letter is correct en op juiste plek',
+            text: 'Groen = juiste letter, juiste plek',
         },
         {
             icon: <span className="size-3 rounded-sm bg-wordle-present" />,
-            text: 'Geel = letter zit in woord maar verkeerde plek',
+            text: 'Geel = juiste letter, verkeerde plek',
         },
         {
             icon: <span className="size-3 rounded-sm bg-wordle-absent" />,
             text: 'Grijs = letter zit niet in woord',
         },
     ],
-    pointsInfo: 'Punten: 6 bij 1 poging, aflopend tot 1 bij 6 pogingen',
+    pointsInfo: '10–20 punten (minder pogingen = meer punten)',
     footer: (
         <p className="mt-4 text-[10px] text-muted-foreground/60">
             Woordenlijst gebaseerd op{' '}
@@ -171,31 +170,29 @@ export const WORDLE_INFO: GameInfoContent = {
 };
 
 export const FORTUNE_INFO: GameInfoContent = {
-    title: 'Hoe werkt het Rad?',
-    description: 'Draai aan het rad en verdubbel je inzet... of verlies alles!',
+    title: 'Rad van Fortuin',
+    description: 'Zet punten in en draai. Win het dubbele of verlies alles!',
     rules: [
-        { text: 'Kies je inzet (10, 25, 50, 100 of max)' },
-        { text: 'Draai aan het rad' },
+        { text: 'Kies je inzet en draai' },
         {
             icon: <span className="size-3 rounded-sm bg-success" />,
-            text: 'Groen segment = verdubbel je inzet',
+            text: 'Groen = ×2 winst',
         },
         {
             icon: <span className="size-3 rounded-sm bg-primary" />,
-            text: 'Blauw segment = verlies je inzet',
+            text: 'Blauw = inzet kwijt',
         },
     ],
     pointsInfo: '50% winkans',
 };
 
 export const GUESS_INFO: GameInfoContent = {
-    title: 'Hoe werkt Vragen?',
-    description: 'Stel ja/nee vragen over het mystery woord of waag een gok!',
+    title: 'Vragen Stellen',
+    description: 'Stel ja/nee vragen om het geheime woord te raden.',
     rules: [
-        { text: 'Stel ja/nee vragen over het mystery woord' },
         { text: 'Elke vraag kost 10 punten' },
-        { text: 'Raad het woord correct = je wint het spel!' },
-        { text: 'Alle spelers zien elkaars vragen' },
+        { text: 'Iedereen ziet elkaars vragen' },
+        { text: 'Raad correct = win de hoofdprijs!' },
     ],
-    pointsInfo: 'Tip: wees specifiek met je vragen',
+    pointsInfo: 'Tip: wees specifiek',
 };

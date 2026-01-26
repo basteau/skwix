@@ -308,7 +308,7 @@ export default function WinPage({ winner, game }: Props) {
                         {winner.name}
                     </p>
                     <p className="mt-0.5 text-sm text-muted-foreground motion-safe:animate-in motion-safe:delay-200 motion-safe:duration-700 motion-safe:fade-in">
-                        heeft het mystery woord geraden
+                        heeft het geheime woord geraden
                     </p>
 
                     {/* Secret word reveal */}

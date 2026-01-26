@@ -38,7 +38,7 @@ const steps: TutorialStep[] = [
         icon: <Snowflake className="size-5" />,
         title: 'Welkom bij Skwix!',
         description:
-            'Een dagelijks woordspel waar je puzzels oplost om punten te sparen. Wie als eerste het geheime mystery-woord raadt, wint de hoofdprijs!',
+            'Los dagelijks puzzels op, spaar punten, en raad het geheime woord om te winnen!',
         visual: (
             <div className="relative flex items-center justify-center py-6">
                 <div className="relative">
@@ -104,8 +104,8 @@ const steps: TutorialStep[] = [
         ),
         title: 'Wordle',
         description:
-            'Raad elke dag een 5-letter woord in 6 pogingen. Kleuren tonen hoe dichtbij je bent.',
-        points: { text: '3–6 punten', type: 'earn' },
+            'Raad het 5-letter woord in 6 pogingen. Kleuren tonen hoe dichtbij je bent.',
+        points: { text: '10–20 punten', type: 'earn' },
         visual: (
             <div className="space-y-3 py-4">
                 {/* Mini wordle grid */}
@@ -172,8 +172,8 @@ const steps: TutorialStep[] = [
         ),
         title: 'Vragen Stellen',
         description:
-            'Stel ja/nee vragen over het mystery-woord om dichter bij het antwoord te komen.',
-        points: { text: '−10 punten', type: 'cost' },
+            'Stel ja/nee vragen om het geheime woord te achterhalen.',
+        points: { text: '−10 punten per vraag', type: 'cost' },
         visual: (
             <div className="space-y-2.5 py-4">
                 {/* Chat-style Q&A */}
@@ -221,8 +221,8 @@ const steps: TutorialStep[] = [
         ),
         title: 'Rad van Fortuin',
         description:
-            'Waag een gokje! Zet punten in en draai aan het rad. Win het dubbele... of verlies alles.',
-        points: { text: '×2 of ×0', type: 'risk' },
+            'Zet punten in en draai. Win het dubbele of verlies alles!',
+        points: { text: '×2 of ×0 (50% kans)', type: 'risk' },
         visual: (
             <div className="flex items-center justify-center py-4">
                 {/* Mini wheel preview */}
@@ -318,7 +318,7 @@ const steps: TutorialStep[] = [
         ),
         title: 'Winnen!',
         description:
-            'Verzamel genoeg punten en raad het mystery-woord. De eerste die het woord raadt, claimt de prijs!',
+            'Verzamel genoeg punten en raad het geheime woord. De eerste die het raadt, wint!',
         visual: (
             <div className="flex flex-col items-center py-4">
                 {/* Trophy visualization */}
