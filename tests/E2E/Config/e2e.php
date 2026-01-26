@@ -82,7 +82,7 @@ return [
             'title' => 'win-title',
             'secret_word_reveal' => 'secret-word-reveal',
             'winner_name' => 'winner-name',
-            'prize_qr_code' => 'prize-qr-code',
+            'prize_display' => 'prize-display',
         ],
 
         // Lose Page

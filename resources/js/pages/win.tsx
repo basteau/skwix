@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
 import { Snowflake } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import QRCode from 'react-qr-code';
 
 function seededRandom(seed: number) {
     const x = Math.sin(seed) * 10000;
@@ -22,7 +21,6 @@ interface Props {
         id: number;
         secret_word: string;
     };
-    prizeUrl: string;
 }
 
 const CONFETTI_DATA = Array.from({ length: 60 }).map((_, i) => ({
@@ -43,7 +41,7 @@ const SNOWFLAKES = Array.from({ length: 12 }).map((_, i) => ({
     opacity: 0.12 + (i % 4) * 0.04,
 }));
 
-export default function WinPage({ winner, game, prizeUrl }: Props) {
+export default function WinPage({ winner, game }: Props) {
     const [showConfetti, setShowConfetti] = useState(true);
     const [revealedLetters, setRevealedLetters] = useState(0);
 
@@ -343,42 +341,38 @@ export default function WinPage({ winner, game, prizeUrl }: Props) {
                         </span>
                     </div>
 
-                    {/* QR Code Prize */}
+                    {/* Prize */}
                     <div
-                        data-testid="prize-qr-code"
+                        data-testid="prize-display"
                         className="mt-8 w-full motion-safe:animate-in motion-safe:delay-500 motion-safe:duration-700 motion-safe:zoom-in-95 motion-safe:fade-in"
                     >
-                        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-white p-1 shadow-lg">
-                            {/* Ribbon header */}
-                            <div className="flex items-center justify-center gap-2 rounded-t-xl bg-gradient-to-r from-primary via-primary to-primary/90 py-2.5">
+                        <div
+                            className="relative overflow-hidden rounded-2xl px-8 py-6"
+                            style={{
+                                background:
+                                    'linear-gradient(135deg, oklch(85% 0.12 80) 0%, oklch(78% 0.15 75) 50%, oklch(85% 0.12 80) 100%)',
+                            }}
+                        >
+                            <div className="flex items-center justify-center gap-3">
                                 <svg
-                                    viewBox="0 0 20 20"
-                                    className="size-4 text-primary-foreground"
+                                    viewBox="0 0 24 24"
+                                    className="size-6 text-amber-900/80"
                                     fill="currentColor"
                                 >
-                                    <path d="M10 2L12 8H18L13 12L15 18L10 14L5 18L7 12L2 8H8L10 2Z" />
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                                 </svg>
-                                <span className="text-sm font-bold tracking-wide text-primary-foreground uppercase">
-                                    Jouw Prijs
+                                <span className="font-display text-xl font-bold tracking-wide text-amber-900">
+                                    Eeuwige Roem
                                 </span>
                                 <svg
-                                    viewBox="0 0 20 20"
-                                    className="size-4 text-primary-foreground"
+                                    viewBox="0 0 24 24"
+                                    className="size-6 text-amber-900/80"
                                     fill="currentColor"
                                 >
-                                    <path d="M10 2L12 8H18L13 12L15 18L10 14L5 18L7 12L2 8H8L10 2Z" />
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                                 </svg>
                             </div>
-                            {/* QR container */}
-                            <div className="bg-white p-4">
-                                <div className="mx-auto w-fit rounded-lg bg-white p-2">
-                                    <QRCode value={prizeUrl} size={140} />
-                                </div>
-                            </div>
                         </div>
-                        <p className="mt-3 text-sm text-muted-foreground">
-                            Scan om je prijs te claimen
-                        </p>
                     </div>
                 </div>
             </div>

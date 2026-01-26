@@ -58,7 +58,7 @@ test('complete winning game flow', function () {
     // 17. Redirected to /win
     // 18. Assert winner name displayed
     // 19. Assert secret word "WINTER" revealed
-    // 20. Assert QR code for prize visible
+    // 20. Assert prize "Eeuwige Roem" visible
 
     expect(true)->toBeTrue();
 })->skip('Requires Playwright MCP browser interaction');
@@ -74,11 +74,11 @@ test('win page displays correct winner information', function () {
     expect(true)->toBeTrue();
 })->skip('Requires Playwright MCP browser interaction');
 
-test('QR code links to prize redemption', function () {
+test('prize display shows Eeuwige Roem', function () {
     // Arrange: Win the game
     // Act: On /win page
-    // Assert: QR code element exists
-    // Assert: QR contains valid prize URL
+    // Assert: Prize element exists
+    // Assert: Contains "Eeuwige Roem" text
 
     expect(true)->toBeTrue();
 })->skip('Requires Playwright MCP browser interaction');

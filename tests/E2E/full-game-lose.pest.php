@@ -91,10 +91,10 @@ test('lose page has return to start button', function () {
     expect(true)->toBeTrue();
 })->skip('Requires Playwright MCP browser interaction');
 
-test('losing player does not see QR code', function () {
+test('losing player does not see prize display', function () {
     // Arrange: On /lose page
-    // Assert: No QR code element present
-    // (QR is only for winners)
+    // Assert: No prize "Eeuwige Roem" element present
+    // (Prize is only for winners)
 
     expect(true)->toBeTrue();
 })->skip('Requires Playwright MCP browser interaction');

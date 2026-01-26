@@ -20,7 +20,6 @@ import {
     X,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import QRCode from 'react-qr-code';
 
 interface QuestionItem {
     id: number;
@@ -723,31 +722,28 @@ function VictoryCelebration({
                                 </p>
                             </div>
 
-                            {/* QR Code for winner */}
+                            {/* Prize for winner */}
                             {isOwnVictory && phase === 'prize' && (
                                 <div
                                     role="group"
-                                    aria-label="Prijs QR-code"
-                                    className="mt-6 motion-safe:animate-in motion-safe:duration-500 motion-safe:zoom-in-95 motion-safe:fade-in"
+                                    aria-label="Prijs"
+                                    className="mt-6 w-full motion-safe:animate-in motion-safe:duration-500 motion-safe:zoom-in-95 motion-safe:fade-in"
                                 >
-                                    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-white p-1 shadow-lg">
-                                        <div className="flex items-center justify-center gap-2 rounded-t-xl bg-gradient-to-r from-primary via-primary to-primary/90 py-2">
-                                            <Star className="size-4 text-primary-foreground" />
-                                            <span className="text-sm font-bold tracking-wide text-primary-foreground uppercase">
-                                                Jouw Prijs
+                                    <div
+                                        className="relative overflow-hidden rounded-2xl px-6 py-5"
+                                        style={{
+                                            background:
+                                                'linear-gradient(135deg, oklch(85% 0.12 80) 0%, oklch(78% 0.15 75) 50%, oklch(85% 0.12 80) 100%)',
+                                        }}
+                                    >
+                                        <div className="flex items-center justify-center gap-2.5">
+                                            <Star className="size-5 fill-amber-900/80 text-amber-900/80" />
+                                            <span className="font-display text-lg font-bold tracking-wide text-amber-900">
+                                                Eeuwige Roem
                                             </span>
-                                            <Star className="size-4 text-primary-foreground" />
-                                        </div>
-                                        <div className="bg-white p-3">
-                                            <QRCode
-                                                value={prizeUrl}
-                                                size={120}
-                                            />
+                                            <Star className="size-5 fill-amber-900/80 text-amber-900/80" />
                                         </div>
                                     </div>
-                                    <p className="mt-2 text-xs text-muted-foreground">
-                                        Scan om je prijs te claimen
-                                    </p>
                                 </div>
                             )}
 

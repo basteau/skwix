@@ -19,7 +19,7 @@ class WinPage
 
     public const SECRET_WORD = 'secret-word-reveal';
 
-    public const QR_CODE = 'prize-qr-code';
+    public const PRIZE_DISPLAY = 'prize-display';
 
     public function __construct(PlaywrightHelper $playwright)
     {
@@ -73,11 +73,11 @@ class WinPage
     }
 
     /**
-     * Assert QR code is visible.
+     * Assert prize display is visible.
      */
-    public function assertQRCodeVisible(): self
+    public function assertPrizeVisible(): self
     {
-        $this->playwright->waitFor(self::QR_CODE);
+        $this->playwright->waitFor(self::PRIZE_DISPLAY);
 
         return $this;
     }
