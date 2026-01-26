@@ -62,7 +62,7 @@ describe('Wordle Controller', function () {
         $game = Game::factory()->create([
             'status' => 'active',
             'starts_at' => Carbon::now()->subDays(1),
-            'wordle_words' => ['woord', 'appel'],
+            'wordle_words' => ['crane', 'apple'],
         ]);
 
         $player = Player::factory()->create([
@@ -95,7 +95,7 @@ describe('Wordle Controller', function () {
         $game = Game::factory()->create([
             'status' => 'active',
             'starts_at' => Carbon::now()->subDays(1),
-            'wordle_words' => ['woord', 'appel'],
+            'wordle_words' => ['crane', 'apple'],
         ]);
 
         $player = Player::factory()->create([
@@ -105,7 +105,7 @@ describe('Wordle Controller', function () {
         ]);
 
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
-            'guess' => 'appel',
+            'guess' => 'apple',
         ]);
 
         $response->assertOk();
@@ -137,7 +137,7 @@ describe('Wordle Controller', function () {
         $game = Game::factory()->create([
             'status' => 'active',
             'starts_at' => Carbon::now()->subDays(1),
-            'wordle_words' => ['woord', 'appel'],
+            'wordle_words' => ['crane', 'apple'],
         ]);
 
         $player = Player::factory()->create([
@@ -148,14 +148,14 @@ describe('Wordle Controller', function () {
 
         // First guess (wrong)
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
-            'guess' => 'woord',
+            'guess' => 'crane',
         ]);
         $response->assertOk();
         $response->assertJson(['correct' => false, 'completed' => false]);
 
         // Second guess (correct)
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
-            'guess' => 'appel',
+            'guess' => 'apple',
         ]);
 
         $response->assertOk();
@@ -178,7 +178,7 @@ describe('Wordle Controller', function () {
         $game = Game::factory()->create([
             'status' => 'active',
             'starts_at' => Carbon::now()->subDays(1),
-            'wordle_words' => ['woord', 'appel'],
+            'wordle_words' => ['crane', 'apple'],
         ]);
 
         Player::factory()->create([
@@ -204,7 +204,7 @@ describe('Wordle Controller', function () {
         $game = Game::factory()->create([
             'status' => 'active',
             'starts_at' => Carbon::now()->subDays(1),
-            'wordle_words' => ['woord', 'appel'],
+            'wordle_words' => ['crane', 'apple'],
         ]);
 
         $player = Player::factory()->create([
@@ -216,13 +216,13 @@ describe('Wordle Controller', function () {
             'game_id' => $game->id,
             'player_id' => $player->id,
             'day_number' => 2,
-            'guesses' => [['word' => 'appel', 'result' => []]],
+            'guesses' => [['word' => 'apple', 'result' => []]],
             'completed' => true,
             'points_earned' => 20,
         ]);
 
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
-            'guess' => 'woord',
+            'guess' => 'crane',
         ]);
 
         $response->assertStatus(400);

@@ -46,6 +46,6 @@ test('can get random words', function () {
 test('can validate words', function () {
     $service = new WordlistService;
 
-    expect($service->isValidWord('aarde'))->toBeTrue();
+    expect($service->isValidWord('apple'))->toBeTrue();
     expect($service->isValidWord('xxxxx'))->toBeFalse();
 });

@@ -25,7 +25,7 @@ class WordlistValidationTest extends TestCase
     public function test_wordlist_is_not_empty(): void
     {
         $this->assertNotEmpty($this->words, 'Word list should not be empty');
-        $this->assertGreaterThan(3000, count($this->words), 'Word list should have at least 3000 words');
+        $this->assertGreaterThan(2000, count($this->words), 'Word list should have at least 2000 words');
     }
 
     public function test_all_words_are_exactly_five_letters(): void
@@ -81,18 +81,15 @@ class WordlistValidationTest extends TestCase
         );
     }
 
-    public function test_common_dutch_five_letter_words_are_included(): void
+    public function test_common_english_five_letter_words_are_included(): void
     {
-        // Only test 5-letter common Dutch words
+        // Common English 5-letter words from official Wordle
         $commonFiveLetterWords = [
-            'hallo', 'water', 'brood', 'tafel', 'stoel', 'klein', 'blauw',
-            'groen', 'zwart', 'lopen', 'staan', 'horen', 'komen', 'geven',
-            'maken', 'nemen', 'zegge', 'weten', 'denkt', 'vraag', 'thuis',
-            'later', 'geval', 'sinds', 'welke', 'eigen', 'grote', 'eerste',
+            'about', 'above', 'after', 'again', 'apple', 'beach', 'bread',
+            'bring', 'chair', 'child', 'clean', 'close', 'could', 'dance',
+            'dream', 'drink', 'drive', 'earth', 'every', 'first', 'found',
+            'fruit', 'great', 'green', 'happy', 'heart', 'house', 'large',
         ];
-
-        // Filter to only 5-letter words (in case any slipped through)
-        $commonFiveLetterWords = array_filter($commonFiveLetterWords, fn ($w) => mb_strlen($w) === 5);
 
         $missingWords = array_filter($commonFiveLetterWords, fn ($w) => ! in_array($w, $this->words));
 
@@ -103,44 +100,39 @@ class WordlistValidationTest extends TestCase
         $this->assertGreaterThanOrEqual(
             $threshold,
             $present,
-            'Most common Dutch 5-letter words should be included. Missing: '.implode(', ', $missingWords)
+            'Most common English 5-letter words should be included. Missing: '.implode(', ', $missingWords)
         );
     }
 
-    public function test_no_obvious_english_only_words(): void
+    public function test_words_contain_only_ascii_letters(): void
     {
-        $englishOnlyWords = [
-            'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can',
-            'had', 'her', 'was', 'one', 'our', 'out', 'has', 'his', 'how',
-            'its', 'let', 'may', 'new', 'now', 'old', 'see', 'two', 'way',
-            'who', 'boy', 'did', 'get', 'put', 'say', 'she', 'too', 'use',
-        ];
+        $nonAscii = [];
+        foreach ($this->words as $word) {
+            if (! preg_match('/^[a-z]+$/', $word)) {
+                $nonAscii[] = $word;
+            }
+        }
 
-        $foundEnglish = array_filter($englishOnlyWords, fn ($w) => in_array($w, $this->words));
-
-        // Allow some overlap (some words are valid in both languages)
-        $this->assertLessThan(
-            5,
-            count($foundEnglish),
-            'Too many English-only words found: '.implode(', ', $foundEnglish)
+        $this->assertEmpty(
+            $nonAscii,
+            'Words should only contain ASCII letters. Found: '.implode(', ', array_slice($nonAscii, 0, 10))
         );
     }
 
     public function test_wordlist_contains_reasonable_number_of_words(): void
     {
-        // For a good Wordle game, we need a substantial list
-        // Original Dutch Wordle (woordle.nl) uses ~3000+ words
+        // Official Wordle uses ~2300 answer words
         $this->assertGreaterThan(
-            3000,
+            2000,
             count($this->words),
-            'Word list should have at least 3000 words for good game variety'
+            'Word list should have at least 2000 words for good game variety'
         );
 
         // But not too many obscure words
         $this->assertLessThan(
-            15000,
+            5000,
             count($this->words),
-            'Word list should not exceed 15000 words to maintain quality'
+            'Word list should not exceed 5000 words to maintain quality'
         );
     }
 }
