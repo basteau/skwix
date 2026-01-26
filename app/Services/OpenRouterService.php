@@ -26,7 +26,7 @@ class OpenRouterService
         $this->witModel = config('services.openrouter.wit_model') ?? $this->model;
     }
 
-    public function askQuestion(string $secretWord, string $question): array
+    public function askQuestion(string $secretWord, string $question, ?string $wordDescription = null): array
     {
         if (empty($this->apiKey)) {
             return [
@@ -47,7 +47,7 @@ class OpenRouterService
 
         RateLimiter::hit($rateLimitKey, 60);
 
-        $systemPrompt = $this->buildSystemPrompt($secretWord);
+        $systemPrompt = $this->buildSystemPrompt($secretWord, $wordDescription);
 
         try {
             $response = Http::timeout(30)
@@ -116,10 +116,14 @@ class OpenRouterService
         }
     }
 
-    private function buildSystemPrompt(string $secretWord): string
+    private function buildSystemPrompt(string $secretWord, ?string $wordDescription = null): string
     {
+        $descriptionContext = $wordDescription
+            ? "\nAdditional context about this word: {$wordDescription}\nUse this context to answer questions more accurately."
+            : '';
+
         return <<<PROMPT
-You know the secret word is "{$secretWord}".
+You know the secret word is "{$secretWord}".{$descriptionContext}
 
 Answer the yes/no question about this word. Be GENEROUS in interpreting questions as yes/no.
 

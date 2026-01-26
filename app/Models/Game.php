@@ -16,6 +16,7 @@ class Game extends Model
 
     protected $fillable = [
         'secret_word',
+        'word_description',
         'status',
         'winner_id',
         'starts_at',

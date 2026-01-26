@@ -161,7 +161,7 @@ class GuessController extends Controller
         }
 
         // Regular property question - proceed with normal Q&A flow
-        $result = $this->openRouterService->askQuestion($game->secret_word, $question);
+        $result = $this->openRouterService->askQuestion($game->secret_word, $question, $game->word_description);
 
         if (! $result['success']) {
             return response()->json([
@@ -402,7 +402,7 @@ class GuessController extends Controller
             ]);
         }
 
-        // Regular property question
+        // Regular property question (test mode - no description available)
         $result = $this->openRouterService->askQuestion($secretWord, $question);
 
         if (! $result['success']) {

@@ -86,6 +86,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'secret_word' => 'required|string|min:2|max:50',
+            'word_description' => 'nullable|string|max:500',
             'starts_at' => 'required|date|after:now',
             'wordle_hour' => 'required|integer|min:0|max:23',
             'starting_points' => 'nullable|integer|min:0|max:10000',
@@ -108,6 +109,7 @@ class AdminController extends Controller
 
             $game = Game::create([
                 'secret_word' => strtolower(trim($request->secret_word)),
+                'word_description' => $request->word_description ? trim($request->word_description) : null,
                 'status' => 'draft',
                 'starts_at' => $startsAt,
                 'ends_at' => null,

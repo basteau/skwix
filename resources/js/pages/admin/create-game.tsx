@@ -40,6 +40,7 @@ const WORDLE_HOURS = Array.from({ length: 24 }, (_, i) => ({
 
 export default function CreateGame({ availableUsers }: Props) {
     const [secretWord, setSecretWord] = useState('');
+    const [wordDescription, setWordDescription] = useState('');
     const [startsAt, setStartsAt] = useState<Date | undefined>(
         getDefaultStartDate(),
     );
@@ -128,6 +129,7 @@ export default function CreateGame({ availableUsers }: Props) {
 
         const payload = {
             secret_word: secretWord,
+            word_description: wordDescription || null,
             starts_at: startsAt?.toISOString() ?? '',
             wordle_hour: effectiveWordleHour,
             starting_points: startingPoints,
@@ -145,7 +147,7 @@ export default function CreateGame({ availableUsers }: Props) {
         } catch {
             setIsSubmitting(false);
         }
-    }, [secretWord, startsAt, wordleHour, wordleAtStart, startingPoints, players]);
+    }, [secretWord, wordDescription, startsAt, wordleHour, wordleAtStart, startingPoints, players]);
 
     return (
         <>
@@ -180,6 +182,27 @@ export default function CreateGame({ availableUsers }: Props) {
                                     {errors.secret_word}
                                 </p>
                             )}
+                            <div className="mt-4">
+                                <label className="mb-1 block text-sm font-medium text-foreground">
+                                    Context voor AI (optioneel)
+                                </label>
+                                <textarea
+                                    value={wordDescription}
+                                    onChange={(e) => setWordDescription(e.target.value)}
+                                    placeholder="Bv. 'financiële instelling, niet een parkbank' of 'de vrucht, niet de kleur'"
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    maxLength={500}
+                                    data-testid="word-description-input"
+                                />
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Extra context om de AI te helpen accuratere antwoorden te geven
+                                </p>
+                                {errors.word_description && (
+                                    <p className="mt-1 text-sm text-destructive">
+                                        {errors.word_description}
+                                    </p>
+                                )}
+                            </div>
                         </section>
 
                         {/* Timing */}
