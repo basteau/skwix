@@ -19,6 +19,7 @@ class Game extends Model
         'ends_at',
         'wordle_words',
         'wordle_hour',
+        'starting_points',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class Game extends Model
             'ends_at' => 'datetime',
             'wordle_words' => 'array',
             'wordle_hour' => 'integer',
+            'starting_points' => 'integer',
         ];
     }
 

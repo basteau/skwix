@@ -44,6 +44,7 @@ export default function CreateGame({ availableUsers }: Props) {
         getDefaultStartDate(),
     );
     const [wordleHour, setWordleHour] = useState(8);
+    const [startingPoints, setStartingPoints] = useState(0);
     const [players, setPlayers] = useState<PlayerRow[]>([
         { id: crypto.randomUUID(), name: '', email: '' },
         { id: crypto.randomUUID(), name: '', email: '' },
@@ -124,6 +125,7 @@ export default function CreateGame({ availableUsers }: Props) {
             secret_word: secretWord,
             starts_at: startsAt?.toISOString() ?? '',
             wordle_hour: wordleHour,
+            starting_points: startingPoints,
             players: validPlayers.map((p) => ({
                 name: p.name,
                 email: p.email,
@@ -138,7 +140,7 @@ export default function CreateGame({ availableUsers }: Props) {
         } catch {
             setIsSubmitting(false);
         }
-    }, [secretWord, startsAt, wordleHour, players]);
+    }, [secretWord, startsAt, wordleHour, startingPoints, players]);
 
     return (
         <>
@@ -228,6 +230,32 @@ export default function CreateGame({ availableUsers }: Props) {
                                     {errors.wordle_hour && (
                                         <p className="mt-1 text-sm text-destructive">
                                             {errors.wordle_hour}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">
+                                        Startpunten
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        max={10000}
+                                        value={startingPoints}
+                                        onChange={(e) =>
+                                            setStartingPoints(
+                                                parseInt(e.target.value, 10) ||
+                                                    0,
+                                            )
+                                        }
+                                        data-testid="starting-points-input"
+                                    />
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Elke speler begint met dit aantal punten
+                                    </p>
+                                    {errors.starting_points && (
+                                        <p className="mt-1 text-sm text-destructive">
+                                            {errors.starting_points}
                                         </p>
                                     )}
                                 </div>

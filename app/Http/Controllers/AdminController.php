@@ -88,6 +88,7 @@ class AdminController extends Controller
             'secret_word' => 'required|string|min:2|max:50',
             'starts_at' => 'required|date|after:now',
             'wordle_hour' => 'required|integer|min:0|max:23',
+            'starting_points' => 'nullable|integer|min:0|max:10000',
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
             'players.*.email' => 'required|email|max:255',
@@ -103,6 +104,7 @@ class AdminController extends Controller
 
         $game = \DB::transaction(function () use ($request) {
             $startsAt = Carbon::parse($request->starts_at)->setTimezone('Europe/Brussels');
+            $startingPoints = (int) ($request->starting_points ?? 0);
 
             $game = Game::create([
                 'secret_word' => strtolower(trim($request->secret_word)),
@@ -111,6 +113,7 @@ class AdminController extends Controller
                 'ends_at' => null,
                 'wordle_words' => $this->wordlistService->getRandomWords(60),
                 'wordle_hour' => (int) $request->wordle_hour,
+                'starting_points' => $startingPoints,
             ]);
 
             foreach ($request->players as $playerData) {
@@ -137,7 +140,7 @@ class AdminController extends Controller
                     'name' => $playerData['name'],
                     'email' => $playerData['email'],
                     'avatar_url' => $avatarUrl,
-                    'points' => 0,
+                    'points' => $startingPoints,
                     'invite_code' => $inviteCode,
                 ]);
             }
