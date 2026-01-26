@@ -314,11 +314,34 @@ class AdminController extends Controller
 
     public function deleteGame(Game $game): RedirectResponse
     {
+        if ($game->status !== 'completed') {
+            return redirect()
+                ->route('admin.dashboard')
+                ->with('error', 'Alleen voltooide spellen kunnen verwijderd worden');
+        }
+
         $game->delete();
 
         return redirect()
             ->route('admin.dashboard')
-            ->with('success', 'Spel verwijderd en spelers uitgelogd');
+            ->with('success', 'Spel verwijderd');
+    }
+
+    public function deleteAllGames(): RedirectResponse
+    {
+        $count = Game::where('status', 'completed')->count();
+
+        if ($count === 0) {
+            return redirect()
+                ->route('admin.dashboard')
+                ->with('error', 'Geen voltooide spellen om te verwijderen');
+        }
+
+        Game::where('status', 'completed')->delete();
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', "{$count} voltooide spellen verwijderd");
     }
 
     private function validateWordleWordsAgainstWordlist(array $words): array

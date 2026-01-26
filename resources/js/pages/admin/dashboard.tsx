@@ -9,10 +9,12 @@ import {
     FlaskConical,
     Mail,
     Play,
+    Trash2,
     Trophy,
     UserSearch,
     Users,
 } from 'lucide-react';
+import { useState } from 'react';
 
 type GameStatus = 'draft' | 'pending' | 'active' | 'completed';
 
@@ -30,6 +32,18 @@ interface Props {
 }
 
 export default function AdminDashboard({ games = [] }: Props) {
+    const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+
+    const handleDeleteAll = () => {
+        if (confirmDeleteAll) {
+            router.delete('/admin/games');
+            setConfirmDeleteAll(false);
+        } else {
+            setConfirmDeleteAll(true);
+            setTimeout(() => setConfirmDeleteAll(false), 3000);
+        }
+    };
+
     return (
         <>
             <Head title="Admin - Skwix" />
@@ -40,6 +54,24 @@ export default function AdminDashboard({ games = [] }: Props) {
                     subtitle="Beheer Skwix spellen"
                     actions={
                         <div className="flex gap-2">
+                            {games.some((g) => g.status === 'completed') && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleDeleteAll}
+                                    className={cn(
+                                        'gap-2',
+                                        confirmDeleteAll &&
+                                            'border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground',
+                                    )}
+                                >
+                                    <Trash2 className="size-4" />
+                                    <span className="hidden sm:inline">
+                                        {confirmDeleteAll
+                                            ? 'Bevestig'
+                                            : 'Voltooide weg'}
+                                    </span>
+                                </Button>
+                            )}
                             <Button variant="outline" asChild className="gap-2">
                                 <Link href="/admin/players">
                                     <UserSearch className="size-4" />
@@ -182,6 +214,18 @@ function GameCard({ game }: { game: GameData }) {
     const config = statusConfig[game.status];
     const StatusIcon = config.icon;
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
+    const [confirmDelete, setConfirmDelete] = useState(false);
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirmDelete) {
+            router.delete(`/admin/game/${game.id}`);
+        } else {
+            setConfirmDelete(true);
+            setTimeout(() => setConfirmDelete(false), 3000);
+        }
+    };
 
     return (
         <Link
@@ -220,10 +264,24 @@ function GameCard({ game }: { game: GameData }) {
                         )}
                     </div>
                 </div>
-                <div className="shrink-0 text-right">
-                    <span className="text-xs font-medium text-muted-foreground">
-                        {config.hint}
-                    </span>
+                <div className="flex shrink-0 items-center gap-2">
+                    {game.status === 'completed' && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleDelete}
+                            className={cn(
+                                'size-8 p-0',
+                                confirmDelete &&
+                                    'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                            )}
+                        >
+                            <Trash2 className="size-4" />
+                            <span className="sr-only">
+                                {confirmDelete ? 'Bevestig verwijderen' : 'Verwijder'}
+                            </span>
+                        </Button>
+                    )}
                 </div>
             </div>
         </Link>

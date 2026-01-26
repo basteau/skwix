@@ -116,6 +116,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/game/{game}/invite', [AdminController::class, 'invitePlayers'])->name('game.invite');
     Route::post('/game/{game}/end', [AdminController::class, 'endGame'])->name('game.end');
     Route::delete('/game/{game}', [AdminController::class, 'deleteGame'])->name('game.delete');
+    Route::delete('/games', [AdminController::class, 'deleteAllGames'])->name('games.delete-all');
 });
 
 // Test Game Mode (admin only, ephemeral)
