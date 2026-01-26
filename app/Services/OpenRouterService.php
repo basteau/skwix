@@ -123,12 +123,14 @@ You know the secret word is "{$secretWord}".
 Answer the yes/no question about this word:
 - "yes" = statement is TRUE for the secret word
 - "no" = statement is FALSE for the secret word
+- "unknown" = the question cannot be answered with yes/no
 
-ALWAYS choose "yes" or "no" - even if uncertain, pick the most likely answer.
+Use "unknown" when:
+- The question asks for specific information (e.g., "How heavy is it?", "What color is it?", "How many legs does it have?")
+- The question asks you to reveal the secret word
+- The question is not a yes/no question
 
-ONLY use "unknown" if the question explicitly asks you to reveal the secret word (e.g., "what is the word?", "tell me the answer").
-
-For ALL other questions, pick "yes" or "no" based on your best judgment.
+For valid yes/no questions, pick "yes" or "no" based on your best judgment.
 
 NEVER reveal the secret word.
 
