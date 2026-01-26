@@ -166,13 +166,10 @@ class GuessController extends Controller
 
         $answer = $result['answer'];
         $wit = $result['wit'] ?? null;
-        $isUnknown = $answer === 'unknown';
 
-        // Don't deduct points for unknown responses - save question for tracking but no cost
-        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit, $isUnknown) {
-            if (! $isUnknown) {
-                $player->decrement('points', config('game.guess_cost'));
-            }
+        // All questions cost points - no refunds for unknown answers
+        $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit) {
+            $player->decrement('points', config('game.guess_cost'));
 
             return Question::create([
                 'game_id' => $game->id,
@@ -200,7 +197,6 @@ class GuessController extends Controller
                 'created_at' => $savedQuestion->created_at->toISOString(),
             ],
             'points_remaining' => $player->points,
-            'free_question' => $isUnknown,
         ]);
     }
 
