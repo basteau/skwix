@@ -66,7 +66,7 @@ class Player extends Model
         }
 
         $cooldownHours = config('game.guess_cooldown_hours', 8);
-        $cooldownEndsAt = $this->last_guess_at->copy()->addHours($cooldownHours);
+        $cooldownEndsAt = Carbon::parse($this->last_guess_at)->addHours($cooldownHours);
 
         return $cooldownEndsAt->isFuture() ? $cooldownEndsAt : null;
     }
