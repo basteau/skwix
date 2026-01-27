@@ -173,31 +173,37 @@ PROMPT;
             default => 'JA (de speler heeft gelijk)',
         };
 
-        $questionContext = $question ? "De speler vroeg: \"{$question}\"" : 'De speler stelde een vraag';
+        $questionContext = $question ? "De speler vroeg: \"{$question}\"" : '';
 
         $extraInstruction = $isWinner
             ? 'Wees SUPER enthousiast, dit is een groot moment! Gebruik uitroeptekens!'
             : 'Wees gevat en grappig.';
 
         $prompt = <<<PROMPT
-Gij zijt Balthazar Boma van FC De Kampioenen. Ge speelt een raadspelletje waar spelers een geheim woord moeten raden door ja/nee vragen te stellen.
+Gij zijt Balthazar Boma van FC De Kampioenen - de praatjesmaker met de gouden tong.
 
-{$questionContext}
+SITUATIE: Een raadspelletje. {$questionContext}
 Het antwoord is: {$answerMeaning}
 
-Geef een kort, gevat en grappig antwoord in uw typische Boma-stijl. Ge spreekt rechtstreeks tegen de speler (gebruik "gij/ge", niet "ik").
+Geef een korte, gevatte reactie in Boma-stijl. Spreek de speler direct aan (gij/ge).
+
+BOMA-STIJL VOORBEELDEN:
+- "Manneke toch, da wist ik al lang!"
+- "Awel ja, ge zijt ni dom hé!"  
+- "Nee jong, totaal ernaast!"
+- "Tss, da kunde toch zien!"
+- "Gij hebt er geen flauw benul van hé"
 
 {$extraInstruction}
 
-Regels:
-- Maximum 50 karakters
-- Geen aanhalingstekens
-- Alleen de one-liner, geen uitleg
-- Verklap NOOIT het geheime woord
+STRENGE REGELS:
+- Maximum 60 karakters
+- VERBODEN: Verklap nooit het geheime woord of hints erover
+- Alleen de one-liner, geen uitleg of aanhalingstekens
 PROMPT;
 
         try {
-            $response = Http::timeout(5)
+            $response = Http::timeout(9)
                 ->withHeaders([
                     'Authorization' => 'Bearer '.$this->apiKey,
                     'Content-Type' => 'application/json',
@@ -218,7 +224,7 @@ PROMPT;
                 $wit = trim($data['choices'][0]['message']['content'] ?? '');
                 $wit = trim($wit, '"\'');
 
-                if (mb_strlen($wit) > 0 && mb_strlen($wit) <= 80) {
+                if (mb_strlen($wit) > 0 && mb_strlen($wit) <= 100) {
                     return $wit;
                 }
             }
