@@ -17,10 +17,12 @@ import {
     Skull,
     Snowflake,
     Sparkles,
+    Timer,
     Trophy,
     X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 
 interface QuestionItem {
     id: number;
@@ -40,6 +42,8 @@ interface Props {
         id: number;
         name: string;
         points: number;
+        cooldown_remaining?: number;
+        cooldown_ends_at?: string;
     };
     game?: {
         id: number;
@@ -106,12 +110,18 @@ export default function GuessPage({
     // Track which questions are being retried
     const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
 
+    // Cooldown timer
+    const { isOnCooldown, formatted: cooldownFormatted } = useCooldownTimer(
+        player?.cooldown_remaining ?? 0,
+    );
+
     // Sync revealed sabotage IDs from server (on poll updates)
     useEffect(() => {
         setSabotagedQuestionIds(revealedSabotagedIds);
     }, [revealedSabotagedIds]);
 
-    const canAsk = points >= QUESTION_COST && input.trim().length >= 3;
+    const canAsk =
+        points >= QUESTION_COST && input.trim().length >= 3 && !isOnCooldown;
 
     // Cleanup victory timer on unmount
     useEffect(
@@ -225,6 +235,7 @@ export default function GuessPage({
                     ai_error: (data?.message as string) || 'Er ging iets mis',
                     multi_guess:
                         (data?.message as string) || 'Raad één woord tegelijk',
+                    cooldown_active: 'Wacht tot de cooldown voorbij is',
                 };
                 setMessage({
                     type: 'error',
@@ -468,9 +479,26 @@ export default function GuessPage({
                     {/* Question cost indicator */}
                     <div className="mb-3 flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
-                            <Sparkles className="size-3.5" />
-                            {questionsRemaining}{' '}
-                            {questionsRemaining === 1 ? 'vraag' : 'vragen'} over
+                            {isOnCooldown ? (
+                                <>
+                                    <Timer className="size-3.5 shrink-0 animate-pulse" />
+                                    <span>
+                                        Cooldown:{' '}
+                                        <span className="font-medium tabular-nums text-foreground">
+                                            {cooldownFormatted}
+                                        </span>
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="size-3.5" />
+                                    {questionsRemaining}{' '}
+                                    {questionsRemaining === 1
+                                        ? 'vraag'
+                                        : 'vragen'}{' '}
+                                    over
+                                </>
+                            )}
                         </span>
                         <span className="font-medium text-primary">
                             {QUESTION_COST} punten per vraag
@@ -488,7 +516,9 @@ export default function GuessPage({
                                 onKeyDown={handleKeyDown}
                                 placeholder="Stel een vraag of raad: 'Is het woord...'"
                                 disabled={
-                                    isSubmitting || points < QUESTION_COST
+                                    isSubmitting ||
+                                    points < QUESTION_COST ||
+                                    isOnCooldown
                                 }
                                 className={cn(
                                     'h-12 w-full rounded-xl border-2 border-border/60 bg-card pr-12 pl-4 text-base',
@@ -514,7 +544,7 @@ export default function GuessPage({
                         </Button>
                     </div>
 
-                    {points < QUESTION_COST && (
+                    {points < QUESTION_COST && !isOnCooldown && (
                         <p className="mt-3 text-center text-xs text-muted-foreground">
                             Je hebt {QUESTION_COST} punten nodig om een vraag te
                             stellen

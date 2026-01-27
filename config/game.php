@@ -50,4 +50,14 @@ return [
     */
     'sabotage_cost' => 8,
     'reveal_cost' => 10,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Guess Cooldown
+    |--------------------------------------------------------------------------
+    |
+    | Hours a player must wait between guesses. Set to 0 to disable.
+    |
+    */
+    'guess_cooldown_hours' => env('GAME_GUESS_COOLDOWN_HOURS', 8),
 ];

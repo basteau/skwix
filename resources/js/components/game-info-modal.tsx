@@ -7,7 +7,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 
-import { Snowflake, X } from 'lucide-react';
+import { Snowflake, Timer, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 const SNOWFLAKES = Array.from({ length: 6 }).map((_, i) => ({
@@ -191,9 +191,14 @@ export const GUESS_INFO: GameInfoContent = {
     description: 'Stel ja/nee vragen om het geheime woord te raden.',
     rules: [
         { text: 'Elke vraag kost 10 punten' },
+        {
+            icon: <Timer className="size-3.5 text-muted-foreground" />,
+            text: '8 uur cooldown na elke vraag',
+        },
         { text: 'Iedereen ziet elkaars vragen' },
         { text: 'Raad correct = win de hoofdprijs!' },
         { text: 'Pas op: sabotage draait je antwoord om (ja↔nee)' },
     ],
-    pointsInfo: 'Tip: check de Spelers tab om te saboteren of sabotages te onthullen.',
+    pointsInfo:
+        'Tip: check de Spelers tab om te saboteren of sabotages te onthullen.',
 };

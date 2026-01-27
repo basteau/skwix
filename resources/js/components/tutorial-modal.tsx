@@ -7,7 +7,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Skull, Snowflake, X } from 'lucide-react';
+import { Skull, Snowflake, Timer, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 const TUTORIAL_SEEN_KEY = 'skwix_tutorial_seen';
@@ -172,7 +172,7 @@ const steps: TutorialStep[] = [
         ),
         title: 'Vragen Stellen',
         description:
-            'Stel ja/nee vragen om het geheime woord te achterhalen.',
+            'Stel ja/nee vragen om het geheime woord te achterhalen. 8 uur cooldown na elke vraag.',
         points: { text: '−10 punten per vraag', type: 'cost' },
         visual: (
             <div className="space-y-2.5 py-4">

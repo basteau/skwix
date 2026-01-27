@@ -68,6 +68,8 @@ class GuessController extends Controller
                 'id' => $player->id,
                 'name' => $player->name,
                 'points' => $player->points,
+                'cooldown_remaining' => $player->getCooldownRemainingSeconds(),
+                'cooldown_ends_at' => $player->getCooldownEndsAt()?->toISOString(),
             ],
             'game' => [
                 'id' => $game->id,
@@ -133,6 +135,14 @@ class GuessController extends Controller
 
         if ($player->points < config('game.guess_cost')) {
             return response()->json(['error' => 'insufficient_points'], 400);
+        }
+
+        if ($player->isOnCooldown()) {
+            return response()->json([
+                'error' => 'cooldown_active',
+                'cooldown_remaining' => $player->getCooldownRemainingSeconds(),
+                'cooldown_ends_at' => $player->getCooldownEndsAt()?->toISOString(),
+            ], 429);
         }
 
         $question = trim($request->question);
@@ -201,6 +211,7 @@ class GuessController extends Controller
         $wasSabotaged = false;
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit, &$wasSabotaged) {
             $player->decrement('points', config('game.guess_cost'));
+            $player->update(['last_guess_at' => now()]);
 
             $questionRecord = Question::create([
                 'game_id' => $game->id,
@@ -351,6 +362,7 @@ class GuessController extends Controller
         // Deduct points and save the question
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answerType, $guessedWord, $wit) {
             $player->decrement('points', config('game.guess_cost'));
+            $player->update(['last_guess_at' => now()]);
 
             return Question::create([
                 'game_id' => $game->id,

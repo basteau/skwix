@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ class Player extends Model
         'points',
         'invite_code',
         'joined_at',
+        'last_guess_at',
     ];
 
     protected function casts(): array
@@ -26,7 +28,47 @@ class Player extends Model
         return [
             'joined_at' => 'datetime',
             'points' => 'integer',
+            'last_guess_at' => 'datetime',
         ];
+    }
+
+    public function isOnCooldown(): bool
+    {
+        if (! $this->last_guess_at) {
+            return false;
+        }
+
+        $cooldownHours = config('game.guess_cooldown_hours', 8);
+
+        return $this->last_guess_at->copy()->addHours($cooldownHours)->isFuture();
+    }
+
+    public function getCooldownRemainingSeconds(): int
+    {
+        if (! $this->last_guess_at) {
+            return 0;
+        }
+
+        $cooldownHours = config('game.guess_cooldown_hours', 8);
+        $cooldownEndsAt = $this->last_guess_at->copy()->addHours($cooldownHours);
+
+        if ($cooldownEndsAt->isPast()) {
+            return 0;
+        }
+
+        return (int) now()->diffInSeconds($cooldownEndsAt);
+    }
+
+    public function getCooldownEndsAt(): ?Carbon
+    {
+        if (! $this->last_guess_at) {
+            return null;
+        }
+
+        $cooldownHours = config('game.guess_cooldown_hours', 8);
+        $cooldownEndsAt = $this->last_guess_at->copy()->addHours($cooldownHours);
+
+        return $cooldownEndsAt->isFuture() ? $cooldownEndsAt : null;
     }
 
     public function game(): BelongsTo
