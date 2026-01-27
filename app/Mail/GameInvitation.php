@@ -9,16 +9,26 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 
 class GameInvitation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    public int $tries = 3;
+
+    public int $backoff = 10;
+
     public function __construct(
         public Player $player,
         public Game $game,
     ) {}
+
+    public function middleware(): array
+    {
+        return [new RateLimited('emails')];
+    }
 
     public function envelope(): Envelope
     {

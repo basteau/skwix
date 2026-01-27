@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -15,6 +17,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiting();
+    }
+
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('emails', function (object $job) {
+            return Limit::perSecond(2)->by('resend-api');
+        });
     }
 
     protected function configureDefaults(): void
