@@ -134,9 +134,14 @@ export default function GuessPage({
 
     useEffect(() => {
         if (listRef.current) {
-            listRef.current.scrollTo({
-                top: listRef.current.scrollHeight,
-                behavior: 'smooth',
+            // Use requestAnimationFrame to ensure DOM has updated before scrolling
+            requestAnimationFrame(() => {
+                if (listRef.current) {
+                    listRef.current.scrollTo({
+                        top: listRef.current.scrollHeight,
+                        behavior: 'smooth',
+                    });
+                }
             });
         }
     }, [questions, pendingQuestion]);
