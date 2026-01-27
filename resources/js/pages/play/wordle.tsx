@@ -574,12 +574,12 @@ export default function WordlePage({
 
                 {/* Keyboard */}
                 {isAvailable && !isCompleted && (
-                    <div className="shrink-0 border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 px-2 pt-3 pb-2">
-                        <div className="mx-auto flex max-w-md flex-col gap-1.5">
+                    <div className="shrink-0 border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 px-1 sm:px-2 pt-2 sm:pt-3 pb-2">
+                        <div className="mx-auto flex max-w-md flex-col gap-1 sm:gap-1.5">
                             {KEYBOARD_ROWS.map((row, rowIdx) => (
                                 <div
                                     key={rowIdx}
-                                    className="flex justify-center gap-1.5"
+                                    className="flex justify-center gap-1 sm:gap-1.5"
                                 >
                                     {row.map((key) => (
                                         <KeyboardKey
@@ -615,7 +615,7 @@ function Tile({
     testId?: string;
 }) {
     const baseClasses = cn(
-        'flex size-[54px] sm:size-[62px] md:size-[68px] items-center justify-center rounded-md text-[1.65rem] sm:text-[1.85rem] md:text-[2rem] font-bold uppercase',
+        'flex size-[clamp(44px,14vw,54px)] sm:size-[62px] md:size-[68px] items-center justify-center rounded-md text-[clamp(1.25rem,4vw,1.65rem)] sm:text-[1.85rem] md:text-[2rem] font-bold uppercase',
         'transition-all duration-200',
     );
 
@@ -684,9 +684,9 @@ function KeyboardKey({
     };
 
     const baseClasses = cn(
-        'flex items-center justify-center font-semibold uppercase',
-        'transition-all duration-100 active:scale-[0.92] disabled:opacity-40',
-        'motion-safe:active:transition-transform',
+        'flex items-center justify-center font-semibold uppercase select-none',
+        'transition-all duration-100 active:scale-95 disabled:opacity-40',
+        'touch-manipulation [-webkit-tap-highlight-color:transparent]',
     );
 
     if (isAction) {
@@ -698,7 +698,7 @@ function KeyboardKey({
                 disabled={disabled}
                 className={cn(
                     baseClasses,
-                    'h-12 sm:h-[52px] min-w-[58px] sm:min-w-[64px] rounded-xl px-2 text-base',
+                    'h-11 sm:h-[52px] min-w-12 sm:min-w-16 rounded-lg px-1.5 sm:px-2 text-sm sm:text-base',
                     'hover:bg-primary-hover bg-primary text-primary-foreground shadow-sm',
                 )}
             >
@@ -715,7 +715,7 @@ function KeyboardKey({
             disabled={disabled}
             className={cn(
                 baseClasses,
-                'h-12 sm:h-[52px] min-w-[32px] sm:min-w-[36px] rounded-xl text-base',
+                'h-11 sm:h-[52px] flex-1 max-w-9 rounded-lg text-sm sm:text-base',
                 stateClasses[state ?? 'default'],
             )}
         >

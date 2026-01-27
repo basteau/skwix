@@ -213,7 +213,12 @@ export default function FortunePage({
     }, [canSpin, wager, triggerHaptic, rotation]);
 
     const adjustWager = (amount: number) => {
-        setWager((prev) => Math.max(0, Math.min(points, prev + amount)));
+        setWager((prev) => {
+            const newValue = prev + amount;
+            if (newValue < 1) return 1;
+            if (newValue > points) return points;
+            return newValue;
+        });
     };
 
     const setPresetWager = (preset: number) => {
@@ -837,9 +842,9 @@ export default function FortunePage({
                             <button
                                 onClick={() => {
                                     triggerHaptic('tick');
-                                    adjustWager(-10);
+                                    adjustWager(-1);
                                 }}
-                                disabled={isSpinning || wager < 10}
+                                disabled={isSpinning || wager <= 1}
                                 className="flex size-11 items-center justify-center rounded-full border-2 border-border bg-card text-lg font-bold text-foreground transition-all duration-150 hover:bg-muted active:scale-90 disabled:opacity-40"
                             >
                                 −
@@ -856,7 +861,7 @@ export default function FortunePage({
                             <button
                                 onClick={() => {
                                     triggerHaptic('tick');
-                                    adjustWager(10);
+                                    adjustWager(1);
                                 }}
                                 disabled={isSpinning || wager >= points}
                                 className="flex size-11 items-center justify-center rounded-full border-2 border-border bg-card text-lg font-bold text-foreground transition-all duration-150 hover:bg-muted active:scale-90 disabled:opacity-40"
