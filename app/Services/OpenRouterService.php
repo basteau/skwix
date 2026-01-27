@@ -217,7 +217,7 @@ PROMPT;
                     ],
                     'max_tokens' => 100,
                     'temperature' => 0.9,
-                    'reasoning' => ['effort' => 'none'],
+                    'reasoning' => ['effort' => 'minimal'],
                 ]);
 
             if ($response->successful()) {
