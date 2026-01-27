@@ -197,7 +197,7 @@ Regels:
 PROMPT;
 
         try {
-            $response = Http::timeout(15)
+            $response = Http::timeout(5)
                 ->withHeaders([
                     'Authorization' => 'Bearer '.$this->apiKey,
                     'Content-Type' => 'application/json',
@@ -209,9 +209,7 @@ PROMPT;
                     'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'reasoning' => [
-                        'effort' => 'medium',
-                    ],
+                    'max_tokens' => 500,
                     'temperature' => 0.9,
                 ]);
 
