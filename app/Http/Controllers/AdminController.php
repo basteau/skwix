@@ -313,6 +313,27 @@ class AdminController extends Controller
             ->with('success', $game->players->count().' uitnodigingen verstuurd');
     }
 
+    public function resendInvitation(Game $game, Player $player): RedirectResponse
+    {
+        if ($player->game_id !== $game->id) {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Speler hoort niet bij dit spel');
+        }
+
+        if ($game->status === 'completed') {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Spel is al beëindigd');
+        }
+
+        Mail::to($player->email)->queue(new GameInvitation($player, $game));
+
+        return redirect()
+            ->route('admin.game', $game)
+            ->with('success', 'Uitnodiging verstuurd naar '.$player->name);
+    }
+
     public function deleteGame(Game $game): RedirectResponse
     {
         if ($game->status !== 'completed') {

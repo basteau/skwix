@@ -118,6 +118,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/game/{game}', [AdminController::class, 'showGame'])->name('game');
     Route::put('/game/{game}/wordle-words', [AdminController::class, 'updateWordleWords'])->name('game.wordle-words');
     Route::post('/game/{game}/invite', [AdminController::class, 'invitePlayers'])->name('game.invite');
+    Route::post('/game/{game}/player/{player}/resend', [AdminController::class, 'resendInvitation'])->name('game.resend');
     Route::post('/game/{game}/end', [AdminController::class, 'endGame'])->name('game.end');
     Route::delete('/game/{game}', [AdminController::class, 'deleteGame'])->name('game.delete');
     Route::delete('/games', [AdminController::class, 'deleteAllGames'])->name('games.delete-all');

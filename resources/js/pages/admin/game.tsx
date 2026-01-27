@@ -83,6 +83,9 @@ export default function AdminGameDetail({ game, players }: Props) {
     const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(
         null,
     );
+    const [resendingPlayerId, setResendingPlayerId] = useState<number | null>(
+        null,
+    );
 
     useEffect(() => {
         const timers = validationTimers.current;
@@ -212,6 +215,20 @@ export default function AdminGameDetail({ game, players }: Props) {
             },
         );
     }, [game.id]);
+
+    const handleResendInvitation = useCallback(
+        (playerId: number) => {
+            setResendingPlayerId(playerId);
+            router.post(
+                `/admin/game/${game.id}/player/${playerId}/resend`,
+                {},
+                {
+                    onFinish: () => setResendingPlayerId(null),
+                },
+            );
+        },
+        [game.id],
+    );
 
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
     const endsAt = game.ends_at ? new Date(game.ends_at) : null;
@@ -574,8 +591,34 @@ export default function AdminGameDetail({ game, players }: Props) {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="shrink-0 font-mono text-xs text-muted-foreground">
-                                                {player.invite_code}
+                                            <div className="flex shrink-0 items-center gap-2">
+                                                <span className="font-mono text-xs text-muted-foreground">
+                                                    {player.invite_code}
+                                                </span>
+                                                {game.status !== 'completed' && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-7"
+                                                        onClick={() =>
+                                                            handleResendInvitation(
+                                                                player.id,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            resendingPlayerId ===
+                                                            player.id
+                                                        }
+                                                        title="Uitnodiging opnieuw versturen"
+                                                    >
+                                                        {resendingPlayerId ===
+                                                        player.id ? (
+                                                            <Loader2 className="size-4 animate-spin" />
+                                                        ) : (
+                                                            <Mail className="size-4" />
+                                                        )}
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                         {/* Stats row */}
