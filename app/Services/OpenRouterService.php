@@ -215,8 +215,9 @@ PROMPT;
                     'messages' => [
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'max_tokens' => 500,
+                    'max_tokens' => 100,
                     'temperature' => 0.9,
+                    'reasoning' => ['effort' => 'none'],
                 ]);
 
             if ($response->successful()) {
