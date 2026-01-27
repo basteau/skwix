@@ -224,9 +224,21 @@ PROMPT;
                 $wit = trim($data['choices'][0]['message']['content'] ?? '');
                 $wit = trim($wit, '"\'');
 
-                if (mb_strlen($wit) > 0 && mb_strlen($wit) <= 100) {
+                $len = mb_strlen($wit);
+                if ($len > 0 && $len <= 100) {
                     return $wit;
                 }
+
+                Log::warning('Boma wit rejected', [
+                    'wit' => $wit,
+                    'length' => $len,
+                    'reason' => $len === 0 ? 'empty' : 'too_long',
+                ]);
+            } else {
+                Log::warning('Boma wit API failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
             }
         } catch (\Exception $e) {
             Log::warning('Boma wit generation failed', ['error' => $e->getMessage()]);
