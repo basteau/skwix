@@ -5,13 +5,19 @@ import { PlayHeader } from '@/components/play-header';
 import { PlayerAvatar } from '@/components/player-avatar';
 
 import { Button } from '@/components/ui/button';
+import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 import { getInitials } from '@/hooks/use-initials';
+import {
+    NotificationItem,
+    useNotifications,
+} from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import {
     AlertTriangle,
     Check,
+    Lightbulb,
     RefreshCw,
     Search,
     Skull,
@@ -22,7 +28,6 @@ import {
     X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 
 interface QuestionItem {
     id: number;
@@ -56,6 +61,7 @@ interface Props {
     testMode?: { active: boolean; secretWord?: string };
     isAdmin?: boolean;
     revealedSabotagedIds?: number[];
+    notifications?: NotificationItem[];
 }
 
 const QUESTION_COST = 10;
@@ -85,6 +91,7 @@ export default function GuessPage({
     error,
     testMode,
     revealedSabotagedIds = [],
+    notifications: initialNotifications = [],
 }: Props) {
     const [questions, setQuestions] =
         useState<QuestionItem[]>(initialQuestions);
@@ -109,6 +116,12 @@ export default function GuessPage({
 
     // Track which questions are being retried
     const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
+
+    // Notifications toast display
+    useNotifications({
+        notifications: initialNotifications,
+        enabled: !testMode?.active,
+    });
 
     // Cooldown timer
     const { isOnCooldown, formatted: cooldownFormatted } = useCooldownTimer(
@@ -171,6 +184,7 @@ export default function GuessPage({
                         'questions',
                         'player',
                         'revealedSabotagedIds',
+                        'notifications',
                     ],
                 });
             }
@@ -461,7 +475,12 @@ export default function GuessPage({
                                         isSabotaged={sabotagedQuestionIds.includes(
                                             q.id,
                                         )}
-                                        onRetry={q.answer === 'failed' && q.player.id === player?.id ? () => handleRetry(q.id) : undefined}
+                                        onRetry={
+                                            q.answer === 'failed' &&
+                                            q.player.id === player?.id
+                                                ? () => handleRetry(q.id)
+                                                : undefined
+                                        }
                                         isRetrying={retryingIds.has(q.id)}
                                     />
                                 ))}

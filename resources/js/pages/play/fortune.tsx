@@ -4,6 +4,10 @@ import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 
 import { Button } from '@/components/ui/button';
+import {
+    NotificationItem,
+    useNotifications,
+} from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -50,6 +54,7 @@ interface Props {
     };
     recentSpins?: SpinRecord[];
     error?: string;
+    notifications?: NotificationItem[];
 }
 
 const SEGMENTS = 8;
@@ -65,7 +70,14 @@ export default function FortunePage({
     game,
     recentSpins: initialSpins = [],
     error,
+    notifications = [],
 }: Props) {
+    // Notifications toast display
+    useNotifications({
+        notifications,
+        enabled: !testMode?.active,
+    });
+
     const [points, setPoints] = useState(player?.points ?? 0);
     const [wager, setWager] = useState(0);
     const [isSpinning, setIsSpinning] = useState(false);
@@ -104,7 +116,7 @@ export default function FortunePage({
         }
 
         pollRef.current = setInterval(() => {
-            router.reload({ only: ['game', 'player'] });
+            router.reload({ only: ['game', 'player', 'notifications'] });
         }, POLL_INTERVAL);
 
         return () => {

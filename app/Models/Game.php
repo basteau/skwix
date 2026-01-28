@@ -61,4 +61,9 @@ class Game extends Model
     {
         return $this->hasMany(SpinResult::class);
     }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(GameNotification::class);
+    }
 }

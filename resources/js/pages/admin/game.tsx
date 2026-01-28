@@ -21,14 +21,20 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { toast } from '@/components/ui/sonner';
 import { getInitials } from '@/hooks/use-initials';
-import { cn } from '@/lib/utils';
+import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
 import {
     AlertTriangle,
+    Bell,
     CheckCircle2,
+    Lightbulb,
     Loader2,
     Mail,
+    Plus,
+    Power,
+    Trash2,
     XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -63,12 +69,24 @@ interface GameData {
     winner: { id: number; name: string } | null;
 }
 
+interface NotificationData {
+    id: number;
+    message: string;
+    is_active: boolean;
+    created_at: string;
+}
+
 interface Props {
     game: GameData;
     players: PlayerData[];
+    notifications: NotificationData[];
 }
 
-export default function AdminGameDetail({ game, players }: Props) {
+export default function AdminGameDetail({
+    game,
+    players,
+    notifications: initialNotifications,
+}: Props) {
     const [wordleWords, setWordleWords] = useState<string[]>(
         game.wordle_words.map((w) => w.toLowerCase()),
     );
@@ -86,6 +104,18 @@ export default function AdminGameDetail({ game, players }: Props) {
     const [resendingPlayerId, setResendingPlayerId] = useState<number | null>(
         null,
     );
+
+    // Notification state
+    const [notifications, setNotifications] =
+        useState<NotificationData[]>(initialNotifications);
+    const [newNotificationMessage, setNewNotificationMessage] = useState('');
+    const [isAddingNotification, setIsAddingNotification] = useState(false);
+    const [togglingNotificationId, setTogglingNotificationId] = useState<
+        number | null
+    >(null);
+    const [deletingNotificationId, setDeletingNotificationId] = useState<
+        number | null
+    >(null);
 
     useEffect(() => {
         const timers = validationTimers.current;
@@ -228,6 +258,119 @@ export default function AdminGameDetail({ game, players }: Props) {
             );
         },
         [game.id],
+    );
+
+    const handleAddNotification = useCallback(async () => {
+        if (!newNotificationMessage.trim() || isAddingNotification) return;
+
+        setIsAddingNotification(true);
+        try {
+            const response = await fetch(`/admin/game/${game.id}/notification`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({ message: newNotificationMessage.trim() }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setNotifications((prev) => [data.notification, ...prev]);
+                setNewNotificationMessage('');
+                toast.success('Notificatie toegevoegd');
+            } else {
+                toast.error(data.message || 'Er ging iets mis');
+            }
+        } catch {
+            toast.error('Verbinding mislukt');
+        } finally {
+            setIsAddingNotification(false);
+        }
+    }, [game.id, newNotificationMessage, isAddingNotification]);
+
+    const handleToggleNotification = useCallback(
+        async (notificationId: number) => {
+            if (togglingNotificationId) return;
+
+            setTogglingNotificationId(notificationId);
+            try {
+                const response = await fetch(
+                    `/admin/game/${game.id}/notification/${notificationId}/toggle`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            Accept: 'application/json',
+                        },
+                    },
+                );
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    setNotifications((prev) =>
+                        prev.map((n) =>
+                            n.id === notificationId
+                                ? { ...n, is_active: data.is_active }
+                                : n,
+                        ),
+                    );
+                    toast.success(
+                        data.is_active
+                            ? 'Notificatie geactiveerd'
+                            : 'Notificatie gedeactiveerd',
+                    );
+                } else {
+                    toast.error(data.message || 'Er ging iets mis');
+                }
+            } catch {
+                toast.error('Verbinding mislukt');
+            } finally {
+                setTogglingNotificationId(null);
+            }
+        },
+        [game.id, togglingNotificationId],
+    );
+
+    const handleDeleteNotification = useCallback(
+        async (notificationId: number) => {
+            if (deletingNotificationId) return;
+
+            setDeletingNotificationId(notificationId);
+            try {
+                const response = await fetch(
+                    `/admin/game/${game.id}/notification/${notificationId}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            Accept: 'application/json',
+                        },
+                    },
+                );
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    setNotifications((prev) =>
+                        prev.filter((n) => n.id !== notificationId),
+                    );
+                    toast.success('Notificatie verwijderd');
+                } else {
+                    toast.error(data.message || 'Er ging iets mis');
+                }
+            } catch {
+                toast.error('Verbinding mislukt');
+            } finally {
+                setDeletingNotificationId(null);
+            }
+        },
+        [game.id, deletingNotificationId],
     );
 
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
@@ -660,6 +803,175 @@ export default function AdminGameDetail({ game, players }: Props) {
                                 ))}
                             </div>
                         </section>
+
+                        {/* Notifications */}
+                        {game.status !== 'completed' && (
+                            <section className="rounded-lg border border-primary/30 bg-primary/5 p-6">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <Bell className="size-5 text-primary" />
+                                    <h2 className="text-lg font-semibold text-foreground">
+                                        Notificaties
+                                    </h2>
+                                </div>
+                                <p className="mb-4 text-sm text-muted-foreground">
+                                    Stuur een bericht naar alle spelers. Het
+                                    bericht wordt als toast getoond wanneer een
+                                    speler het spel opent.
+                                </p>
+
+                                {/* Add notification form */}
+                                <div className="mb-4 flex gap-2">
+                                    <Input
+                                        value={newNotificationMessage}
+                                        onChange={(e) =>
+                                            setNewNotificationMessage(
+                                                e.target.value,
+                                            )
+                                        }
+                                        placeholder="Typ je bericht hier..."
+                                        maxLength={500}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                e.key === 'Enter' &&
+                                                !e.shiftKey
+                                            ) {
+                                                e.preventDefault();
+                                                handleAddNotification();
+                                            }
+                                        }}
+                                    />
+                                    <Button
+                                        onClick={handleAddNotification}
+                                        disabled={
+                                            isAddingNotification ||
+                                            !newNotificationMessage.trim()
+                                        }
+                                        className="shrink-0 gap-2"
+                                    >
+                                        {isAddingNotification ? (
+                                            <Loader2 className="size-4 animate-spin" />
+                                        ) : (
+                                            <Plus className="size-4" />
+                                        )}
+                                        Versturen
+                                    </Button>
+                                </div>
+
+                                {/* Existing notifications */}
+                                {notifications.length > 0 && (
+                                    <div className="space-y-2">
+                                        {notifications.map((notification) => (
+                                            <div
+                                                key={notification.id}
+                                                className={cn(
+                                                    'flex items-start gap-3 rounded-lg border p-3',
+                                                    notification.is_active
+                                                        ? 'border-primary/30 bg-card'
+                                                        : 'border-border bg-muted/50 opacity-60',
+                                                )}
+                                            >
+                                                <Lightbulb
+                                                    className={cn(
+                                                        'mt-0.5 size-4 shrink-0',
+                                                        notification.is_active
+                                                            ? 'text-amber-500'
+                                                            : 'text-muted-foreground',
+                                                    )}
+                                                />
+                                                <div className="min-w-0 flex-1">
+                                                    <p
+                                                        className={cn(
+                                                            'text-sm',
+                                                            notification.is_active
+                                                                ? 'text-foreground'
+                                                                : 'text-muted-foreground',
+                                                        )}
+                                                    >
+                                                        {notification.message}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {new Date(
+                                                            notification.created_at,
+                                                        ).toLocaleString(
+                                                            'nl-BE',
+                                                            {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            },
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <div className="flex shrink-0 gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8"
+                                                        onClick={() =>
+                                                            handleToggleNotification(
+                                                                notification.id,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            togglingNotificationId ===
+                                                            notification.id
+                                                        }
+                                                        title={
+                                                            notification.is_active
+                                                                ? 'Deactiveren'
+                                                                : 'Activeren'
+                                                        }
+                                                    >
+                                                        {togglingNotificationId ===
+                                                        notification.id ? (
+                                                            <Loader2 className="size-4 animate-spin" />
+                                                        ) : (
+                                                            <Power
+                                                                className={cn(
+                                                                    'size-4',
+                                                                    notification.is_active
+                                                                        ? 'text-success'
+                                                                        : 'text-muted-foreground',
+                                                                )}
+                                                            />
+                                                        )}
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                        onClick={() =>
+                                                            handleDeleteNotification(
+                                                                notification.id,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            deletingNotificationId ===
+                                                            notification.id
+                                                        }
+                                                        title="Verwijderen"
+                                                    >
+                                                        {deletingNotificationId ===
+                                                        notification.id ? (
+                                                            <Loader2 className="size-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="size-4" />
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {notifications.length === 0 && (
+                                    <p className="text-center text-sm text-muted-foreground">
+                                        Nog geen notificaties verstuurd
+                                    </p>
+                                )}
+                            </section>
+                        )}
 
                         {/* End Game */}
                         {game.status !== 'completed' && (

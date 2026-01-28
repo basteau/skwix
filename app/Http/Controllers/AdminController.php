@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Mail\GameInvitation;
 use App\Models\Game;
+use App\Models\GameNotification;
 use App\Models\Player;
 use App\Models\User;
 use App\Services\GameEndedNotificationService;
 use App\Services\WordlistService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -201,7 +203,7 @@ class AdminController extends Controller
 
     public function showGame(Game $game): Response
     {
-        $game->load(['players', 'winner', 'wordleAttempts', 'spinResults', 'questions']);
+        $game->load(['players', 'winner', 'wordleAttempts', 'spinResults', 'questions', 'notifications']);
 
         $players = $game->players
             ->sortByDesc('points')
@@ -219,6 +221,16 @@ class AdminController extends Controller
                 'spins_count' => $game->spinResults->where('player_id', $player->id)->count(),
             ]);
 
+        $notifications = $game->notifications
+            ->sortByDesc('created_at')
+            ->values()
+            ->map(fn ($notification) => [
+                'id' => $notification->id,
+                'message' => $notification->message,
+                'is_active' => $notification->is_active,
+                'created_at' => $notification->created_at->toISOString(),
+            ]);
+
         return Inertia::render('admin/game', [
             'game' => [
                 'id' => $game->id,
@@ -234,6 +246,7 @@ class AdminController extends Controller
                 ] : null,
             ],
             'players' => $players,
+            'notifications' => $notifications,
         ]);
     }
 
@@ -397,5 +410,70 @@ class AdminController extends Controller
         $normalized = strtolower(trim($name));
 
         return in_array($normalized, $availableAvatars, true) ? $normalized : null;
+    }
+
+    public function storeNotification(Request $request, Game $game): JsonResponse
+    {
+        if ($game->status === 'completed') {
+            return response()->json([
+                'error' => 'game_completed',
+                'message' => 'Spel is al beëindigd',
+            ], 400);
+        }
+
+        $request->validate([
+            'message' => 'required|string|max:500',
+        ]);
+
+        $notification = GameNotification::create([
+            'game_id' => $game->id,
+            'message' => trim($request->message),
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'notification' => [
+                'id' => $notification->id,
+                'message' => $notification->message,
+                'is_active' => $notification->is_active,
+                'created_at' => $notification->created_at->toISOString(),
+            ],
+        ]);
+    }
+
+    public function toggleNotification(Game $game, GameNotification $notification): JsonResponse
+    {
+        if ($notification->game_id !== $game->id) {
+            return response()->json([
+                'error' => 'invalid_notification',
+                'message' => 'Notificatie hoort niet bij dit spel',
+            ], 400);
+        }
+
+        $notification->update([
+            'is_active' => ! $notification->is_active,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_active' => $notification->is_active,
+        ]);
+    }
+
+    public function deleteNotification(Game $game, GameNotification $notification): JsonResponse
+    {
+        if ($notification->game_id !== $game->id) {
+            return response()->json([
+                'error' => 'invalid_notification',
+                'message' => 'Notificatie hoort niet bij dit spel',
+            ], 400);
+        }
+
+        $notification->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

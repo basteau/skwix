@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GameNotification;
 use App\Models\WordleAttempt;
 use App\Services\GameService;
 use App\Services\TestGameService;
@@ -49,6 +50,9 @@ class WordleController extends Controller
 
         $isAvailable = $this->gameService->isWordleAvailable($game);
 
+        // Get active notifications that the player hasn't dismissed
+        $notifications = GameNotification::getActiveForPlayer($player);
+
         return Inertia::render('play/wordle', [
             'player' => [
                 'id' => $player->id,
@@ -70,6 +74,7 @@ class WordleController extends Controller
                 'target_word' => $todayAttempt?->completed ? $targetWord : null,
                 'next_unlock_at' => ! $isAvailable ? $this->gameService->getNextWordleUnlockTime($game)->toISOString() : null,
             ],
+            'notifications' => $notifications,
         ]);
     }
 

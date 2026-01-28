@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GameNotification;
 use App\Models\SpinResult;
 use App\Services\TestGameService;
 use Illuminate\Http\JsonResponse;
@@ -47,6 +48,9 @@ class FortuneController extends Controller
                 'created_at' => $spin->created_at->toISOString(),
             ]);
 
+        // Get active notifications that the player hasn't dismissed
+        $notifications = GameNotification::getActiveForPlayer($player);
+
         return Inertia::render('play/fortune', [
             'player' => [
                 'id' => $player->id,
@@ -58,6 +62,7 @@ class FortuneController extends Controller
                 'status' => $game->status,
             ],
             'recentSpins' => $recentSpins,
+            'notifications' => $notifications,
         ]);
     }
 
