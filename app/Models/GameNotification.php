@@ -39,4 +39,25 @@ class GameNotification extends Model
     {
         return $this->dismissedByPlayers()->where('player_id', $player->id)->exists();
     }
+
+    /**
+     * Get active notifications for a player that haven't been dismissed.
+     * Returns formatted array ready for Inertia response.
+     *
+     * @return array<int, array{id: int, message: string, created_at: string}>
+     */
+    public static function getActiveForPlayer(Player $player): array
+    {
+        return static::where('game_id', $player->game_id)
+            ->where('is_active', true)
+            ->whereDoesntHave('dismissedByPlayers', fn ($q) => $q->where('player_id', $player->id))
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'message' => $n->message,
+                'created_at' => $n->created_at->toISOString(),
+            ])
+            ->toArray();
+    }
 }

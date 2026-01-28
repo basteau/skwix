@@ -49,16 +49,7 @@ class FortuneController extends Controller
             ]);
 
         // Get active notifications that the player hasn't dismissed
-        $notifications = GameNotification::where('game_id', $game->id)
-            ->where('is_active', true)
-            ->whereDoesntHave('dismissedByPlayers', fn ($q) => $q->where('player_id', $player->id))
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn ($n) => [
-                'id' => $n->id,
-                'message' => $n->message,
-                'created_at' => $n->created_at->toISOString(),
-            ]);
+        $notifications = GameNotification::getActiveForPlayer($player);
 
         return Inertia::render('play/fortune', [
             'player' => [

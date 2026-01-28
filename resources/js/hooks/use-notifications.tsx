@@ -47,6 +47,20 @@ function markNotificationAsShown(id: number): void {
 }
 
 /**
+ * Clean up sessionStorage by removing IDs that are no longer active.
+ * This prevents unbounded growth of stored IDs.
+ */
+function cleanupShownIds(activeIds: Set<number>): void {
+    try {
+        const shown = getShownNotificationIds();
+        const cleaned = [...shown].filter((id) => activeIds.has(id));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+    } catch {
+        // Ignore storage errors
+    }
+}
+
+/**
  * Hook to display notification toasts on play pages.
  * Shows toast for each notification, with "Begrepen" button for server-side dismissal.
  * Uses sessionStorage to prevent duplicate toasts when switching between pages.
@@ -76,6 +90,10 @@ export function useNotifications({
         if (!enabled) return;
 
         const shownIds = getShownNotificationIds();
+        const activeIds = new Set(notifications.map((n) => n.id));
+
+        // Clean up old IDs that are no longer active (prevents unbounded growth)
+        cleanupShownIds(activeIds);
 
         notifications.forEach((notification) => {
             if (!shownIds.has(notification.id)) {
