@@ -120,12 +120,9 @@ export default function GuessPage({
     // Track which questions are being retried
     const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
 
-    // Notifications state
+    // Notifications state (for toast display)
     const [notifications, setNotifications] =
         useState<NotificationItem[]>(initialNotifications);
-    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<
-        Set<number>
-    >(new Set());
     const toastShownRef = useRef<Set<number>>(new Set());
 
     // Cooldown timer
@@ -159,29 +156,6 @@ export default function GuessPage({
     useEffect(() => {
         setSabotagedQuestionIds(revealedSabotagedIds);
     }, [revealedSabotagedIds]);
-
-    const handleDismissNotification = useCallback(
-        async (notificationId: number) => {
-            // Optimistically remove from UI
-            setDismissedNotificationIds((prev) =>
-                new Set(prev).add(notificationId),
-            );
-
-            try {
-                await fetch(`/play/notification/${notificationId}/dismiss`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken(),
-                        Accept: 'application/json',
-                    },
-                });
-            } catch {
-                // Silently fail - notification will reappear on next poll if not saved
-            }
-        },
-        [],
-    );
 
     const canAsk =
         points >= QUESTION_COST && input.trim().length >= 3 && !isOnCooldown;
@@ -499,11 +473,7 @@ export default function GuessPage({
                     className="relative flex-1 overflow-y-auto"
                     style={{ paddingBottom: inputAreaHeight }}
                 >
-                    {questions.length === 0 &&
-                    !pendingQuestion &&
-                    notifications.filter(
-                        (n) => !dismissedNotificationIds.has(n.id),
-                    ).length === 0 ? (
+                    {questions.length === 0 && !pendingQuestion ? (
                         <EmptyState
                             questionsRemaining={questionsRemaining}
                             onSelectHint={(text) => {
@@ -514,23 +484,6 @@ export default function GuessPage({
                     ) : (
                         <div data-testid="guess-history" className="px-4 py-4">
                             <div className="space-y-3">
-                                {/* Active notifications */}
-                                {notifications
-                                    .filter(
-                                        (n) =>
-                                            !dismissedNotificationIds.has(n.id),
-                                    )
-                                    .map((notification) => (
-                                        <NotificationBubble
-                                            key={`notification-${notification.id}`}
-                                            notification={notification}
-                                            onDismiss={() =>
-                                                handleDismissNotification(
-                                                    notification.id,
-                                                )
-                                            }
-                                        />
-                                    ))}
                                 {questions.map((q, idx) => (
                                     <QuestionBubble
                                         key={q.id}
@@ -790,63 +743,6 @@ function PendingBubble({
                 <div className="rounded-2xl rounded-bl-sm bg-muted/80 px-4 py-2.5 text-sm text-muted-foreground">
                     <ThinkingDots />
                 </div>
-            </div>
-        </div>
-    );
-}
-
-function NotificationBubble({
-    notification,
-    onDismiss,
-}: {
-    notification: NotificationItem;
-    onDismiss: () => void;
-}) {
-    return (
-        <div
-            className={cn(
-                'animate-in fade-in-0 slide-in-from-top-2 duration-300',
-                'relative overflow-hidden rounded-xl',
-                'bg-gradient-to-br from-amber-50 via-amber-100/80 to-amber-50',
-                'border border-amber-200/60',
-                'shadow-md shadow-amber-100/50',
-            )}
-        >
-            {/* Decorative glow */}
-            <div className="absolute -top-6 -right-6 size-20 rounded-full bg-amber-300/20 blur-xl" />
-
-            <div className="relative flex items-start gap-3 p-4">
-                {/* Icon */}
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-sm">
-                    <Lightbulb className="size-5 text-white" />
-                </div>
-
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium leading-relaxed text-amber-900">
-                        {notification.message}
-                    </p>
-                    <p className="mt-1.5 text-xs text-amber-600/80">
-                        {new Date(notification.created_at).toLocaleString(
-                            'nl-BE',
-                            {
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            },
-                        )}
-                    </p>
-                </div>
-
-                {/* Dismiss button */}
-                <button
-                    onClick={onDismiss}
-                    className="shrink-0 rounded-full p-1.5 text-amber-500/70 transition-colors hover:bg-amber-200/50 hover:text-amber-700"
-                    aria-label="Bericht sluiten"
-                >
-                    <X className="size-4" />
-                </button>
             </div>
         </div>
     );
