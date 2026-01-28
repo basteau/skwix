@@ -179,6 +179,10 @@ PROMPT;
             ? 'Wees SUPER enthousiast, dit is een groot moment! Gebruik uitroeptekens!'
             : 'Wees gevat en grappig.';
 
+        // Get random examples for this answer type to increase response variety
+        $examples = $this->getRandomBomaExamples($answerType, 3);
+        $examplesText = implode("\n", array_map(fn ($e) => "- \"{$e}\"", $examples));
+
         $prompt = <<<PROMPT
 Gij zijt Balthazar Boma van FC De Kampioenen - de praatjesmaker met de gouden tong.
 
@@ -186,13 +190,11 @@ SITUATIE: Een raadspelletje. {$questionContext}
 Het antwoord is: {$answerMeaning}
 
 Geef een korte, gevatte reactie in Boma-stijl. Spreek de speler direct aan (gij/ge).
+Gebruik Vlaams dialect (manneke, jong, pansen, allee, awel, zeg, hé, etc.).
+Wees ORIGINEEL - kopieer de voorbeelden NIET letterlijk, verzin iets nieuws!
 
-BOMA-STIJL VOORBEELDEN:
-- "Manneke toch, da wist ik al lang!"
-- "Awel ja, ge zijt ni dom hé!"  
-- "Nee jong, totaal ernaast!"
-- "Tss, da kunde toch zien!"
-- "Gij hebt er geen flauw benul van hé"
+INSPIRATIE VOOR DEZE STIJL:
+{$examplesText}
 
 {$extraInstruction}
 
@@ -200,6 +202,7 @@ STRENGE REGELS:
 - Maximum 60 karakters
 - VERBODEN: Verklap nooit het geheime woord of hints erover
 - Alleen de one-liner, geen uitleg of aanhalingstekens
+- NIET letterlijk de voorbeelden kopiëren!
 PROMPT;
 
         try {
@@ -254,6 +257,75 @@ PROMPT;
         'unknown' => 'Onduidelijk',
         'winner' => 'Correct, goed geraden!',
     ];
+
+    /**
+     * Boma-style example phrases per answer type for wit generation.
+     * A random subset is selected each time to increase response variety.
+     */
+    private const BOMA_EXAMPLES = [
+        'yes' => [
+            'Awel ja, ge zijt ni dom hé!',
+            'Manneke toch, da wist ik al lang!',
+            'Juist! Gij hebt er verstand van!',
+            'Ja jong, da klopt als een bus!',
+            'Voilà, eindelijk iemand die het snapt!',
+            'Ge zijt goed bezig, chapeau!',
+            'Correct! Ik ben onder de indruk!',
+            'Da\'s het, ge wordt er beter in!',
+            'Proficiat, ge hebt gelijk!',
+            'Zie je wel, \'t is nie zo moeilijk hé!',
+        ],
+        'no' => [
+            'Nee jong, totaal ernaast!',
+            'Tss, da kunde toch zien!',
+            'Neenee, zo zit da nie!',
+            'Mis pansen, probeer opnieuw!',
+            'Allee kom, da\'s toch dansen op een slak!',
+            'Fout! Peist nog eens na!',
+            'Helaas pansen, nie correct!',
+            'Nee hé, ge zijt er nogal naast!',
+            'Dat slaat nergens op jong!',
+            'Jamaar zeg, wablieft?!',
+        ],
+        'unknown' => [
+            'Gij hebt er geen flauw benul van hé',
+            'Tja, da kan ik zo nie zeggen...',
+            'Euh, da\'s een beetje vaag hé!',
+            'Daar kan ik niks mee jong!',
+            'Manneke, stel een betere vraag!',
+            'Allee, wat voor vraag is da nu?',
+            'Hmmm, da\'s nie zo simpel...',
+            'Ge moet specifieker zijn!',
+            'Ja of nee? Daar zit iets tussen!',
+            'Da\'s me nogal een vraag zeg!',
+        ],
+        'winner' => [
+            'JAAAAA! Ge hebt het! Fenomenaal!',
+            'GEWONNEN! Wa een kampioen zijt gij!',
+            'Proficiat jong! Ge zijt een topper!',
+            'BINGO! Da was prachtwerk!',
+            'Fantastisch! Gij zijt de max!',
+            'JAWADDE! Proper gedaan!',
+            'Ongelooflijk! Gij zijt een genie!',
+            'VICTORIE! Wat een prestatie!',
+            'Prachtig! Da was van klasse!',
+            'Fantastisch geraden, proficiat!',
+        ],
+    ];
+
+    /**
+     * Get random Boma-style examples for prompt variation.
+     *
+     * @param  int  $count  Number of examples to return
+     */
+    private function getRandomBomaExamples(string $answerType, int $count = 3): array
+    {
+        $examples = self::BOMA_EXAMPLES[$answerType] ?? self::BOMA_EXAMPLES['yes'];
+        $shuffled = $examples;
+        shuffle($shuffled);
+
+        return array_slice($shuffled, 0, min($count, count($shuffled)));
+    }
 
     private function parseAnswer(string $rawAnswer): string
     {
