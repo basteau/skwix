@@ -15,12 +15,32 @@ interface UseNotificationsOptions {
 }
 
 /**
- * Module-level set to track shown notification IDs.
- * Resets on full page refresh but persists during SPA navigation.
- * This ensures toasts show again on refresh, but only clicking
- * "Begrepen" permanently dismisses via server-side tracking.
+ * Track shown notification IDs per page session.
+ * Uses a unique session ID that changes on every full page load,
+ * ensuring toasts show again after refresh while preventing
+ * duplicates during SPA navigation. Only clicking "Begrepen"
+ * permanently dismisses via server-side tracking.
  */
-const shownNotificationIds = new Set<number>();
+const pageSessionId = Date.now().toString();
+const shownNotificationIds = new Set<string>();
+
+// Clear on bfcache restore (back/forward navigation)
+if (typeof window !== 'undefined') {
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            shownNotificationIds.clear();
+        }
+    });
+}
+
+/**
+ * Create a session-scoped key for tracking shown notifications.
+ * This ensures the Set effectively resets on page refresh since
+ * the pageSessionId changes with each full page load.
+ */
+function getNotificationKey(notificationId: number): string {
+    return `${pageSessionId}-${notificationId}`;
+}
 
 /**
  * Hook to display notification toasts on play pages.
@@ -53,9 +73,10 @@ export function useNotifications({
         if (!enabled) return;
 
         notifications.forEach((notification) => {
-            if (!shownNotificationIds.has(notification.id)) {
+            const key = getNotificationKey(notification.id);
+            if (!shownNotificationIds.has(key)) {
                 // Mark as shown immediately to prevent duplicates during SPA navigation
-                shownNotificationIds.add(notification.id);
+                shownNotificationIds.add(key);
 
                 toast(notification.message, {
                     id: `notification-${notification.id}`, // Unique toast ID prevents duplicates
