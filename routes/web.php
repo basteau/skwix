@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::get('players', [PlayersController::class, 'show'])->name('players');
         Route::post('sabotage', [SabotageController::class, 'place'])->name('sabotage.place');
         Route::post('sabotage/reveal', [SabotageController::class, 'reveal'])->name('sabotage.reveal');
+        Route::post('notification/{notification}/dismiss', [\App\Http\Controllers\NotificationController::class, 'dismiss'])->name('notification.dismiss');
     });
 });
 
@@ -122,6 +123,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/game/{game}/end', [AdminController::class, 'endGame'])->name('game.end');
     Route::delete('/game/{game}', [AdminController::class, 'deleteGame'])->name('game.delete');
     Route::delete('/games', [AdminController::class, 'deleteAllGames'])->name('games.delete-all');
+
+    // Notification routes
+    Route::post('/game/{game}/notification', [AdminController::class, 'storeNotification'])->name('game.notification.store');
+    Route::patch('/game/{game}/notification/{notification}/toggle', [AdminController::class, 'toggleNotification'])->name('game.notification.toggle');
+    Route::delete('/game/{game}/notification/{notification}', [AdminController::class, 'deleteNotification'])->name('game.notification.delete');
 });
 
 // Test Game Mode (admin only, ephemeral)

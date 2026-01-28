@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GameNotification;
 use App\Models\Question;
 use App\Services\GameService;
 use App\Services\OpenRouterService;
@@ -63,6 +64,18 @@ class GuessController extends Controller
         // Get revealed sabotaged question IDs for this player
         $revealedSabotagedIds = $this->sabotageService->getRevealedSabotagedQuestionIds($player);
 
+        // Get active notifications that the player hasn't dismissed
+        $notifications = GameNotification::where('game_id', $game->id)
+            ->where('is_active', true)
+            ->whereDoesntHave('dismissedByPlayers', fn ($q) => $q->where('player_id', $player->id))
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'message' => $n->message,
+                'created_at' => $n->created_at->toISOString(),
+            ]);
+
         return Inertia::render('play/guess', [
             'player' => [
                 'id' => $player->id,
@@ -80,6 +93,7 @@ class GuessController extends Controller
             'questions' => $questions,
             'isAdmin' => $user->is_admin,
             'revealedSabotagedIds' => $revealedSabotagedIds,
+            'notifications' => $notifications,
         ]);
     }
 

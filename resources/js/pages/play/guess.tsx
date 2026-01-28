@@ -5,6 +5,8 @@ import { PlayHeader } from '@/components/play-header';
 import { PlayerAvatar } from '@/components/player-avatar';
 
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/sonner';
+import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 import { getInitials } from '@/hooks/use-initials';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
@@ -12,6 +14,7 @@ import { Head, router } from '@inertiajs/react';
 import {
     AlertTriangle,
     Check,
+    Lightbulb,
     RefreshCw,
     Search,
     Skull,
@@ -22,7 +25,12 @@ import {
     X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
+
+interface NotificationItem {
+    id: number;
+    message: string;
+    created_at: string;
+}
 
 interface QuestionItem {
     id: number;
@@ -56,6 +64,7 @@ interface Props {
     testMode?: { active: boolean; secretWord?: string };
     isAdmin?: boolean;
     revealedSabotagedIds?: number[];
+    notifications?: NotificationItem[];
 }
 
 const QUESTION_COST = 10;
@@ -85,6 +94,7 @@ export default function GuessPage({
     error,
     testMode,
     revealedSabotagedIds = [],
+    notifications: initialNotifications = [],
 }: Props) {
     const [questions, setQuestions] =
         useState<QuestionItem[]>(initialQuestions);
@@ -110,15 +120,68 @@ export default function GuessPage({
     // Track which questions are being retried
     const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
 
+    // Notifications state
+    const [notifications, setNotifications] =
+        useState<NotificationItem[]>(initialNotifications);
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<
+        Set<number>
+    >(new Set());
+    const toastShownRef = useRef<Set<number>>(new Set());
+
     // Cooldown timer
     const { isOnCooldown, formatted: cooldownFormatted } = useCooldownTimer(
         player?.cooldown_remaining ?? 0,
     );
 
+    // Show toast for new notifications on mount/update
+    useEffect(() => {
+        if (testMode?.active) return;
+
+        notifications.forEach((notification) => {
+            if (!toastShownRef.current.has(notification.id)) {
+                toastShownRef.current.add(notification.id);
+                toast(notification.message, {
+                    icon: <Lightbulb className="size-5 text-amber-500" />,
+                    duration: 8000,
+                    className:
+                        'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700/30',
+                });
+            }
+        });
+    }, [notifications, testMode?.active]);
+
+    // Sync notifications from server (on poll updates)
+    useEffect(() => {
+        setNotifications(initialNotifications);
+    }, [initialNotifications]);
+
     // Sync revealed sabotage IDs from server (on poll updates)
     useEffect(() => {
         setSabotagedQuestionIds(revealedSabotagedIds);
     }, [revealedSabotagedIds]);
+
+    const handleDismissNotification = useCallback(
+        async (notificationId: number) => {
+            // Optimistically remove from UI
+            setDismissedNotificationIds((prev) =>
+                new Set(prev).add(notificationId),
+            );
+
+            try {
+                await fetch(`/play/notification/${notificationId}/dismiss`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                        Accept: 'application/json',
+                    },
+                });
+            } catch {
+                // Silently fail - notification will reappear on next poll if not saved
+            }
+        },
+        [],
+    );
 
     const canAsk =
         points >= QUESTION_COST && input.trim().length >= 3 && !isOnCooldown;
@@ -171,6 +234,7 @@ export default function GuessPage({
                         'questions',
                         'player',
                         'revealedSabotagedIds',
+                        'notifications',
                     ],
                 });
             }
@@ -435,7 +499,11 @@ export default function GuessPage({
                     className="relative flex-1 overflow-y-auto"
                     style={{ paddingBottom: inputAreaHeight }}
                 >
-                    {questions.length === 0 && !pendingQuestion ? (
+                    {questions.length === 0 &&
+                    !pendingQuestion &&
+                    notifications.filter(
+                        (n) => !dismissedNotificationIds.has(n.id),
+                    ).length === 0 ? (
                         <EmptyState
                             questionsRemaining={questionsRemaining}
                             onSelectHint={(text) => {
@@ -446,6 +514,23 @@ export default function GuessPage({
                     ) : (
                         <div data-testid="guess-history" className="px-4 py-4">
                             <div className="space-y-3">
+                                {/* Active notifications */}
+                                {notifications
+                                    .filter(
+                                        (n) =>
+                                            !dismissedNotificationIds.has(n.id),
+                                    )
+                                    .map((notification) => (
+                                        <NotificationBubble
+                                            key={`notification-${notification.id}`}
+                                            notification={notification}
+                                            onDismiss={() =>
+                                                handleDismissNotification(
+                                                    notification.id,
+                                                )
+                                            }
+                                        />
+                                    ))}
                                 {questions.map((q, idx) => (
                                     <QuestionBubble
                                         key={q.id}
@@ -461,7 +546,12 @@ export default function GuessPage({
                                         isSabotaged={sabotagedQuestionIds.includes(
                                             q.id,
                                         )}
-                                        onRetry={q.answer === 'failed' && q.player.id === player?.id ? () => handleRetry(q.id) : undefined}
+                                        onRetry={
+                                            q.answer === 'failed' &&
+                                            q.player.id === player?.id
+                                                ? () => handleRetry(q.id)
+                                                : undefined
+                                        }
                                         isRetrying={retryingIds.has(q.id)}
                                     />
                                 ))}
@@ -700,6 +790,63 @@ function PendingBubble({
                 <div className="rounded-2xl rounded-bl-sm bg-muted/80 px-4 py-2.5 text-sm text-muted-foreground">
                     <ThinkingDots />
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function NotificationBubble({
+    notification,
+    onDismiss,
+}: {
+    notification: NotificationItem;
+    onDismiss: () => void;
+}) {
+    return (
+        <div
+            className={cn(
+                'animate-in fade-in-0 slide-in-from-top-2 duration-300',
+                'relative overflow-hidden rounded-xl',
+                'bg-gradient-to-br from-amber-50 via-amber-100/80 to-amber-50',
+                'border border-amber-200/60',
+                'shadow-md shadow-amber-100/50',
+            )}
+        >
+            {/* Decorative glow */}
+            <div className="absolute -top-6 -right-6 size-20 rounded-full bg-amber-300/20 blur-xl" />
+
+            <div className="relative flex items-start gap-3 p-4">
+                {/* Icon */}
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-sm">
+                    <Lightbulb className="size-5 text-white" />
+                </div>
+
+                {/* Content */}
+                <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium leading-relaxed text-amber-900">
+                        {notification.message}
+                    </p>
+                    <p className="mt-1.5 text-xs text-amber-600/80">
+                        {new Date(notification.created_at).toLocaleString(
+                            'nl-BE',
+                            {
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            },
+                        )}
+                    </p>
+                </div>
+
+                {/* Dismiss button */}
+                <button
+                    onClick={onDismiss}
+                    className="shrink-0 rounded-full p-1.5 text-amber-500/70 transition-colors hover:bg-amber-200/50 hover:text-amber-700"
+                    aria-label="Bericht sluiten"
+                >
+                    <X className="size-4" />
+                </button>
             </div>
         </div>
     );
