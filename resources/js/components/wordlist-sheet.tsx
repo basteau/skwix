@@ -158,6 +158,7 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
 
     const clearSearch = () => {
         setSearch('');
+        setDebouncedSearch('');
         inputRef.current?.focus();
     };
 
