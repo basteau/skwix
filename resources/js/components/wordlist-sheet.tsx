@@ -75,39 +75,37 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     }, [open]);
 
     const toggleMustContain = (letter: string) => {
-        setMustContain((prev) => {
-            const next = new Set(prev);
-            if (next.has(letter)) {
+        if (mustContain.has(letter)) {
+            setMustContain((prev) => {
+                const next = new Set(prev);
                 next.delete(letter);
-            } else {
-                next.add(letter);
-                // Remove from mustNotContain if present
-                setMustNotContain((prevNot) => {
-                    const nextNot = new Set(prevNot);
-                    nextNot.delete(letter);
-                    return nextNot;
-                });
-            }
-            return next;
-        });
+                return next;
+            });
+        } else {
+            setMustContain((prev) => new Set(prev).add(letter));
+            setMustNotContain((prev) => {
+                const next = new Set(prev);
+                next.delete(letter);
+                return next;
+            });
+        }
     };
 
     const toggleMustNotContain = (letter: string) => {
-        setMustNotContain((prev) => {
-            const next = new Set(prev);
-            if (next.has(letter)) {
+        if (mustNotContain.has(letter)) {
+            setMustNotContain((prev) => {
+                const next = new Set(prev);
                 next.delete(letter);
-            } else {
-                next.add(letter);
-                // Remove from mustContain if present
-                setMustContain((prevCont) => {
-                    const nextCont = new Set(prevCont);
-                    nextCont.delete(letter);
-                    return nextCont;
-                });
-            }
-            return next;
-        });
+                return next;
+            });
+        } else {
+            setMustNotContain((prev) => new Set(prev).add(letter));
+            setMustContain((prev) => {
+                const next = new Set(prev);
+                next.delete(letter);
+                return next;
+            });
+        }
     };
 
     const clearFilters = () => {
@@ -115,7 +113,7 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
         setMustNotContain(new Set());
     };
 
-    const filteredWords = useMemo(() => {
+    const { filteredWords, totalMatches } = useMemo(() => {
         let filtered = words;
 
         // Apply text search
@@ -124,44 +122,26 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
             filtered = filtered.filter((word) => word.includes(searchLower));
         }
 
-        // Apply mustContain filter
+        // Apply mustContain filter - convert Set to Array once
         if (mustContain.size > 0) {
+            const containLetters = [...mustContain];
             filtered = filtered.filter((word) =>
-                [...mustContain].every((letter) => word.includes(letter)),
+                containLetters.every((letter) => word.includes(letter)),
             );
         }
 
-        // Apply mustNotContain filter
+        // Apply mustNotContain filter - convert Set to Array once
         if (mustNotContain.size > 0) {
+            const excludeLetters = [...mustNotContain];
             filtered = filtered.filter((word) =>
-                [...mustNotContain].every((letter) => !word.includes(letter)),
+                excludeLetters.every((letter) => !word.includes(letter)),
             );
         }
 
-        return filtered.slice(0, MAX_DISPLAYED_WORDS);
-    }, [words, search, mustContain, mustNotContain]);
-
-    const totalMatches = useMemo(() => {
-        let filtered = words;
-
-        if (search.trim()) {
-            const searchLower = search.toLowerCase().trim();
-            filtered = filtered.filter((word) => word.includes(searchLower));
-        }
-
-        if (mustContain.size > 0) {
-            filtered = filtered.filter((word) =>
-                [...mustContain].every((letter) => word.includes(letter)),
-            );
-        }
-
-        if (mustNotContain.size > 0) {
-            filtered = filtered.filter((word) =>
-                [...mustNotContain].every((letter) => !word.includes(letter)),
-            );
-        }
-
-        return filtered.length;
+        return {
+            filteredWords: filtered.slice(0, MAX_DISPLAYED_WORDS),
+            totalMatches: filtered.length,
+        };
     }, [words, search, mustContain, mustNotContain]);
 
     const clearSearch = () => {
@@ -422,7 +402,6 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                                     word={word}
                                     highlight={search}
                                     mustContain={mustContain}
-                                    mustNotContain={mustNotContain}
                                 />
                             ))}
                         </div>
@@ -453,6 +432,8 @@ function LetterGrid({ selected, onToggle, variant, disabled }: LetterGridProps) 
                         type="button"
                         onClick={() => onToggle(letter)}
                         disabled={isDisabled}
+                        aria-pressed={isSelected}
+                        aria-label={`${letter.toUpperCase()}${isSelected ? (variant === 'contain' ? ' (bevat)' : ' (bevat niet)') : ''}`}
                         className={cn(
                             'flex size-8 items-center justify-center rounded-md text-sm font-semibold uppercase transition-all',
                             'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
@@ -480,7 +461,6 @@ interface WordItemProps {
     word: string;
     highlight: string;
     mustContain: Set<string>;
-    mustNotContain: Set<string>;
 }
 
 function WordItem({ word, highlight, mustContain }: WordItemProps) {
