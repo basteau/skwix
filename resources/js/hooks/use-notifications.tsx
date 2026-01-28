@@ -79,7 +79,7 @@ export function useNotifications({
                 shownNotificationIds.add(key);
 
                 toast(notification.message, {
-                    id: `notification-${notification.id}`, // Unique toast ID prevents duplicates
+                    id: `notification-${pageSessionId}-${notification.id}`, // Session-scoped to allow re-show after refresh
                     icon: <Lightbulb className="size-5 text-amber-500" />,
                     duration: 8000,
                     className:
