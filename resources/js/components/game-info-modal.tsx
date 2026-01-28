@@ -6,9 +6,10 @@ import {
     DialogDescription,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { openExternalUrl } from '@/lib/pwa';
 
 import { Snowflake, Timer, X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 
 const SNOWFLAKES = Array.from({ length: 6 }).map((_, i) => ({
     left: 10 + ((i * 14) % 80),
@@ -158,9 +159,11 @@ export const WORDLE_INFO: GameInfoContent = {
         <p className="mt-4 text-[10px] text-muted-foreground/60">
             Woordenlijst gebaseerd op{' '}
             <a
-                href={`/woordenlijst.txt?v=${Date.now()}`}
-                target="_blank"
-                rel="noopener"
+                href="/woordenlijst.txt"
+                onClick={(e: MouseEvent<HTMLAnchorElement>) => {
+                    e.preventDefault();
+                    openExternalUrl('/woordenlijst.txt');
+                }}
                 className="underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
             >
                 originele Wordle woordenlijst
