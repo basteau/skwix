@@ -35,7 +35,7 @@
                     <!-- Header - Playful Winter Banner -->
                     <tr>
                         <td style="padding: 0;">
-                            <table role="presentation" style="width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #3b6eb5 0%, #2a5298 50%, #1e3a6e 100%);">
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #3b6eb5; background: linear-gradient(135deg, #3b6eb5 0%, #2a5298 50%, #1e3a6e 100%);">
                                 <tr>
                                     <td style="padding: 36px 24px 30px; text-align: center;">
                                         <!-- Snowflake cluster -->
@@ -75,11 +75,11 @@
                             @endif
 
                             <!-- Greeting -->
-                            <p class="text-primary" style="margin: 0 0 20px; font-size: 17px; line-height: 1.5; color: #1e293b;{{ $avatarUrl ? ' text-align: center;' : '' }}">
+                            <p class="text-primary" style="margin: 0 0 20px; font-size: 17px; line-height: 1.5;{{ $avatarUrl ? ' text-align: center;' : '' }}">
                                 Hoi <strong>{{ $playerName }}</strong>! 👋
                             </p>
-                            
-                            <p class="text-secondary" style="margin: 0 0 28px; font-size: 15px; line-height: 1.65; color: #475569;">
+
+                            <p class="text-secondary" style="margin: 0 0 28px; font-size: 15px; line-height: 1.65;">
                                 Je bent uitgenodigd voor een potje Skwix – los puzzels op, stel vragen en draai aan het rad. Wie als eerste het geheime woord raadt wint!
                             </p>
 
@@ -97,7 +97,7 @@
                                                     <p class="text-muted" style="margin: 0 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">
                                                         Het spel start op:
                                                     </p>
-                                                    <p class="text-primary" style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b;">
+                                                    <p class="text-primary" style="margin: 0; font-size: 15px; font-weight: 600;">
                                                         {{ $startsAt }}
                                                     </p>
                                                 </td>
@@ -111,7 +111,7 @@
                             <!-- Invite Code - Focal Point -->
                             <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
                                 <tr>
-                                    <td style="padding: 28px 20px; background: linear-gradient(145deg, #3b6eb5 0%, #2a5298 100%); border-radius: 16px; text-align: center;">
+                                    <td style="padding: 28px 20px; background-color: #3b6eb5; background: linear-gradient(145deg, #3b6eb5 0%, #2a5298 100%); border-radius: 16px; text-align: center;">
                                         <p style="margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.7); font-weight: 600;">
                                             Jouw code
                                         </p>
@@ -126,7 +126,7 @@
                             <table role="presentation" style="width: 100%; border-collapse: collapse;">
                                 <tr>
                                     <td align="center" style="padding: 0 0 20px;">
-                                        <a href="{{ $loginUrl }}" style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #3b6eb5 0%, #2a5298 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 12px rgba(59, 110, 181, 0.35); letter-spacing: 0.3px;">
+                                        <a href="{{ $loginUrl }}" style="display: inline-block; padding: 16px 48px; background-color: #3b6eb5; background: linear-gradient(135deg, #3b6eb5 0%, #2a5298 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 12px rgba(59, 110, 181, 0.35); letter-spacing: 0.3px;">
                                             Spelen! ❄️
                                         </a>
                                     </td>
@@ -145,7 +145,7 @@
                             <table role="presentation" style="width: 100%; border-collapse: collapse;">
                                 <tr>
                                     <td align="center">
-                                        <p class="text-secondary" style="margin: 0 0 16px; font-size: 15px; color: #475569; font-weight: 500;">
+                                        <p class="text-secondary" style="margin: 0 0 16px; font-size: 15px; font-weight: 500;">
                                             Geniet nog van de skireis! ⛷️
                                         </p>
                                         <img src="{{ url('/images/ski_group_family.png') }}" alt="Ski groepsfoto" style="max-width: 100%; height: auto; border-radius: 12px; display: block;">
