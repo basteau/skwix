@@ -1,7 +1,7 @@
 import { toast } from '@/components/ui/sonner';
 import { getCsrfToken } from '@/lib/utils';
 import { Lightbulb } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 export interface NotificationItem {
     id: number;
@@ -14,16 +14,47 @@ interface UseNotificationsOptions {
     enabled?: boolean;
 }
 
+const STORAGE_KEY = 'shown_notification_toasts';
+
+/**
+ * Get shown notification IDs from sessionStorage.
+ * Uses sessionStorage so toasts show once per browser session,
+ * but will show again if user closes/reopens the browser.
+ */
+function getShownNotificationIds(): Set<number> {
+    try {
+        const stored = sessionStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return new Set(JSON.parse(stored) as number[]);
+        }
+    } catch {
+        // Ignore parsing errors
+    }
+    return new Set();
+}
+
+/**
+ * Mark a notification as shown in sessionStorage.
+ */
+function markNotificationAsShown(id: number): void {
+    try {
+        const shown = getShownNotificationIds();
+        shown.add(id);
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...shown]));
+    } catch {
+        // Ignore storage errors
+    }
+}
+
 /**
  * Hook to display notification toasts on play pages.
  * Shows toast for each notification, with "Begrepen" button for server-side dismissal.
+ * Uses sessionStorage to prevent duplicate toasts when switching between pages.
  */
 export function useNotifications({
     notifications,
     enabled = true,
 }: UseNotificationsOptions) {
-    const toastShownRef = useRef<Set<number>>(new Set());
-
     // Dismiss notification on server (only called when user clicks "Begrepen")
     const dismissNotificationOnServer = async (notificationId: number) => {
         try {
@@ -44,10 +75,15 @@ export function useNotifications({
     useEffect(() => {
         if (!enabled) return;
 
+        const shownIds = getShownNotificationIds();
+
         notifications.forEach((notification) => {
-            if (!toastShownRef.current.has(notification.id)) {
-                toastShownRef.current.add(notification.id);
+            if (!shownIds.has(notification.id)) {
+                // Mark as shown immediately to prevent duplicates
+                markNotificationAsShown(notification.id);
+
                 toast(notification.message, {
+                    id: `notification-${notification.id}`, // Unique toast ID prevents duplicates
                     icon: <Lightbulb className="size-5 text-amber-500" />,
                     duration: 8000,
                     className:
