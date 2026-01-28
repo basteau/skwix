@@ -278,18 +278,16 @@ function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
                         </span>
                     )}
                 </span>
-                {isPodium && (
-                    <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="rounded bg-muted/70 px-1.5 py-0.5">
+                        {player.questions_count} vragen
+                    </span>
+                    {player.avg_wordle_guesses !== null && (
                         <span className="rounded bg-muted/70 px-1.5 py-0.5">
-                            {player.questions_count} vragen
+                            ∅ {player.avg_wordle_guesses}
                         </span>
-                        {player.avg_wordle_guesses !== null && (
-                            <span className="rounded bg-muted/70 px-1.5 py-0.5">
-                                ∅ {player.avg_wordle_guesses}
-                            </span>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {/* Points */}
@@ -302,9 +300,7 @@ function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
                 >
                     {player.points}
                 </span>
-                {isPodium && (
-                    <p className="text-xs text-muted-foreground">pts</p>
-                )}
+                <p className="text-xs text-muted-foreground">pts</p>
             </div>
 
             {/* Sabotage button */}
