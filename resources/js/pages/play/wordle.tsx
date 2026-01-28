@@ -274,6 +274,12 @@ export default function WordlePage({
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
 
+            // Don't capture keys when user is typing in an input
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                return;
+            }
+
             if (e.key === 'Backspace') {
                 e.preventDefault();
                 handleKey('backspace');

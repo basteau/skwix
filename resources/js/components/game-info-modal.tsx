@@ -163,16 +163,13 @@ function WordlistFooter() {
 
     return (
         <>
-            <p className="mt-4 text-[10px] text-muted-foreground/60">
-                Woordenlijst gebaseerd op{' '}
-                <button
-                    type="button"
-                    onClick={() => setShowWordlist(true)}
-                    className="underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
-                >
-                    originele Wordle woordenlijst
-                </button>
-            </p>
+            <button
+                type="button"
+                onClick={() => setShowWordlist(true)}
+                className="mt-4 text-[10px] text-muted-foreground/60 underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
+            >
+                Doorzoek volledige woordlijst
+            </button>
             <WordlistSheet open={showWordlist} onOpenChange={setShowWordlist} />
         </>
     );
