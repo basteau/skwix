@@ -21,7 +21,7 @@ class FakeAIService extends OpenRouterService
     }
 
     #[\Override]
-    public function askQuestion(string $secretWord, string $question, ?string $wordDescription = null): array
+    public function askQuestion(string $secretWord, string $question, ?string $wordDescription = null, ?string $playerName = null): array
     {
         $answer = $this->sequence[$this->index % count($this->sequence)];
         $this->index++;

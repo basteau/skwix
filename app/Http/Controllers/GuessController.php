@@ -171,7 +171,7 @@ class GuessController extends Controller
         }
 
         // Regular property question - proceed with normal Q&A flow
-        $result = $this->openRouterService->askQuestion($game->secret_word, $question, $game->word_description);
+        $result = $this->openRouterService->askQuestion($game->secret_word, $question, $game->word_description, $player->name);
 
         // If AI fails, save question with 'failed' status (no points deducted)
         if (! $result['success']) {
@@ -227,7 +227,7 @@ class GuessController extends Controller
                 if ($sabotage) {
                     $flippedAnswer = $this->sabotageService->flipAnswer($answer);
                     // Regenerate wit based on the flipped answer
-                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question);
+                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question, $player->name);
                     $questionRecord->update([
                         'answer' => $flippedAnswer,
                         'wit' => $flippedWit ?? $wit,
@@ -292,7 +292,7 @@ class GuessController extends Controller
         }
 
         // Retry the AI call
-        $result = $this->openRouterService->askQuestion($game->secret_word, $question->question_text, $game->word_description);
+        $result = $this->openRouterService->askQuestion($game->secret_word, $question->question_text, $game->word_description, $player->name);
 
         if (! $result['success']) {
             return response()->json([
@@ -320,7 +320,7 @@ class GuessController extends Controller
                 $sabotage = $this->sabotageService->consumePendingSabotage($player, $question);
                 if ($sabotage) {
                     $flippedAnswer = $this->sabotageService->flipAnswer($answer);
-                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question->question_text);
+                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question->question_text, $player->name);
                     $question->update([
                         'answer' => $flippedAnswer,
                         'wit' => $flippedWit ?? $wit,
@@ -357,7 +357,7 @@ class GuessController extends Controller
         $answerType = $isCorrect ? 'winner' : 'no';
 
         // Generate Boma-style wit for the guess result
-        $wit = $this->openRouterService->generateBomaWit($answerType, $question);
+        $wit = $this->openRouterService->generateBomaWit($answerType, $question, $player->name);
 
         // Deduct points and save the question
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answerType, $guessedWord, $wit) {
@@ -530,7 +530,7 @@ class GuessController extends Controller
         }
 
         // Regular property question (test mode - no description available)
-        $result = $this->openRouterService->askQuestion($secretWord, $question);
+        $result = $this->openRouterService->askQuestion($secretWord, $question, null, $player['name']);
 
         if (! $result['success']) {
             return response()->json([

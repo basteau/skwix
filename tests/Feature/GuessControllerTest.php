@@ -117,7 +117,7 @@ describe('GuessController ask', function () {
 
             $mock->shouldReceive('askQuestion')
                 ->once()
-                ->with('winter', 'Is het koud?', \Mockery::any())
+                ->with('winter', 'Is het koud?', \Mockery::any(), \Mockery::any())
                 ->andReturn(['success' => true, 'answer' => 'yes']);
         });
 
