@@ -14,56 +14,19 @@ interface UseNotificationsOptions {
     enabled?: boolean;
 }
 
-const STORAGE_KEY = 'shown_notification_toasts';
-
 /**
- * Get shown notification IDs from sessionStorage.
- * Uses sessionStorage so toasts show once per browser session,
- * but will show again if user closes/reopens the browser.
+ * Module-level set to track shown notification IDs.
+ * Resets on full page refresh but persists during SPA navigation.
+ * This ensures toasts show again on refresh, but only clicking
+ * "Begrepen" permanently dismisses via server-side tracking.
  */
-function getShownNotificationIds(): Set<number> {
-    try {
-        const stored = sessionStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            return new Set(JSON.parse(stored) as number[]);
-        }
-    } catch {
-        // Ignore parsing errors
-    }
-    return new Set();
-}
-
-/**
- * Mark a notification as shown in sessionStorage.
- */
-function markNotificationAsShown(id: number): void {
-    try {
-        const shown = getShownNotificationIds();
-        shown.add(id);
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...shown]));
-    } catch {
-        // Ignore storage errors
-    }
-}
-
-/**
- * Clean up sessionStorage by removing IDs that are no longer active.
- * This prevents unbounded growth of stored IDs.
- */
-function cleanupShownIds(activeIds: Set<number>): void {
-    try {
-        const shown = getShownNotificationIds();
-        const cleaned = [...shown].filter((id) => activeIds.has(id));
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
-    } catch {
-        // Ignore storage errors
-    }
-}
+const shownNotificationIds = new Set<number>();
 
 /**
  * Hook to display notification toasts on play pages.
  * Shows toast for each notification, with "Begrepen" button for server-side dismissal.
- * Uses sessionStorage to prevent duplicate toasts when switching between pages.
+ * Uses module-level tracking to prevent duplicate toasts during SPA navigation,
+ * but allows toasts to show again on full page refresh.
  */
 export function useNotifications({
     notifications,
@@ -89,16 +52,10 @@ export function useNotifications({
     useEffect(() => {
         if (!enabled) return;
 
-        const shownIds = getShownNotificationIds();
-        const activeIds = new Set(notifications.map((n) => n.id));
-
-        // Clean up old IDs that are no longer active (prevents unbounded growth)
-        cleanupShownIds(activeIds);
-
         notifications.forEach((notification) => {
-            if (!shownIds.has(notification.id)) {
-                // Mark as shown immediately to prevent duplicates
-                markNotificationAsShown(notification.id);
+            if (!shownNotificationIds.has(notification.id)) {
+                // Mark as shown immediately to prevent duplicates during SPA navigation
+                shownNotificationIds.add(notification.id);
 
                 toast(notification.message, {
                     id: `notification-${notification.id}`, // Unique toast ID prevents duplicates
