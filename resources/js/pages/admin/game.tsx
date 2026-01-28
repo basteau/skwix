@@ -29,6 +29,8 @@ import {
     AlertTriangle,
     Bell,
     CheckCircle2,
+    ChevronDown,
+    ChevronUp,
     Lightbulb,
     Loader2,
     Mail,
@@ -126,6 +128,7 @@ export default function AdminGameDetail({
         game.wordle_interval_hours,
     );
     const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+    const [wordleWordsExpanded, setWordleWordsExpanded] = useState(false);
 
     // Notification state
     const [notifications, setNotifications] =
@@ -282,7 +285,6 @@ export default function AdminGameDetail({
         [game.id],
     );
 
-<<<<<<< HEAD
     const handleAddNotification = useCallback(async () => {
         if (!newNotificationMessage.trim() || isAddingNotification) return;
 
@@ -395,7 +397,7 @@ export default function AdminGameDetail({
         },
         [game.id, deletingNotificationId],
     );
-=======
+
     const handleSaveSettings = useCallback(() => {
         setIsUpdatingSettings(true);
         router.put(
@@ -413,7 +415,6 @@ export default function AdminGameDetail({
     const hasSettingsChanged =
         cooldownHours !== game.cooldown_hours ||
         wordleIntervalHours !== game.wordle_interval_hours;
->>>>>>> 79716bf (feat: add configurable game settings for cooldown and wordle interval)
 
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
     const endsAt = game.ends_at ? new Date(game.ends_at) : null;
@@ -719,17 +720,32 @@ export default function AdminGameDetail({
 
                         {/* Wordle Words */}
                         <section className="rounded-lg border border-border bg-card p-6">
-                            <h2 className="mb-4 text-lg font-semibold text-foreground">
-                                Wordle Woorden
-                            </h2>
-                            {game.status !== 'draft' && (
-                                <p className="mb-4 text-sm text-muted-foreground">
-                                    {game.status === 'completed'
-                                        ? 'Wordle woorden kunnen niet meer worden aangepast na afloop van het spel.'
-                                        : 'Wordle woorden kunnen niet meer worden aangepast nadat uitnodigingen zijn verstuurd.'}
-                                </p>
-                            )}
-                            <div className="grid gap-3 sm:grid-cols-3">
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setWordleWordsExpanded(!wordleWordsExpanded)
+                                }
+                                className="flex w-full items-center justify-between text-left"
+                            >
+                                <h2 className="text-lg font-semibold text-foreground">
+                                    Wordle Woorden ({wordleWords.length})
+                                </h2>
+                                {wordleWordsExpanded ? (
+                                    <ChevronUp className="size-5 text-muted-foreground" />
+                                ) : (
+                                    <ChevronDown className="size-5 text-muted-foreground" />
+                                )}
+                            </button>
+                            {wordleWordsExpanded && (
+                                <>
+                                    {game.status !== 'draft' && (
+                                        <p className="mt-4 text-sm text-muted-foreground">
+                                            {game.status === 'completed'
+                                                ? 'Wordle woorden kunnen niet meer worden aangepast na afloop van het spel.'
+                                                : 'Wordle woorden kunnen niet meer worden aangepast nadat uitnodigingen zijn verstuurd.'}
+                                        </p>
+                                    )}
+                                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
                                 {wordleWords.map((word, i) => {
                                     const validation = wordValidations[i];
                                     const showStatus =
@@ -818,17 +834,19 @@ export default function AdminGameDetail({
                                         </div>
                                     );
                                 })}
-                            </div>
-                            {game.status === 'draft' && (
-                                <Button
-                                    onClick={handleSaveWordleWords}
-                                    disabled={isUpdatingWords}
-                                    className="mt-4"
-                                >
-                                    {isUpdatingWords
-                                        ? 'Opslaan...'
-                                        : 'Woorden Opslaan'}
-                                </Button>
+                                    </div>
+                                    {game.status === 'draft' && (
+                                        <Button
+                                            onClick={handleSaveWordleWords}
+                                            disabled={isUpdatingWords}
+                                            className="mt-4"
+                                        >
+                                            {isUpdatingWords
+                                                ? 'Opslaan...'
+                                                : 'Woorden Opslaan'}
+                                        </Button>
+                                    )}
+                                </>
                             )}
                         </section>
 
