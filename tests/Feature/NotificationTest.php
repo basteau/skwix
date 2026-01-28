@@ -258,4 +258,45 @@ describe('Notification Display in Game', function () {
                 ->has('notifications', 0)
         );
     });
+
+    it('continues showing notification on subsequent page loads until explicitly dismissed', function () {
+        $notification = GameNotification::create([
+            'game_id' => $this->game->id,
+            'message' => 'Persistent notification',
+            'is_active' => true,
+        ]);
+
+        // First page load - notification should show
+        $response = $this->actingAs($this->user)->get('/play/guess');
+        $response->assertInertia(
+            fn ($page) => $page->has('notifications', 1)
+                ->where('notifications.0.id', $notification->id)
+        );
+
+        // Second page load (simulating refresh) - notification should STILL show
+        // because no dismissal was recorded server-side
+        $response = $this->actingAs($this->user)->get('/play/guess');
+        $response->assertInertia(
+            fn ($page) => $page->has('notifications', 1)
+                ->where('notifications.0.id', $notification->id)
+        );
+
+        // Third page load on different play page - still shows
+        $response = $this->actingAs($this->user)->get('/play/wordle');
+        $response->assertInertia(
+            fn ($page) => $page->has('notifications', 1)
+                ->where('notifications.0.id', $notification->id)
+        );
+
+        // Now dismiss via server endpoint
+        $this->actingAs($this->user)
+            ->postJson("/play/notification/{$notification->id}/dismiss")
+            ->assertSuccessful();
+
+        // After explicit dismissal - notification should NOT show
+        $response = $this->actingAs($this->user)->get('/play/guess');
+        $response->assertInertia(
+            fn ($page) => $page->has('notifications', 0)
+        );
+    });
 });
