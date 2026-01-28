@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GameNotification;
 use App\Models\Player;
 use App\Models\Sabotage;
 use App\Services\SabotageService;
@@ -68,6 +69,18 @@ class PlayersController extends Controller
                 ];
             });
 
+        // Get active notifications that the player hasn't dismissed
+        $notifications = GameNotification::where('game_id', $game->id)
+            ->where('is_active', true)
+            ->whereDoesntHave('dismissedByPlayers', fn ($q) => $q->where('player_id', $player->id))
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'message' => $n->message,
+                'created_at' => $n->created_at->toISOString(),
+            ]);
+
         return Inertia::render('play/players', [
             'player' => [
                 'id' => $player->id,
@@ -83,6 +96,7 @@ class PlayersController extends Controller
                 'cost' => config('game.sabotage_cost'),
                 'reveal_cost' => config('game.reveal_cost'),
             ],
+            'notifications' => $notifications,
         ]);
     }
 

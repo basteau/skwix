@@ -6,6 +6,10 @@ import { PlayHeader } from '@/components/play-header';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
+import {
+    NotificationItem,
+    useNotifications,
+} from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -48,6 +52,7 @@ interface Props {
         next_unlock_at?: string;
     };
     error?: string;
+    notifications?: NotificationItem[];
 }
 
 const POLL_INTERVAL = 10_000; // 10 seconds
@@ -81,7 +86,14 @@ export default function WordlePage({
     game,
     wordle,
     error,
+    notifications = [],
 }: Props) {
+    // Notifications toast display
+    useNotifications({
+        notifications,
+        enabled: !testMode?.active,
+    });
+
     const [currentGuess, setCurrentGuess] = useState('');
     const [guesses, setGuesses] = useState<Guess[]>(wordle?.guesses ?? []);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -109,7 +121,7 @@ export default function WordlePage({
         }
 
         pollRef.current = setInterval(() => {
-            router.reload({ only: ['game', 'player', 'wordle'] });
+            router.reload({ only: ['game', 'player', 'wordle', 'notifications'] });
         }, POLL_INTERVAL);
 
         return () => {

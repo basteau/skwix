@@ -5,9 +5,12 @@ import { PlayHeader } from '@/components/play-header';
 import { PlayerAvatar } from '@/components/player-avatar';
 
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/sonner';
 import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 import { getInitials } from '@/hooks/use-initials';
+import {
+    NotificationItem,
+    useNotifications,
+} from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -25,12 +28,6 @@ import {
     X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-interface NotificationItem {
-    id: number;
-    message: string;
-    created_at: string;
-}
 
 interface QuestionItem {
     id: number;
@@ -120,57 +117,16 @@ export default function GuessPage({
     // Track which questions are being retried
     const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
 
-    // Notifications state (for toast display)
-    const [notifications, setNotifications] =
-        useState<NotificationItem[]>(initialNotifications);
-    const toastShownRef = useRef<Set<number>>(new Set());
+    // Notifications toast display
+    useNotifications({
+        notifications: initialNotifications,
+        enabled: !testMode?.active,
+    });
 
     // Cooldown timer
     const { isOnCooldown, formatted: cooldownFormatted } = useCooldownTimer(
         player?.cooldown_remaining ?? 0,
     );
-
-    // Dismiss notification on server (only called when user clicks "Begrepen")
-    const dismissNotificationOnServer = async (notificationId: number) => {
-        try {
-            await fetch(`/play/notification/${notificationId}/dismiss`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                    Accept: 'application/json',
-                },
-            });
-        } catch {
-            // Silently fail
-        }
-    };
-
-    // Show toast for new notifications on mount/update
-    useEffect(() => {
-        if (testMode?.active) return;
-
-        notifications.forEach((notification) => {
-            if (!toastShownRef.current.has(notification.id)) {
-                toastShownRef.current.add(notification.id);
-                toast(notification.message, {
-                    icon: <Lightbulb className="size-5 text-amber-500" />,
-                    duration: 8000,
-                    className:
-                        'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700/30',
-                    action: {
-                        label: 'Begrepen',
-                        onClick: () => dismissNotificationOnServer(notification.id),
-                    },
-                });
-            }
-        });
-    }, [notifications, testMode?.active]);
-
-    // Sync notifications from server (on poll updates)
-    useEffect(() => {
-        setNotifications(initialNotifications);
-    }, [initialNotifications]);
 
     // Sync revealed sabotage IDs from server (on poll updates)
     useEffect(() => {

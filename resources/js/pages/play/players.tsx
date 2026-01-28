@@ -16,6 +16,10 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+    NotificationItem,
+    useNotifications,
+} from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -55,6 +59,7 @@ interface Props {
     sabotage?: SabotageInfo;
     error?: string;
     testMode?: { active: boolean };
+    notifications?: NotificationItem[];
 }
 
 const POLL_INTERVAL = 10_000; // 10 seconds
@@ -83,7 +88,14 @@ export default function PlayersPage({
     sabotage,
     error,
     testMode,
+    notifications = [],
 }: Props) {
+    // Notifications toast display
+    useNotifications({
+        notifications,
+        enabled: !testMode?.active,
+    });
+
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [sabotageTarget, setSabotageTarget] = useState<PlayerData | null>(
         null,
@@ -104,7 +116,7 @@ export default function PlayersPage({
         const poll = () => {
             if (shouldPoll()) {
                 router.reload({
-                    only: ['players', 'game', 'player', 'sabotage'],
+                    only: ['players', 'game', 'player', 'sabotage', 'notifications'],
                 });
             }
         };
