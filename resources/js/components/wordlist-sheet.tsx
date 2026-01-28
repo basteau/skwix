@@ -23,18 +23,29 @@ interface WordlistSheetProps {
 
 const MAX_DISPLAYED_WORDS = 100;
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const SEARCH_DEBOUNCE_MS = 150;
 
 export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     const [words, setWords] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [mustContain, setMustContain] = useState<Set<string>>(new Set());
     const [mustNotContain, setMustNotContain] = useState<Set<string>>(new Set());
     const [filtersOpen, setFiltersOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const hasActiveFilters = mustContain.size > 0 || mustNotContain.size > 0;
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => clearTimeout(timer);
+    }, [search]);
 
     const fetchWordlist = useCallback(async () => {
         setIsLoading(true);
@@ -67,6 +78,7 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     useEffect(() => {
         if (open) {
             setSearch('');
+            setDebouncedSearch('');
             setMustContain(new Set());
             setMustNotContain(new Set());
             setFiltersOpen(false);
@@ -116,9 +128,9 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     const { filteredWords, totalMatches } = useMemo(() => {
         let filtered = words;
 
-        // Apply text search
-        if (search.trim()) {
-            const searchLower = search.toLowerCase().trim();
+        // Apply text search (debounced)
+        if (debouncedSearch.trim()) {
+            const searchLower = debouncedSearch.toLowerCase().trim();
             filtered = filtered.filter((word) => word.includes(searchLower));
         }
 
@@ -142,14 +154,14 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
             filteredWords: filtered.slice(0, MAX_DISPLAYED_WORDS),
             totalMatches: filtered.length,
         };
-    }, [words, search, mustContain, mustNotContain]);
+    }, [words, debouncedSearch, mustContain, mustNotContain]);
 
     const clearSearch = () => {
         setSearch('');
         inputRef.current?.focus();
     };
 
-    const hasAnyFilter = search.trim() || hasActiveFilters;
+    const hasAnyFilter = debouncedSearch.trim() || hasActiveFilters;
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -400,7 +412,7 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                                 <WordItem
                                     key={word}
                                     word={word}
-                                    highlight={search}
+                                    highlight={debouncedSearch}
                                     mustContain={mustContain}
                                 />
                             ))}
