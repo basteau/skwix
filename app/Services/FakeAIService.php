@@ -30,7 +30,22 @@ class FakeAIService extends OpenRouterService
             'success' => true,
             'answer' => $answer,
             'raw_answer' => $answer === 'yes' ? 'Yes' : 'No',
+            'wit' => $this->generateBomaWit($answer, $question, $playerName),
         ];
+    }
+
+    #[\Override]
+    public function generateBomaWit(string $answerType, ?string $question = null, ?string $playerName = null): ?string
+    {
+        $name = $playerName ?? 'vriend';
+
+        return match ($answerType) {
+            'yes' => "Ja {$name}, ge zijt op de goeie weg!",
+            'no' => "Nee {$name}, probeer nog eens!",
+            'unknown' => "Allez {$name}, stel een betere vraag!",
+            'winner' => "Proficiat {$name}, gij zijt een topper!",
+            default => "Boma zegt: volgende vraag!",
+        };
     }
 
     public function reset(): void
