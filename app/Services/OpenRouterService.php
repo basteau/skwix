@@ -190,7 +190,7 @@ Geef een korte, gevatte reactie in Boma-stijl. Spreek de speler direct aan (gij/
 {$extraInstruction}
 
 STRENGE REGELS:
-- Maximum 60 karakters
+- Maximum 80 karakters
 - VERBODEN: Verklap nooit het geheime woord of hints erover
 - Alleen de one-liner, geen uitleg of aanhalingstekens
 PROMPT;
