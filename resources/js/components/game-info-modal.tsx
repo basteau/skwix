@@ -6,9 +6,10 @@ import {
     DialogDescription,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { WordlistSheet } from '@/components/wordlist-sheet';
 
 import { Snowflake, Timer, X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 
 const SNOWFLAKES = Array.from({ length: 6 }).map((_, i) => ({
     left: 10 + ((i * 14) % 80),
@@ -154,20 +155,28 @@ export const WORDLE_INFO: GameInfoContent = {
         },
     ],
     pointsInfo: '7–20 punten (minder pogingen = meer punten)',
-    footer: (
-        <p className="mt-4 text-[10px] text-muted-foreground/60">
-            Woordenlijst gebaseerd op{' '}
-            <a
-                href={`/woordenlijst.txt?v=${Date.now()}`}
-                target="_blank"
-                rel="noopener"
-                className="underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
-            >
-                originele Wordle woordenlijst
-            </a>
-        </p>
-    ),
+    footer: <WordlistFooter />,
 };
+
+function WordlistFooter() {
+    const [showWordlist, setShowWordlist] = useState(false);
+
+    return (
+        <>
+            <p className="mt-4 text-[10px] text-muted-foreground/60">
+                Woordenlijst gebaseerd op{' '}
+                <button
+                    type="button"
+                    onClick={() => setShowWordlist(true)}
+                    className="underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground/50"
+                >
+                    originele Wordle woordenlijst
+                </button>
+            </p>
+            <WordlistSheet open={showWordlist} onOpenChange={setShowWordlist} />
+        </>
+    );
+}
 
 export const FORTUNE_INFO: GameInfoContent = {
     title: 'Rad van Fortuin',
