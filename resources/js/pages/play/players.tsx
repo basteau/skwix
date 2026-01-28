@@ -300,9 +300,7 @@ function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
                 >
                     {player.points}
                 </span>
-                {isPodium && (
-                    <p className="text-xs text-muted-foreground">pts</p>
-                )}
+                <p className="text-xs text-muted-foreground">pts</p>
             </div>
 
             {/* Sabotage button */}
