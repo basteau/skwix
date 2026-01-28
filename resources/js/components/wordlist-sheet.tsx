@@ -1,3 +1,9 @@
+import { Button } from '@/components/ui/button';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import {
     Sheet,
@@ -7,7 +13,7 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { BookOpen, Search, X } from 'lucide-react';
+import { BookOpen, ChevronDown, Filter, Search, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface WordlistSheetProps {
@@ -16,13 +22,19 @@ interface WordlistSheetProps {
 }
 
 const MAX_DISPLAYED_WORDS = 100;
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     const [words, setWords] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [mustContain, setMustContain] = useState<Set<string>>(new Set());
+    const [mustNotContain, setMustNotContain] = useState<Set<string>>(new Set());
+    const [filtersOpen, setFiltersOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const hasActiveFilters = mustContain.size > 0 || mustNotContain.size > 0;
 
     const fetchWordlist = useCallback(async () => {
         setIsLoading(true);
@@ -55,38 +67,115 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     useEffect(() => {
         if (open) {
             setSearch('');
+            setMustContain(new Set());
+            setMustNotContain(new Set());
+            setFiltersOpen(false);
             setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [open]);
 
+    const toggleMustContain = (letter: string) => {
+        setMustContain((prev) => {
+            const next = new Set(prev);
+            if (next.has(letter)) {
+                next.delete(letter);
+            } else {
+                next.add(letter);
+                // Remove from mustNotContain if present
+                setMustNotContain((prevNot) => {
+                    const nextNot = new Set(prevNot);
+                    nextNot.delete(letter);
+                    return nextNot;
+                });
+            }
+            return next;
+        });
+    };
+
+    const toggleMustNotContain = (letter: string) => {
+        setMustNotContain((prev) => {
+            const next = new Set(prev);
+            if (next.has(letter)) {
+                next.delete(letter);
+            } else {
+                next.add(letter);
+                // Remove from mustContain if present
+                setMustContain((prevCont) => {
+                    const nextCont = new Set(prevCont);
+                    nextCont.delete(letter);
+                    return nextCont;
+                });
+            }
+            return next;
+        });
+    };
+
+    const clearFilters = () => {
+        setMustContain(new Set());
+        setMustNotContain(new Set());
+    };
+
     const filteredWords = useMemo(() => {
-        if (!search.trim()) {
-            return words.slice(0, MAX_DISPLAYED_WORDS);
+        let filtered = words;
+
+        // Apply text search
+        if (search.trim()) {
+            const searchLower = search.toLowerCase().trim();
+            filtered = filtered.filter((word) => word.includes(searchLower));
         }
 
-        const searchLower = search.toLowerCase().trim();
-        const filtered = words.filter((word) => word.includes(searchLower));
+        // Apply mustContain filter
+        if (mustContain.size > 0) {
+            filtered = filtered.filter((word) =>
+                [...mustContain].every((letter) => word.includes(letter)),
+            );
+        }
+
+        // Apply mustNotContain filter
+        if (mustNotContain.size > 0) {
+            filtered = filtered.filter((word) =>
+                [...mustNotContain].every((letter) => !word.includes(letter)),
+            );
+        }
+
         return filtered.slice(0, MAX_DISPLAYED_WORDS);
-    }, [words, search]);
+    }, [words, search, mustContain, mustNotContain]);
 
     const totalMatches = useMemo(() => {
-        if (!search.trim()) {
-            return words.length;
+        let filtered = words;
+
+        if (search.trim()) {
+            const searchLower = search.toLowerCase().trim();
+            filtered = filtered.filter((word) => word.includes(searchLower));
         }
-        const searchLower = search.toLowerCase().trim();
-        return words.filter((word) => word.includes(searchLower)).length;
-    }, [words, search]);
+
+        if (mustContain.size > 0) {
+            filtered = filtered.filter((word) =>
+                [...mustContain].every((letter) => word.includes(letter)),
+            );
+        }
+
+        if (mustNotContain.size > 0) {
+            filtered = filtered.filter((word) =>
+                [...mustNotContain].every((letter) => !word.includes(letter)),
+            );
+        }
+
+        return filtered.length;
+    }, [words, search, mustContain, mustNotContain]);
 
     const clearSearch = () => {
         setSearch('');
         inputRef.current?.focus();
     };
 
+    const hasAnyFilter = search.trim() || hasActiveFilters;
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
                 side="bottom"
-                className="flex h-[85vh] max-h-[600px] flex-col rounded-t-2xl px-0 pb-0"
+                className="flex h-[85vh] max-h-[700px] flex-col rounded-t-2xl px-0 pb-0"
             >
                 <SheetHeader className="shrink-0 border-b border-border/50 px-5 pb-4">
                     <div className="flex items-center gap-3">
@@ -106,7 +195,8 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                     </div>
                 </SheetHeader>
 
-                <div className="shrink-0 px-5 py-3">
+                <div className="shrink-0 space-y-3 px-5 py-3">
+                    {/* Search input */}
                     <div className="relative">
                         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -132,14 +222,129 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                         )}
                     </div>
 
+                    {/* Letter filters */}
+                    <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+                        <CollapsibleTrigger asChild>
+                            <button
+                                type="button"
+                                className={cn(
+                                    'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors',
+                                    'hover:bg-muted/80',
+                                    filtersOpen || hasActiveFilters
+                                        ? 'bg-muted'
+                                        : 'bg-muted/50',
+                                )}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Filter className="size-4 text-muted-foreground" />
+                                    <span className="font-medium">
+                                        Letter filters
+                                    </span>
+                                    {hasActiveFilters && (
+                                        <span className="flex items-center gap-1">
+                                            {mustContain.size > 0 && (
+                                                <span className="inline-flex items-center rounded bg-wordle-correct/20 px-1.5 py-0.5 text-xs font-medium text-wordle-correct">
+                                                    +{mustContain.size}
+                                                </span>
+                                            )}
+                                            {mustNotContain.size > 0 && (
+                                                <span className="inline-flex items-center rounded bg-wordle-absent/20 px-1.5 py-0.5 text-xs font-medium text-wordle-absent">
+                                                    -{mustNotContain.size}
+                                                </span>
+                                            )}
+                                        </span>
+                                    )}
+                                </div>
+                                <ChevronDown
+                                    className={cn(
+                                        'size-4 text-muted-foreground transition-transform duration-200',
+                                        filtersOpen && 'rotate-180',
+                                    )}
+                                />
+                            </button>
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+                            <div className="space-y-4 pt-3">
+                                {/* Must contain */}
+                                <div>
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <label className="text-xs font-medium text-muted-foreground">
+                                            Bevat{' '}
+                                            <span className="text-wordle-correct">
+                                                (groen)
+                                            </span>
+                                        </label>
+                                        {mustContain.size > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                {[...mustContain]
+                                                    .sort()
+                                                    .join(', ')
+                                                    .toUpperCase()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <LetterGrid
+                                        selected={mustContain}
+                                        onToggle={toggleMustContain}
+                                        variant="contain"
+                                        disabled={mustNotContain}
+                                    />
+                                </div>
+
+                                {/* Must not contain */}
+                                <div>
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <label className="text-xs font-medium text-muted-foreground">
+                                            Bevat niet{' '}
+                                            <span className="text-wordle-absent">
+                                                (grijs)
+                                            </span>
+                                        </label>
+                                        {mustNotContain.size > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                {[...mustNotContain]
+                                                    .sort()
+                                                    .join(', ')
+                                                    .toUpperCase()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <LetterGrid
+                                        selected={mustNotContain}
+                                        onToggle={toggleMustNotContain}
+                                        variant="exclude"
+                                        disabled={mustContain}
+                                    />
+                                </div>
+
+                                {/* Clear filters button */}
+                                {hasActiveFilters && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={clearFilters}
+                                        className="w-full"
+                                    >
+                                        <X className="mr-1.5 size-3.5" />
+                                        Filters wissen
+                                    </Button>
+                                )}
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
+
+                    {/* Results count */}
                     {!isLoading && words.length > 0 && (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                            {search ? (
+                        <p className="text-xs text-muted-foreground">
+                            {hasAnyFilter ? (
                                 <>
                                     <span className="font-medium text-foreground">
                                         {totalMatches.toLocaleString('nl-NL')}
                                     </span>{' '}
-                                    {totalMatches === 1 ? 'resultaat' : 'resultaten'}
+                                    {totalMatches === 1
+                                        ? 'resultaat'
+                                        : 'resultaten'}
                                     {totalMatches > MAX_DISPLAYED_WORDS && (
                                         <span className="text-muted-foreground/70">
                                             {' '}
@@ -177,7 +382,9 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                             <div className="rounded-full bg-destructive/10 p-3">
                                 <X className="size-5 text-destructive" />
                             </div>
-                            <p className="text-sm text-muted-foreground">{error}</p>
+                            <p className="text-sm text-muted-foreground">
+                                {error}
+                            </p>
                             <button
                                 type="button"
                                 onClick={fetchWordlist}
@@ -192,8 +399,18 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                         <div className="flex flex-col items-center gap-2 py-8 text-center">
                             <Search className="size-8 text-muted-foreground/40" />
                             <p className="text-sm text-muted-foreground">
-                                Geen woorden gevonden voor "{search}"
+                                Geen woorden gevonden
+                                {hasAnyFilter && ' met deze filters'}
                             </p>
+                            {hasActiveFilters && (
+                                <button
+                                    type="button"
+                                    onClick={clearFilters}
+                                    className="text-sm font-medium text-primary hover:underline"
+                                >
+                                    Filters wissen
+                                </button>
+                            )}
                         </div>
                     )}
 
@@ -204,6 +421,8 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
                                     key={word}
                                     word={word}
                                     highlight={search}
+                                    mustContain={mustContain}
+                                    mustNotContain={mustNotContain}
                                 />
                             ))}
                         </div>
@@ -214,29 +433,83 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     );
 }
 
-function WordItem({ word, highlight }: { word: string; highlight: string }) {
+interface LetterGridProps {
+    selected: Set<string>;
+    onToggle: (letter: string) => void;
+    variant: 'contain' | 'exclude';
+    disabled: Set<string>;
+}
+
+function LetterGrid({ selected, onToggle, variant, disabled }: LetterGridProps) {
+    return (
+        <div className="flex flex-wrap gap-1">
+            {ALPHABET.map((letter) => {
+                const isSelected = selected.has(letter);
+                const isDisabled = disabled.has(letter);
+
+                return (
+                    <button
+                        key={letter}
+                        type="button"
+                        onClick={() => onToggle(letter)}
+                        disabled={isDisabled}
+                        className={cn(
+                            'flex size-8 items-center justify-center rounded-md text-sm font-semibold uppercase transition-all',
+                            'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
+                            isDisabled && 'cursor-not-allowed opacity-30',
+                            !isSelected &&
+                                !isDisabled &&
+                                'bg-card border border-border/50 text-foreground/70 hover:border-border hover:bg-muted',
+                            isSelected &&
+                                variant === 'contain' &&
+                                'bg-wordle-correct text-white shadow-sm shadow-wordle-correct/30',
+                            isSelected &&
+                                variant === 'exclude' &&
+                                'bg-wordle-absent text-white shadow-sm',
+                        )}
+                    >
+                        {letter}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+interface WordItemProps {
+    word: string;
+    highlight: string;
+    mustContain: Set<string>;
+    mustNotContain: Set<string>;
+}
+
+function WordItem({ word, highlight, mustContain }: WordItemProps) {
     const highlightedWord = useMemo(() => {
-        if (!highlight.trim()) {
-            return <span>{word}</span>;
-        }
-
         const searchLower = highlight.toLowerCase().trim();
-        const index = word.indexOf(searchLower);
+        const matchIndex = searchLower ? word.indexOf(searchLower) : -1;
 
-        if (index === -1) {
-            return <span>{word}</span>;
-        }
+        return word.split('').map((char, i) => {
+            const isContainMatch = mustContain.has(char);
+            const inSearchRange =
+                matchIndex !== -1 &&
+                i >= matchIndex &&
+                i < matchIndex + searchLower.length;
 
-        return (
-            <>
-                {word.slice(0, index)}
-                <span className="bg-primary/20 text-primary font-semibold">
-                    {word.slice(index, index + searchLower.length)}
+            return (
+                <span
+                    key={i}
+                    className={cn(
+                        isContainMatch && 'text-wordle-correct font-bold',
+                        inSearchRange &&
+                            !isContainMatch &&
+                            'bg-primary/20 text-primary font-semibold',
+                    )}
+                >
+                    {char}
                 </span>
-                {word.slice(index + searchLower.length)}
-            </>
-        );
-    }, [word, highlight]);
+            );
+        });
+    }, [word, highlight, mustContain]);
 
     return (
         <div
