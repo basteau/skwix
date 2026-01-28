@@ -23,6 +23,8 @@ class Game extends Model
         'ends_at',
         'wordle_words',
         'wordle_hour',
+        'cooldown_hours',
+        'wordle_interval_hours',
         'starting_points',
     ];
 
@@ -33,6 +35,8 @@ class Game extends Model
             'ends_at' => 'datetime',
             'wordle_words' => 'array',
             'wordle_hour' => 'integer',
+            'cooldown_hours' => 'integer',
+            'wordle_interval_hours' => 'integer',
             'starting_points' => 'integer',
         ];
     }

@@ -38,7 +38,7 @@ class Player extends Model
             return false;
         }
 
-        $cooldownHours = config('game.guess_cooldown_hours', 8);
+        $cooldownHours = $this->getCooldownHours();
 
         return $this->last_guess_at->copy()->addHours($cooldownHours)->isFuture();
     }
@@ -49,7 +49,7 @@ class Player extends Model
             return 0;
         }
 
-        $cooldownHours = config('game.guess_cooldown_hours', 8);
+        $cooldownHours = $this->getCooldownHours();
         $cooldownEndsAt = $this->last_guess_at->copy()->addHours($cooldownHours);
 
         if ($cooldownEndsAt->isPast()) {
@@ -65,10 +65,15 @@ class Player extends Model
             return null;
         }
 
-        $cooldownHours = config('game.guess_cooldown_hours', 8);
+        $cooldownHours = $this->getCooldownHours();
         $cooldownEndsAt = Carbon::parse($this->last_guess_at)->addHours($cooldownHours);
 
         return $cooldownEndsAt->isFuture() ? $cooldownEndsAt : null;
+    }
+
+    public function getCooldownHours(): int
+    {
+        return $this->game?->cooldown_hours ?? config('game.guess_cooldown_hours', 8);
     }
 
     public function game(): BelongsTo

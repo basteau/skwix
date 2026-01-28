@@ -38,6 +38,20 @@ const WORDLE_HOURS = Array.from({ length: 24 }, (_, i) => ({
     label: `${i.toString().padStart(2, '0')}:00`,
 }));
 
+const COOLDOWN_OPTIONS = [
+    { value: 4, label: '4 uur' },
+    { value: 6, label: '6 uur' },
+    { value: 8, label: '8 uur (standaard)' },
+    { value: 12, label: '12 uur' },
+    { value: 24, label: '24 uur' },
+];
+
+const WORDLE_INTERVAL_OPTIONS = [
+    { value: 8, label: 'Om de 8 uur (3x per dag)' },
+    { value: 12, label: 'Om de 12 uur (2x per dag)' },
+    { value: 24, label: 'Dagelijks (standaard)' },
+];
+
 export default function CreateGame({ availableUsers }: Props) {
     const [secretWord, setSecretWord] = useState('');
     const [wordDescription, setWordDescription] = useState('');
@@ -46,6 +60,8 @@ export default function CreateGame({ availableUsers }: Props) {
     );
     const [wordleHour, setWordleHour] = useState(8);
     const [wordleAtStart, setWordleAtStart] = useState(false);
+    const [cooldownHours, setCooldownHours] = useState(8);
+    const [wordleIntervalHours, setWordleIntervalHours] = useState(24);
     const [startingPoints, setStartingPoints] = useState(0);
     const [players, setPlayers] = useState<PlayerRow[]>([
         { id: crypto.randomUUID(), name: '', email: '' },
@@ -132,6 +148,8 @@ export default function CreateGame({ availableUsers }: Props) {
             word_description: wordDescription || null,
             starts_at: startsAt?.toISOString() ?? '',
             wordle_hour: effectiveWordleHour,
+            cooldown_hours: cooldownHours,
+            wordle_interval_hours: wordleIntervalHours,
             starting_points: startingPoints,
             players: validPlayers.map((p) => ({
                 name: p.name,
@@ -147,7 +165,7 @@ export default function CreateGame({ availableUsers }: Props) {
         } catch {
             setIsSubmitting(false);
         }
-    }, [secretWord, wordDescription, startsAt, wordleHour, wordleAtStart, startingPoints, players]);
+    }, [secretWord, wordDescription, startsAt, wordleHour, wordleAtStart, cooldownHours, wordleIntervalHours, startingPoints, players]);
 
     return (
         <>
@@ -305,6 +323,64 @@ export default function CreateGame({ availableUsers }: Props) {
                                     {errors.starting_points && (
                                         <p className="mt-1 text-sm text-destructive">
                                             {errors.starting_points}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">
+                                        Vraag cooldown
+                                    </label>
+                                    <select
+                                        value={cooldownHours}
+                                        onChange={(e) =>
+                                            setCooldownHours(
+                                                parseInt(e.target.value, 10),
+                                            )
+                                        }
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        data-testid="cooldown-hours-picker"
+                                    >
+                                        {COOLDOWN_OPTIONS.map((opt) => (
+                                            <option key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Wachttijd tussen vragen stellen
+                                    </p>
+                                    {errors.cooldown_hours && (
+                                        <p className="mt-1 text-sm text-destructive">
+                                            {errors.cooldown_hours}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">
+                                        Wordle interval
+                                    </label>
+                                    <select
+                                        value={wordleIntervalHours}
+                                        onChange={(e) =>
+                                            setWordleIntervalHours(
+                                                parseInt(e.target.value, 10),
+                                            )
+                                        }
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        data-testid="wordle-interval-picker"
+                                    >
+                                        {WORDLE_INTERVAL_OPTIONS.map((opt) => (
+                                            <option key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Hoe vaak een nieuwe Wordle beschikbaar komt
+                                    </p>
+                                    {errors.wordle_interval_hours && (
+                                        <p className="mt-1 text-sm text-destructive">
+                                            {errors.wordle_interval_hours}
                                         </p>
                                     )}
                                 </div>

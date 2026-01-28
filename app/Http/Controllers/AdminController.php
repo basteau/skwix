@@ -91,6 +91,8 @@ class AdminController extends Controller
             'word_description' => 'nullable|string|max:500',
             'starts_at' => 'required|date|after:now',
             'wordle_hour' => 'required|integer|min:0|max:23',
+            'cooldown_hours' => 'nullable|integer|in:4,6,8,12,24',
+            'wordle_interval_hours' => 'nullable|integer|in:8,12,24',
             'starting_points' => 'nullable|integer|min:0|max:10000',
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
@@ -117,6 +119,8 @@ class AdminController extends Controller
                 'ends_at' => null,
                 'wordle_words' => $this->wordlistService->getRandomWords(60),
                 'wordle_hour' => (int) $request->wordle_hour,
+                'cooldown_hours' => (int) ($request->cooldown_hours ?? 8),
+                'wordle_interval_hours' => (int) ($request->wordle_interval_hours ?? 24),
                 'starting_points' => $startingPoints,
             ]);
 
@@ -240,6 +244,8 @@ class AdminController extends Controller
                 'ends_at' => $game->ends_at?->toISOString(),
                 'wordle_words' => $game->wordle_words ?? [],
                 'wordle_hour' => $game->wordle_hour ?? 8,
+                'cooldown_hours' => $game->cooldown_hours ?? 8,
+                'wordle_interval_hours' => $game->wordle_interval_hours ?? 24,
                 'winner' => $game->winner ? [
                     'id' => $game->winner->id,
                     'name' => $game->winner->name,
@@ -278,6 +284,29 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.game', $game)
             ->with('success', 'Wordle woorden bijgewerkt');
+    }
+
+    public function updateGameSettings(Request $request, Game $game): RedirectResponse
+    {
+        if ($game->status === 'completed') {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Instellingen kunnen niet worden aangepast voor voltooide spellen');
+        }
+
+        $request->validate([
+            'cooldown_hours' => 'required|integer|in:4,6,8,12,24',
+            'wordle_interval_hours' => 'required|integer|in:8,12,24',
+        ]);
+
+        $game->update([
+            'cooldown_hours' => (int) $request->cooldown_hours,
+            'wordle_interval_hours' => (int) $request->wordle_interval_hours,
+        ]);
+
+        return redirect()
+            ->route('admin.game', $game)
+            ->with('success', 'Spelinstellingen bijgewerkt');
     }
 
     public function endGame(Request $request, Game $game): RedirectResponse
