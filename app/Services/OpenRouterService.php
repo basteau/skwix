@@ -26,7 +26,7 @@ class OpenRouterService
         $this->witModel = config('services.openrouter.wit_model') ?? $this->model;
     }
 
-    public function askQuestion(string $secretWord, string $question, ?string $wordDescription = null): array
+    public function askQuestion(string $secretWord, string $question, ?string $wordDescription = null, ?string $playerName = null): array
     {
         if (empty($this->apiKey)) {
             return [
@@ -86,7 +86,7 @@ class OpenRouterService
             $answer = $this->parseAnswer($rawContent);
 
             // Generate Boma-style wit in a separate call
-            $wit = $this->generateBomaWit($answer, $question);
+            $wit = $this->generateBomaWit($answer, $question, $playerName);
 
             return [
                 'success' => true,
@@ -157,7 +157,7 @@ PROMPT;
     /**
      * Generate a Boma-style witty response based on the answer type.
      */
-    public function generateBomaWit(string $answerType, ?string $question = null): ?string
+    public function generateBomaWit(string $answerType, ?string $question = null, ?string $playerName = null): ?string
     {
         if (empty($this->apiKey)) {
             return null;
@@ -174,6 +174,7 @@ PROMPT;
         };
 
         $questionContext = $question ? "De speler vroeg: \"{$question}\"" : '';
+        $playerContext = $playerName ? "De speler heet \"{$playerName}\"." : '';
 
         $extraInstruction = $isWinner
             ? 'Wees SUPER enthousiast, dit is een groot moment! Gebruik uitroeptekens!'
@@ -182,10 +183,10 @@ PROMPT;
         $prompt = <<<PROMPT
 Gij zijt Balthazar Boma van FC De Kampioenen - de praatjesmaker met de gouden tong.
 
-SITUATIE: Een raadspelletje. {$questionContext}
+SITUATIE: Een raadspelletje. {$playerContext} {$questionContext}
 Het antwoord is: {$answerMeaning}
 
-Geef een korte, gevatte reactie in Boma-stijl. Spreek de speler direct aan (gij/ge).
+Geef een korte, gevatte reactie in Boma-stijl. Spreek de speler direct aan (gij/ge), of gebruik hun naam.
 {$extraInstruction}
 
 STRENGE REGELS:
