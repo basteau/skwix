@@ -27,7 +27,6 @@ function Toaster({ ...props }: ToasterProps) {
             }}
             position="top-center"
             richColors
-            closeButton
             {...props}
         />
     );

@@ -130,6 +130,22 @@ export default function GuessPage({
         player?.cooldown_remaining ?? 0,
     );
 
+    // Dismiss notification on server (only called when user clicks "Begrepen")
+    const dismissNotificationOnServer = async (notificationId: number) => {
+        try {
+            await fetch(`/play/notification/${notificationId}/dismiss`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    Accept: 'application/json',
+                },
+            });
+        } catch {
+            // Silently fail
+        }
+    };
+
     // Show toast for new notifications on mount/update
     useEffect(() => {
         if (testMode?.active) return;
@@ -142,6 +158,10 @@ export default function GuessPage({
                     duration: 8000,
                     className:
                         'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700/30',
+                    action: {
+                        label: 'Begrepen',
+                        onClick: () => dismissNotificationOnServer(notification.id),
+                    },
                 });
             }
         });
