@@ -106,6 +106,10 @@ export function useNotifications({
                     duration: 8000,
                     className:
                         'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700/30',
+                    classNames: {
+                        actionButton:
+                            'bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-md px-3 py-1.5 transition-colors',
+                    },
                     action: {
                         label: 'Begrepen',
                         onClick: () =>
