@@ -815,8 +815,8 @@ export default function AdminGameDetail({
                                 </div>
                                 <p className="mb-4 text-sm text-muted-foreground">
                                     Stuur een bericht naar alle spelers. Het
-                                    bericht wordt als toast getoond en in de
-                                    chat weergegeven.
+                                    bericht wordt als toast getoond wanneer een
+                                    speler het spel opent.
                                 </p>
 
                                 {/* Add notification form */}
