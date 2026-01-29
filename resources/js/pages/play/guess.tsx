@@ -812,9 +812,9 @@ function QuestionBubble({
                         'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in',
                         isSabotaged && 'ring-2 ring-destructive/50',
                         isWinner
-                            ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600 dark:text-amber-400'
+                            ? 'bg-gradient-to-r from-amber-400/25 to-amber-500/15 text-amber-600'
                             : isFailed
-                              ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/10 text-amber-600 dark:text-amber-400'
+                              ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/10 text-amber-600'
                               : isYes
                                 ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
                                 : isUnclear
@@ -854,7 +854,7 @@ function QuestionBubble({
                         disabled={isRetrying}
                         className={cn(
                             'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-                            'border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                            'border border-amber-500/40 bg-amber-500/10 text-amber-600',
                             'transition-all duration-150 ease-out',
                             'hover:bg-amber-500/20 hover:border-amber-500/60 active:scale-95',
                             'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',

@@ -163,7 +163,7 @@ export default function PlayersPage({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setShowRevealModal(true)}
-                                className="h-9 gap-1.5 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400"
+                                className="h-9 gap-1.5 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
                             >
                                 <Eye className="size-4" />
                                 <span className="hidden sm:inline">
@@ -248,9 +248,9 @@ function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
             data-testid={`player-row-${player.id}`}
             className={cn(
                 'relative flex items-center gap-3 rounded-xl px-4 py-3 transition-all',
-                player.rank === 1 && 'bg-amber-50 dark:bg-amber-900/20',
-                player.rank === 2 && 'bg-zinc-50 dark:bg-zinc-800/30',
-                player.rank === 3 && 'bg-orange-50 dark:bg-orange-900/20',
+                player.rank === 1 && 'bg-amber-50',
+                player.rank === 2 && 'bg-zinc-50',
+                player.rank === 3 && 'bg-orange-50',
                 player.rank > 3 && 'bg-card',
                 player.is_current &&
                     'ring-2 ring-primary ring-offset-2 ring-offset-background',

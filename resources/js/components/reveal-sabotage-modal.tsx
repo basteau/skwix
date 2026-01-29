@@ -122,7 +122,7 @@ export function RevealSabotageModal({
 
                 <div className="px-6 pb-4">
                     <div className="rounded-lg bg-amber-500/5 p-3 text-sm">
-                        <p className="font-medium text-amber-600 dark:text-amber-400">
+                        <p className="font-medium text-amber-600">
                             Ben je gesaboteerd?
                         </p>
                         <p className="mt-1 text-muted-foreground">
