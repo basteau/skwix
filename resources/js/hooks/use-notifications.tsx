@@ -16,15 +16,22 @@ interface UseNotificationsOptions {
 
 /**
  * Track shown notification IDs per page session.
- * Uses performance.timeOrigin which is set once per page load,
- * ensuring toasts show again after refresh while preventing
- * duplicates during SPA navigation. Only clicking "Begrepen"
- * permanently dismisses via server-side tracking.
+ * Uses a combination of performance.timeOrigin and Date.now() to generate
+ * a unique session ID. This ensures toasts show again after refresh while
+ * preventing duplicates during SPA navigation.
+ *
+ * Note: performance.timeOrigin alone was insufficient because it may be cached
+ * by some browsers or bundlers. Adding Date.now() ensures uniqueness.
+ * Only clicking "Begrepen" permanently dismisses via server-side tracking.
  */
-const pageSessionId =
-    typeof performance !== 'undefined'
-        ? performance.timeOrigin.toString()
-        : Date.now().toString();
+const pageSessionId = (() => {
+    const timeOrigin =
+        typeof performance !== 'undefined'
+            ? performance.timeOrigin.toString()
+            : '0';
+    // Add Date.now() to ensure uniqueness even if timeOrigin is cached
+    return `${timeOrigin}-${Date.now()}`;
+})();
 const shownNotificationIds = new Set<string>();
 
 // Clear on bfcache restore (back/forward navigation)
@@ -82,7 +89,9 @@ export function useNotifications({
                 shownNotificationIds.add(key);
 
                 toast(notification.message, {
-                    // No ID - let our Set handle deduplication, Sonner's ID tracking persists unexpectedly
+                    // Use session-scoped ID to ensure toast shows after page refresh
+                    // Sonner's ID tracking can persist unexpectedly, so we include pageSessionId
+                    id: `notification-${pageSessionId}-${notification.id}`,
                     icon: <Lightbulb className="size-5 text-amber-500" />,
                     duration: 8000,
                     className:
