@@ -3,6 +3,8 @@ import { GameInfoButton } from '@/components/game-info-button';
 import { GameInfoModal, WORDLE_INFO } from '@/components/game-info-modal';
 import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
+import { WordlistSearchButton } from '@/components/wordlist-search-button';
+import { hasActiveWordlistFilters, WordlistSheet } from '@/components/wordlist-sheet';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
@@ -104,6 +106,7 @@ export default function WordlePage({
     const [showCelebration, setShowCelebration] = useState(false);
     const [displayPoints, setDisplayPoints] = useState(player?.points ?? 0);
     const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showWordlistSheet, setShowWordlistSheet] = useState(false);
     const [wasSuccessful, setWasSuccessful] = useState<boolean | null>(
         wordle?.was_successful ?? null,
     );
@@ -112,6 +115,10 @@ export default function WordlePage({
 
     const isCompleted = wordle?.completed ?? false;
     const isAvailable = wordle?.available ?? false;
+
+    // Player has played at least one game if they have any guesses or completion
+    const hasPlayedBefore = (wordle?.guesses?.length ?? 0) > 0 || isCompleted;
+    const activeFilters = hasActiveWordlistFilters();
 
     // Poll for game updates (game completion detection)
     useEffect(() => {
@@ -390,9 +397,16 @@ export default function WordlePage({
                         setGuesses([]);
                     }}
                     rightAction={
-                        <GameInfoButton
-                            onClick={() => setShowInfoModal(true)}
-                        />
+                        hasPlayedBefore ? (
+                            <WordlistSearchButton
+                                onClick={() => setShowWordlistSheet(true)}
+                                hasActiveFilters={activeFilters}
+                            />
+                        ) : (
+                            <GameInfoButton
+                                onClick={() => setShowInfoModal(true)}
+                            />
+                        )
                     }
                     leftContent={
                         <div className="flex items-center gap-2.5">
@@ -427,6 +441,12 @@ export default function WordlePage({
                     open={showInfoModal}
                     onOpenChange={setShowInfoModal}
                     content={WORDLE_INFO}
+                />
+
+                {/* Wordlist search sheet */}
+                <WordlistSheet
+                    open={showWordlistSheet}
+                    onOpenChange={setShowWordlistSheet}
                 />
 
                 {/* Message toast - only show when not in completed state (avoids duplicate with completion section) */}

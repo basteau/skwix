@@ -24,16 +24,62 @@ interface WordlistSheetProps {
 const MAX_DISPLAYED_WORDS = 100;
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const SEARCH_DEBOUNCE_MS = 150;
+export const WORDLIST_STORAGE_KEY = 'wordle-wordlist-filters';
+
+interface StoredFilters {
+    search: string;
+    mustContain: string[];
+    mustNotContain: string[];
+    filtersOpen: boolean;
+}
+
+function loadStoredFilters(): StoredFilters | null {
+    try {
+        const stored = sessionStorage.getItem(WORDLIST_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : null;
+    } catch {
+        return null;
+    }
+}
+
+function saveFilters(filters: StoredFilters): void {
+    try {
+        sessionStorage.setItem(WORDLIST_STORAGE_KEY, JSON.stringify(filters));
+    } catch {
+        // Ignore storage errors
+    }
+}
+
+export function hasActiveWordlistFilters(): boolean {
+    try {
+        const stored = sessionStorage.getItem(WORDLIST_STORAGE_KEY);
+        if (!stored) return false;
+        const filters = JSON.parse(stored);
+        return (
+            (filters.search?.length > 0) ||
+            (filters.mustContain?.length > 0) ||
+            (filters.mustNotContain?.length > 0)
+        );
+    } catch {
+        return false;
+    }
+}
 
 export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
     const [words, setWords] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [search, setSearch] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [mustContain, setMustContain] = useState<Set<string>>(new Set());
-    const [mustNotContain, setMustNotContain] = useState<Set<string>>(new Set());
-    const [filtersOpen, setFiltersOpen] = useState(false);
+
+    const initialFilters = useRef(loadStoredFilters());
+    const [search, setSearch] = useState(initialFilters.current?.search ?? '');
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [mustContain, setMustContain] = useState<Set<string>>(
+        () => new Set(initialFilters.current?.mustContain ?? [])
+    );
+    const [mustNotContain, setMustNotContain] = useState<Set<string>>(
+        () => new Set(initialFilters.current?.mustNotContain ?? [])
+    );
+    const [filtersOpen, setFiltersOpen] = useState(initialFilters.current?.filtersOpen ?? false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const hasActiveFilters = mustContain.size > 0 || mustNotContain.size > 0;
@@ -75,13 +121,19 @@ export function WordlistSheet({ open, onOpenChange }: WordlistSheetProps) {
         }
     }, [open, words.length, isLoading, fetchWordlist]);
 
+    // Persist filters to localStorage
+    useEffect(() => {
+        saveFilters({
+            search,
+            mustContain: [...mustContain],
+            mustNotContain: [...mustNotContain],
+            filtersOpen,
+        });
+    }, [search, mustContain, mustNotContain, filtersOpen]);
+
+    // Focus input when opening
     useEffect(() => {
         if (open) {
-            setSearch('');
-            setDebouncedSearch('');
-            setMustContain(new Set());
-            setMustNotContain(new Set());
-            setFiltersOpen(false);
             setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [open]);

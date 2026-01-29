@@ -230,4 +230,75 @@ describe('Wordle Controller', function () {
 
         Carbon::setTestNow();
     });
+
+    it('returns empty guesses for new player to show info button', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::now()->subDays(1),
+            'wordle_words' => ['crane', 'apple'],
+        ]);
+
+        Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+        ]);
+
+        $response = $this->actingAs($user)->get('/play/wordle');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('play/wordle')
+            ->where('wordle.guesses', [])
+        );
+
+        Carbon::setTestNow();
+    });
+
+    it('returns guesses for player with attempts to show wordlist button', function () {
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
+
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $game = Game::factory()->create([
+            'status' => 'active',
+            'starts_at' => Carbon::now()->subDays(1),
+            'wordle_words' => ['crane', 'apple'],
+        ]);
+
+        $player = Player::factory()->create([
+            'game_id' => $game->id,
+            'email' => 'test@example.com',
+        ]);
+
+        WordleAttempt::create([
+            'game_id' => $game->id,
+            'player_id' => $player->id,
+            'day_number' => 2,
+            'guesses' => [
+                ['word' => 'crane', 'result' => [
+                    ['letter' => 'c', 'status' => 'absent'],
+                    ['letter' => 'r', 'status' => 'absent'],
+                    ['letter' => 'a', 'status' => 'present'],
+                    ['letter' => 'n', 'status' => 'absent'],
+                    ['letter' => 'e', 'status' => 'present'],
+                ]],
+            ],
+            'completed' => false,
+            'points_earned' => 0,
+        ]);
+
+        $response = $this->actingAs($user)->get('/play/wordle');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('play/wordle')
+            ->has('wordle.guesses', 1)
+        );
+
+        Carbon::setTestNow();
+    });
 });
