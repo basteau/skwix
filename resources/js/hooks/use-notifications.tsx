@@ -105,13 +105,12 @@ export function useNotifications({
                         // Use session-scoped ID to ensure toast shows after page refresh
                         // Sonner's ID tracking can persist unexpectedly, so we include pageSessionId
                         id: `notification-${pageSessionId}-${notification.id}`,
-                        icon: <Lightbulb className="size-5 text-amber-500" />,
+                        icon: <Lightbulb className="size-5 text-primary" />,
                         duration: 8000,
-                        className:
-                            'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200',
+                        className: 'border-border bg-card',
                         classNames: {
                             actionButton:
-                                'bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-md px-3 py-1.5 transition-colors',
+                                'bg-primary hover:bg-primary-hover text-primary-foreground font-medium rounded-md px-3 py-1.5 transition-colors',
                         },
                         action: {
                             label: 'Begrepen',

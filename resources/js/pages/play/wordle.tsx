@@ -449,33 +449,33 @@ export default function WordlePage({
                     onOpenChange={setShowWordlistSheet}
                 />
 
-                {/* Message toast - only show when not in completed state (avoids duplicate with completion section) */}
-                {message && !isCompleted && (
-                    <div
-                        data-testid="wordle-message"
-                        className={cn(
-                            'mx-4 mt-3 rounded-lg px-4 py-2.5 text-center text-sm font-semibold',
-                            'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2',
-                            showCelebration
-                                ? 'bg-gradient-to-r from-success/15 to-success/5 text-success'
-                                : 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary',
-                        )}
-                    >
-                        {showCelebration && (
-                            <Sparkles className="mr-2 inline-block size-4" />
-                        )}
-                        {message}
-                    </div>
-                )}
-
                 {/* Grid */}
                 <div
                     data-testid="wordle-grid"
                     className={cn(
-                        'flex min-h-0 flex-1 flex-col items-center justify-center gap-1 sm:gap-1.5 px-4 py-4',
+                        'relative flex min-h-0 flex-1 flex-col items-center justify-center gap-1 sm:gap-1.5 px-4 py-4',
                         isCompleted && 'justify-start pt-4',
                     )}
                 >
+                    {/* Message toast - positioned as overlay at top of grid to avoid layout shift */}
+                    {message && !isCompleted && (
+                        <div
+                            data-testid="wordle-message"
+                            className={cn(
+                                'absolute left-1/2 top-4 z-10 -translate-x-1/2',
+                                'rounded-md px-4 py-2 text-center text-sm font-medium shadow-md',
+                                'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200',
+                                showCelebration
+                                    ? 'bg-success text-white'
+                                    : 'bg-destructive text-destructive-foreground',
+                            )}
+                        >
+                            {showCelebration && (
+                                <Sparkles className="mr-2 inline-block size-4" />
+                            )}
+                            {message}
+                        </div>
+                    )}
                     {[...Array(6)].map((_, rowIdx) => {
                         const guess = guesses[rowIdx];
                         const isCurrentRow =
