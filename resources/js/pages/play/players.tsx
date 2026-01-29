@@ -16,8 +16,9 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type {
+    NotificationItem} from '@/hooks/use-notifications';
 import {
-    NotificationItem,
     useNotifications,
 } from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';

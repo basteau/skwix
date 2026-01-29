@@ -7,13 +7,13 @@ import { PlayHeader } from '@/components/play-header';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/hooks/use-initials';
 import {
-    NotificationItem,
+    type NotificationItem,
     useNotifications,
 } from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
-import { Heart, Snowflake, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Heart, Snowflake, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface GuessResult {
@@ -107,6 +107,7 @@ export default function WordlePage({
     const [wasSuccessful, setWasSuccessful] = useState<boolean | null>(
         wordle?.was_successful ?? null,
     );
+    const [keyboardVisible, setKeyboardVisible] = useState(true);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const isCompleted = wordle?.completed ?? false;
@@ -592,25 +593,63 @@ export default function WordlePage({
 
                 {/* Keyboard */}
                 {isAvailable && !isCompleted && (
-                    <div className="shrink-0 border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 px-1 sm:px-2 pt-2 sm:pt-3 pb-2">
-                        <div className="mx-auto flex max-w-md flex-col gap-1 sm:gap-1.5">
-                            {KEYBOARD_ROWS.map((row, rowIdx) => (
-                                <div
-                                    key={rowIdx}
-                                    className="flex justify-center gap-1 sm:gap-1.5"
-                                >
-                                    {row.map((key) => (
-                                        <KeyboardKey
-                                            key={key}
-                                            keyVal={key}
-                                            state={states[key]}
-                                            onPress={handleKey}
-                                            disabled={isSubmitting}
-                                            testId={`wordle-key-${key}`}
-                                        />
-                                    ))}
+                    <div className="shrink-0 border-t border-border bg-gradient-to-b from-muted/30 to-muted/60">
+                        {/* Toggle button */}
+                        <button
+                            type="button"
+                            onClick={() => setKeyboardVisible(!keyboardVisible)}
+                            className={cn(
+                                'flex w-full items-center justify-center gap-1.5 py-1.5 text-xs text-muted-foreground/70',
+                                'transition-colors duration-150 hover:text-muted-foreground hover:bg-muted/30',
+                                'touch-manipulation [-webkit-tap-highlight-color:transparent]',
+                            )}
+                            aria-expanded={keyboardVisible}
+                            aria-controls="wordle-keyboard"
+                        >
+                            {keyboardVisible ? (
+                                <>
+                                    <ChevronDown className="size-3.5" />
+                                    <span>Verberg toetsenbord</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronUp className="size-3.5" />
+                                    <span>Toon toetsenbord</span>
+                                </>
+                            )}
+                        </button>
+
+                        {/* Keyboard container with grid animation */}
+                        <div
+                            id="wordle-keyboard"
+                            className={cn(
+                                'grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]',
+                                keyboardVisible ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+                            )}
+                        >
+                            <div className="overflow-hidden">
+                                <div className="px-1 sm:px-2 pt-1 sm:pt-2 pb-2">
+                                    <div className="mx-auto flex max-w-md flex-col gap-1 sm:gap-1.5">
+                                        {KEYBOARD_ROWS.map((row, rowIdx) => (
+                                            <div
+                                                key={rowIdx}
+                                                className="flex justify-center gap-1 sm:gap-1.5"
+                                            >
+                                                {row.map((key) => (
+                                                    <KeyboardKey
+                                                        key={key}
+                                                        keyVal={key}
+                                                        state={states[key]}
+                                                        onPress={handleKey}
+                                                        disabled={isSubmitting}
+                                                        testId={`wordle-key-${key}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
                 )}

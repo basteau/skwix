@@ -7,8 +7,9 @@ import { PlayerAvatar } from '@/components/player-avatar';
 import { Button } from '@/components/ui/button';
 import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 import { getInitials } from '@/hooks/use-initials';
+import type {
+    NotificationItem} from '@/hooks/use-notifications';
 import {
-    NotificationItem,
     useNotifications,
 } from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
@@ -17,7 +18,6 @@ import { Head, router } from '@inertiajs/react';
 import {
     AlertTriangle,
     Check,
-    Lightbulb,
     RefreshCw,
     Search,
     Skull,
@@ -195,7 +195,7 @@ export default function GuessPage({
         return () => {
             if (pollRef.current) clearInterval(pollRef.current);
         };
-    }, [testMode?.active, error, game?.status]);
+    }, [testMode?.active, error, game?.status, game?.winner_id, player?.id]);
 
     // Sync questions from props (for polling updates)
     useEffect(() => {

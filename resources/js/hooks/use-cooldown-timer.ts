@@ -7,8 +7,10 @@ export function useCooldownTimer(initialSeconds: number = 0) {
         setRemainingSeconds(initialSeconds);
     }, [initialSeconds]);
 
+    const isActive = remainingSeconds > 0;
+
     useEffect(() => {
-        if (remainingSeconds <= 0) return;
+        if (!isActive) return;
 
         const interval = setInterval(() => {
             setRemainingSeconds((prev) => {
@@ -21,7 +23,7 @@ export function useCooldownTimer(initialSeconds: number = 0) {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [remainingSeconds > 0]);
+    }, [isActive]);
 
     return {
         remainingSeconds,

@@ -4,8 +4,9 @@ import { NoActiveGame } from '@/components/no-active-game';
 import { PlayHeader } from '@/components/play-header';
 
 import { Button } from '@/components/ui/button';
+import type {
+    NotificationItem} from '@/hooks/use-notifications';
 import {
-    NotificationItem,
     useNotifications,
 } from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
