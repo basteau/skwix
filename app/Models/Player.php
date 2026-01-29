@@ -21,6 +21,7 @@ class Player extends Model
         'invite_code',
         'joined_at',
         'last_guess_at',
+        'cooldown_ends_at',
     ];
 
     protected function casts(): array
@@ -29,46 +30,53 @@ class Player extends Model
             'joined_at' => 'datetime',
             'points' => 'integer',
             'last_guess_at' => 'datetime',
+            'cooldown_ends_at' => 'datetime',
         ];
     }
 
     public function isOnCooldown(): bool
     {
-        if (! $this->last_guess_at) {
+        if (! $this->cooldown_ends_at) {
             return false;
         }
 
-        $cooldownHours = config('game.guess_cooldown_hours', 8);
-
-        return $this->last_guess_at->copy()->addHours($cooldownHours)->isFuture();
+        return $this->cooldown_ends_at->isFuture();
     }
 
     public function getCooldownRemainingSeconds(): int
     {
-        if (! $this->last_guess_at) {
+        if (! $this->cooldown_ends_at || $this->cooldown_ends_at->isPast()) {
             return 0;
         }
 
-        $cooldownHours = config('game.guess_cooldown_hours', 8);
-        $cooldownEndsAt = $this->last_guess_at->copy()->addHours($cooldownHours);
-
-        if ($cooldownEndsAt->isPast()) {
-            return 0;
-        }
-
-        return (int) now()->diffInSeconds($cooldownEndsAt);
+        return (int) now()->diffInSeconds($this->cooldown_ends_at);
     }
 
     public function getCooldownEndsAt(): ?Carbon
     {
-        if (! $this->last_guess_at) {
+        if (! $this->cooldown_ends_at || $this->cooldown_ends_at->isPast()) {
             return null;
         }
 
-        $cooldownHours = config('game.guess_cooldown_hours', 8);
-        $cooldownEndsAt = Carbon::parse($this->last_guess_at)->addHours($cooldownHours);
+        return Carbon::parse($this->cooldown_ends_at);
+    }
 
-        return $cooldownEndsAt->isFuture() ? $cooldownEndsAt : null;
+    public function getCooldownHours(): int
+    {
+        return $this->game?->cooldown_hours ?? config('game.guess_cooldown_hours', 8);
+    }
+
+    /**
+     * Start a new cooldown for this player.
+     * Sets both last_guess_at and cooldown_ends_at.
+     */
+    public function startCooldown(): void
+    {
+        $cooldownHours = $this->getCooldownHours();
+        $this->update([
+            'last_guess_at' => now(),
+            'cooldown_ends_at' => now()->addHours($cooldownHours),
+        ]);
     }
 
     public function game(): BelongsTo

@@ -12,7 +12,7 @@ class NotifyWordleAvailable extends Command
 {
     protected $signature = 'game:notify-wordle';
 
-    protected $description = 'Notify players that daily Wordle is available (runs every minute, sends once per game per day)';
+    protected $description = 'Notify players that Wordle is available (runs every minute, sends once per wordle unlock)';
 
     public function handle(GameService $gameService): int
     {
@@ -23,33 +23,54 @@ class NotifyWordleAvailable extends Command
         }
 
         $currentHour = $now->hour;
-        $today = $now->toDateString();
 
-        $games = Game::where('status', 'active')
-            ->where('wordle_hour', $currentHour)
-            ->get();
+        $games = Game::where('status', 'active')->get();
 
         if ($games->isEmpty()) {
-            $this->info("No active games with wordle_hour={$currentHour}.");
+            $this->info('No active games.');
 
             return self::SUCCESS;
         }
 
         foreach ($games as $game) {
-            $cacheKey = "wordle_notify:{$game->id}:{$today}";
+            if (! $this->isWordleUnlockHour($game, $currentHour)) {
+                continue;
+            }
+
+            $wordleNumber = $gameService->getWordleNumber($game);
+            $cacheKey = "wordle_notify:{$game->id}:{$wordleNumber}";
 
             if (Cache::has($cacheKey)) {
-                $this->info("Game #{$game->id}: Already notified today.");
+                $this->info("Game #{$game->id}: Already notified for wordle #{$wordleNumber}.");
 
                 continue;
             }
 
-            Cache::put($cacheKey, true, now()->addHours(26));
+            $intervalHours = $game->wordle_interval_hours ?? 24;
+            Cache::put($cacheKey, true, now()->addHours($intervalHours + 2));
 
-            $dayNumber = $gameService->getDayNumber($game);
-            $this->info("Game #{$game->id}: Day {$dayNumber} Wordle notification sent.");
+            // Update next_wordle_at for the next interval
+            $gameService->updateNextWordleTime($game);
+
+            $this->info("Game #{$game->id}: Wordle #{$wordleNumber} notification sent (interval: {$intervalHours}h).");
         }
 
         return self::SUCCESS;
+    }
+
+    private function isWordleUnlockHour(Game $game, int $currentHour): bool
+    {
+        $wordleHour = $game->wordle_hour ?? 8;
+        $intervalHours = $game->wordle_interval_hours ?? 24;
+
+        $unlockHours = [];
+        $hour = $wordleHour;
+
+        for ($i = 0; $i < 24 / $intervalHours; $i++) {
+            $unlockHours[] = $hour % 24;
+            $hour += $intervalHours;
+        }
+
+        return in_array($currentHour, $unlockHours, true);
     }
 }

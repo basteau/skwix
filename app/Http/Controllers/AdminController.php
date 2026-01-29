@@ -91,6 +91,8 @@ class AdminController extends Controller
             'word_description' => 'nullable|string|max:500',
             'starts_at' => 'required|date|after:now',
             'wordle_hour' => 'required|integer|min:0|max:23',
+            'cooldown_hours' => 'nullable|integer|in:4,6,8,12,24',
+            'wordle_interval_hours' => 'nullable|integer|in:8,12,24',
             'starting_points' => 'nullable|integer|min:0|max:10000',
             'players' => 'required|array|min:2|max:8',
             'players.*.name' => 'required|string|max:100',
@@ -117,6 +119,8 @@ class AdminController extends Controller
                 'ends_at' => null,
                 'wordle_words' => $this->wordlistService->getRandomWords(60),
                 'wordle_hour' => (int) $request->wordle_hour,
+                'cooldown_hours' => (int) ($request->cooldown_hours ?? 8),
+                'wordle_interval_hours' => (int) ($request->wordle_interval_hours ?? 24),
                 'starting_points' => $startingPoints,
             ]);
 
@@ -240,6 +244,8 @@ class AdminController extends Controller
                 'ends_at' => $game->ends_at?->toISOString(),
                 'wordle_words' => $game->wordle_words ?? [],
                 'wordle_hour' => $game->wordle_hour ?? 8,
+                'cooldown_hours' => $game->cooldown_hours ?? 8,
+                'wordle_interval_hours' => $game->wordle_interval_hours ?? 24,
                 'winner' => $game->winner ? [
                     'id' => $game->winner->id,
                     'name' => $game->winner->name,
@@ -278,6 +284,97 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.game', $game)
             ->with('success', 'Wordle woorden bijgewerkt');
+    }
+
+    public function updateGameSettings(Request $request, Game $game): RedirectResponse
+    {
+        if ($game->status === 'completed') {
+            return redirect()
+                ->route('admin.game', $game)
+                ->with('error', 'Instellingen kunnen niet worden aangepast voor voltooide spellen');
+        }
+
+        $request->validate([
+            'cooldown_hours' => 'required|integer|in:4,6,8,12,24',
+            'wordle_interval_hours' => 'required|integer|in:8,12,24',
+        ]);
+
+        $oldCooldownHours = $game->cooldown_hours;
+        $newCooldownHours = (int) $request->cooldown_hours;
+        $oldWordleInterval = $game->wordle_interval_hours;
+        $newWordleInterval = (int) $request->wordle_interval_hours;
+
+        // Update game settings
+        $game->update([
+            'cooldown_hours' => $newCooldownHours,
+            'wordle_interval_hours' => $newWordleInterval,
+        ]);
+
+        // Apply cooldown changes to players with immediate effect
+        // Rule: if new cooldown is SHORTER, reduce remaining cooldown time
+        // Rule: if new cooldown is LONGER, keep original end time (don't extend)
+        if ($newCooldownHours < $oldCooldownHours) {
+            $this->reducePlayerCooldowns($game, $newCooldownHours);
+        }
+
+        // Apply wordle interval changes with immediate effect
+        // Rule: if new interval is SHORTER, reduce time until next wordle
+        // Rule: if new interval is LONGER, keep original next_wordle_at (don't skip words)
+        if ($newWordleInterval !== $oldWordleInterval) {
+            $this->updateNextWordleTime($game, $newWordleInterval);
+        }
+
+        return redirect()
+            ->route('admin.game', $game)
+            ->with('success', 'Spelinstellingen bijgewerkt');
+    }
+
+    /**
+     * Reduce cooldown_ends_at for all players who would benefit from shorter cooldown.
+     * Only affects players currently on cooldown whose remaining time exceeds new cooldown.
+     */
+    private function reducePlayerCooldowns(Game $game, int $newHours): void
+    {
+        // Get all players currently on cooldown
+        $game->players()
+            ->whereNotNull('cooldown_ends_at')
+            ->where('cooldown_ends_at', '>', now())
+            ->get()
+            ->each(function (Player $player) use ($newHours) {
+                // Calculate what the new cooldown_ends_at would be
+                $newCooldownEndsAt = $player->last_guess_at
+                    ? $player->last_guess_at->copy()->addHours($newHours)
+                    : null;
+
+                // Only reduce if the new end time is earlier than current
+                if ($newCooldownEndsAt && $newCooldownEndsAt->lt($player->cooldown_ends_at)) {
+                    $player->update(['cooldown_ends_at' => $newCooldownEndsAt]);
+                }
+            });
+    }
+
+    /**
+     * Update next_wordle_at when interval changes.
+     * Only reduces time, never extends (to prevent skipping words).
+     * For existing games without next_wordle_at, initializes it.
+     */
+    private function updateNextWordleTime(Game $game, int $newInterval): void
+    {
+        $gameService = app(\App\Services\GameService::class);
+        $lastUnlock = $gameService->getLastWordleUnlockTime($game);
+        $newNextWordle = $lastUnlock->copy()->addHours($newInterval);
+
+        // If next_wordle_at is not set (existing game before migration), initialize it
+        if (! $game->next_wordle_at) {
+            $game->update(['next_wordle_at' => $newNextWordle]);
+
+            return;
+        }
+
+        // Only reduce if new time is earlier (never extend to prevent skipping words)
+        if ($newNextWordle->lt($game->next_wordle_at)) {
+            $game->update(['next_wordle_at' => $newNextWordle]);
+        }
     }
 
     public function endGame(Request $request, Game $game): RedirectResponse

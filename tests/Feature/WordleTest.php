@@ -55,14 +55,20 @@ describe('WordleService', function () {
 
 describe('Wordle Controller', function () {
     it('shows wordle page for authenticated user with active game', function () {
+        // Set time to Jan 24 10:00 Brussels
         Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 
         $user = User::factory()->create(['email' => 'test@example.com']);
 
+        // Game started Jan 23 at 07:00 (before wordle_hour 8)
+        // First wordle unlock: Jan 23 08:00 -> word 'crane' (day 1)
+        // At Jan 24 10:00 -> 26 hours since first unlock -> day 2, word 'apple'
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         $player = Player::factory()->create([
@@ -88,14 +94,20 @@ describe('Wordle Controller', function () {
     });
 
     it('allows submitting a guess', function () {
+        // Set time to Jan 24 10:00 Brussels
         Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 
         $user = User::factory()->create(['email' => 'test@example.com']);
 
+        // Game started Jan 23 at 07:00 (before wordle_hour 8)
+        // First wordle unlock: Jan 23 08:00 -> word 'crane' (day 1)
+        // At Jan 24 10:00 -> 26 hours since first unlock -> day 2, word 'apple'
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         $player = Player::factory()->create([
@@ -130,14 +142,19 @@ describe('Wordle Controller', function () {
     });
 
     it('awards 17 points for solving in 2 guesses', function () {
+        // Set time to Jan 24 10:00 Brussels
         Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
 
         $user = User::factory()->create(['email' => 'test@example.com']);
 
+        // Game started Jan 23 at 07:00 (before wordle_hour 8)
+        // At Jan 24 10:00 -> day 2, word 'apple'
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         $player = Player::factory()->create([
@@ -146,14 +163,14 @@ describe('Wordle Controller', function () {
             'points' => 0,
         ]);
 
-        // First guess (wrong)
+        // First guess (wrong - 'crane' is day 1's word, not day 2's)
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
             'guess' => 'crane',
         ]);
         $response->assertOk();
         $response->assertJson(['correct' => false, 'completed' => false]);
 
-        // Second guess (correct)
+        // Second guess (correct - 'apple' is day 2's word)
         $response = $this->actingAs($user)->postJson('/play/wordle/guess', [
             'guess' => 'apple',
         ]);
@@ -177,8 +194,10 @@ describe('Wordle Controller', function () {
 
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         Player::factory()->create([
@@ -201,10 +220,13 @@ describe('Wordle Controller', function () {
 
         $user = User::factory()->create(['email' => 'test@example.com']);
 
+        // Game started Jan 23 at 07:00 -> at Jan 24 10:00, day 2
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         $player = Player::factory()->create([
@@ -212,6 +234,7 @@ describe('Wordle Controller', function () {
             'email' => 'test@example.com',
         ]);
 
+        // Create completed attempt for day 2
         WordleAttempt::create([
             'game_id' => $game->id,
             'player_id' => $player->id,
@@ -238,8 +261,10 @@ describe('Wordle Controller', function () {
 
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         Player::factory()->create([
@@ -263,10 +288,13 @@ describe('Wordle Controller', function () {
 
         $user = User::factory()->create(['email' => 'test@example.com']);
 
+        // Game started Jan 23 at 07:00 -> at Jan 24 10:00, day 2
         $game = Game::factory()->create([
             'status' => 'active',
-            'starts_at' => Carbon::now()->subDays(1),
+            'starts_at' => Carbon::create(2026, 1, 23, 7, 0, 0, 'Europe/Brussels'),
             'wordle_words' => ['crane', 'apple'],
+            'wordle_hour' => 8,
+            'wordle_interval_hours' => 24,
         ]);
 
         $player = Player::factory()->create([
@@ -274,6 +302,7 @@ describe('Wordle Controller', function () {
             'email' => 'test@example.com',
         ]);
 
+        // Create attempt for day 2 (current day)
         WordleAttempt::create([
             'game_id' => $game->id,
             'player_id' => $player->id,

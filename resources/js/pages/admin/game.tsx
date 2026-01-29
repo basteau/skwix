@@ -29,6 +29,8 @@ import {
     AlertTriangle,
     Bell,
     CheckCircle2,
+    ChevronDown,
+    ChevronUp,
     Lightbulb,
     Loader2,
     Mail,
@@ -66,6 +68,9 @@ interface GameData {
     starts_at: string | null;
     ends_at: string | null;
     wordle_words: string[];
+    wordle_hour: number;
+    cooldown_hours: number;
+    wordle_interval_hours: number;
     winner: { id: number; name: string } | null;
 }
 
@@ -75,6 +80,20 @@ interface NotificationData {
     is_active: boolean;
     created_at: string;
 }
+
+const COOLDOWN_OPTIONS = [
+    { value: 4, label: '4 uur' },
+    { value: 6, label: '6 uur' },
+    { value: 8, label: '8 uur' },
+    { value: 12, label: '12 uur' },
+    { value: 24, label: '24 uur' },
+];
+
+const WORDLE_INTERVAL_OPTIONS = [
+    { value: 8, label: 'Om de 8 uur (3x per dag)' },
+    { value: 12, label: 'Om de 12 uur (2x per dag)' },
+    { value: 24, label: 'Dagelijks' },
+];
 
 interface Props {
     game: GameData;
@@ -104,6 +123,12 @@ export default function AdminGameDetail({
     const [resendingPlayerId, setResendingPlayerId] = useState<number | null>(
         null,
     );
+    const [cooldownHours, setCooldownHours] = useState(game.cooldown_hours);
+    const [wordleIntervalHours, setWordleIntervalHours] = useState(
+        game.wordle_interval_hours,
+    );
+    const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+    const [wordleWordsExpanded, setWordleWordsExpanded] = useState(false);
 
     // Notification state
     const [notifications, setNotifications] =
@@ -373,6 +398,24 @@ export default function AdminGameDetail({
         [game.id, deletingNotificationId],
     );
 
+    const handleSaveSettings = useCallback(() => {
+        setIsUpdatingSettings(true);
+        router.put(
+            `/admin/game/${game.id}/settings`,
+            {
+                cooldown_hours: cooldownHours,
+                wordle_interval_hours: wordleIntervalHours,
+            },
+            {
+                onFinish: () => setIsUpdatingSettings(false),
+            },
+        );
+    }, [game.id, cooldownHours, wordleIntervalHours]);
+
+    const hasSettingsChanged =
+        cooldownHours !== game.cooldown_hours ||
+        wordleIntervalHours !== game.wordle_interval_hours;
+
     const startsAt = game.starts_at ? new Date(game.starts_at) : null;
     const endsAt = game.ends_at ? new Date(game.ends_at) : null;
 
@@ -565,19 +608,144 @@ export default function AdminGameDetail({
                             </div>
                         </section>
 
-                        {/* Wordle Words */}
+                        {/* Game Settings */}
                         <section className="rounded-lg border border-border bg-card p-6">
                             <h2 className="mb-4 text-lg font-semibold text-foreground">
-                                Wordle Woorden
+                                Spelinstellingen
                             </h2>
-                            {game.status !== 'draft' && (
-                                <p className="mb-4 text-sm text-muted-foreground">
-                                    {game.status === 'completed'
-                                        ? 'Wordle woorden kunnen niet meer worden aangepast na afloop van het spel.'
-                                        : 'Wordle woorden kunnen niet meer worden aangepast nadat uitnodigingen zijn verstuurd.'}
-                                </p>
+                            {game.status === 'completed' ? (
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <span className="text-sm text-muted-foreground">
+                                            Vraag cooldown
+                                        </span>
+                                        <p className="font-medium">
+                                            {game.cooldown_hours} uur
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-muted-foreground">
+                                            Wordle interval
+                                        </span>
+                                        <p className="font-medium">
+                                            {game.wordle_interval_hours === 24
+                                                ? 'Dagelijks'
+                                                : `Om de ${game.wordle_interval_hours} uur`}
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="mb-4 text-sm text-muted-foreground">
+                                        Deze instellingen kunnen ook tijdens een
+                                        actief spel worden aangepast.
+                                    </p>
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium text-foreground">
+                                                Vraag cooldown
+                                            </label>
+                                            <select
+                                                value={cooldownHours}
+                                                onChange={(e) =>
+                                                    setCooldownHours(
+                                                        parseInt(
+                                                            e.target.value,
+                                                            10,
+                                                        ),
+                                                    )
+                                                }
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                            >
+                                                {COOLDOWN_OPTIONS.map((opt) => (
+                                                    <option
+                                                        key={opt.value}
+                                                        value={opt.value}
+                                                    >
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                Wachttijd tussen vragen stellen
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium text-foreground">
+                                                Wordle interval
+                                            </label>
+                                            <select
+                                                value={wordleIntervalHours}
+                                                onChange={(e) =>
+                                                    setWordleIntervalHours(
+                                                        parseInt(
+                                                            e.target.value,
+                                                            10,
+                                                        ),
+                                                    )
+                                                }
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                            >
+                                                {WORDLE_INTERVAL_OPTIONS.map(
+                                                    (opt) => (
+                                                        <option
+                                                            key={opt.value}
+                                                            value={opt.value}
+                                                        >
+                                                            {opt.label}
+                                                        </option>
+                                                    ),
+                                                )}
+                                            </select>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                Hoe vaak een nieuwe Wordle
+                                                beschikbaar komt
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {hasSettingsChanged && (
+                                        <Button
+                                            onClick={handleSaveSettings}
+                                            disabled={isUpdatingSettings}
+                                            className="mt-4"
+                                        >
+                                            {isUpdatingSettings
+                                                ? 'Opslaan...'
+                                                : 'Instellingen Opslaan'}
+                                        </Button>
+                                    )}
+                                </>
                             )}
-                            <div className="grid gap-3 sm:grid-cols-3">
+                        </section>
+
+                        {/* Wordle Words */}
+                        <section className="rounded-lg border border-border bg-card p-6">
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setWordleWordsExpanded(!wordleWordsExpanded)
+                                }
+                                className="flex w-full items-center justify-between text-left"
+                            >
+                                <h2 className="text-lg font-semibold text-foreground">
+                                    Wordle Woorden ({wordleWords.length})
+                                </h2>
+                                {wordleWordsExpanded ? (
+                                    <ChevronUp className="size-5 text-muted-foreground" />
+                                ) : (
+                                    <ChevronDown className="size-5 text-muted-foreground" />
+                                )}
+                            </button>
+                            {wordleWordsExpanded && (
+                                <>
+                                    {game.status !== 'draft' && (
+                                        <p className="mt-4 text-sm text-muted-foreground">
+                                            {game.status === 'completed'
+                                                ? 'Wordle woorden kunnen niet meer worden aangepast na afloop van het spel.'
+                                                : 'Wordle woorden kunnen niet meer worden aangepast nadat uitnodigingen zijn verstuurd.'}
+                                        </p>
+                                    )}
+                                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
                                 {wordleWords.map((word, i) => {
                                     const validation = wordValidations[i];
                                     const showStatus =
@@ -666,17 +834,19 @@ export default function AdminGameDetail({
                                         </div>
                                     );
                                 })}
-                            </div>
-                            {game.status === 'draft' && (
-                                <Button
-                                    onClick={handleSaveWordleWords}
-                                    disabled={isUpdatingWords}
-                                    className="mt-4"
-                                >
-                                    {isUpdatingWords
-                                        ? 'Opslaan...'
-                                        : 'Woorden Opslaan'}
-                                </Button>
+                                    </div>
+                                    {game.status === 'draft' && (
+                                        <Button
+                                            onClick={handleSaveWordleWords}
+                                            disabled={isUpdatingWords}
+                                            className="mt-4"
+                                        >
+                                            {isUpdatingWords
+                                                ? 'Opslaan...'
+                                                : 'Woorden Opslaan'}
+                                        </Button>
+                                    )}
+                                </>
                             )}
                         </section>
 

@@ -216,7 +216,7 @@ class GuessController extends Controller
         $wasSabotaged = false;
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answer, $wit, &$wasSabotaged) {
             $player->decrement('points', config('game.guess_cost'));
-            $player->update(['last_guess_at' => now()]);
+            $player->startCooldown();
 
             $questionRecord = Question::create([
                 'game_id' => $game->id,
@@ -367,7 +367,7 @@ class GuessController extends Controller
         // Deduct points and save the question
         $savedQuestion = \DB::transaction(function () use ($game, $player, $question, $answerType, $guessedWord, $wit) {
             $player->decrement('points', config('game.guess_cost'));
-            $player->update(['last_guess_at' => now()]);
+            $player->startCooldown();
 
             return Question::create([
                 'game_id' => $game->id,
