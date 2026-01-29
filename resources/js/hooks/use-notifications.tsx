@@ -1,7 +1,7 @@
 import { toast } from '@/components/ui/sonner';
 import { getCsrfToken } from '@/lib/utils';
 import { Lightbulb } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export interface NotificationItem {
     id: number;
@@ -78,9 +78,19 @@ export function useNotifications({
         }
     };
 
+    // Track pending timeouts for cleanup
+    const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
+
     // Show toast for new notifications
+    // Uses setTimeout to defer toast calls - this is a known workaround for Sonner
+    // not showing toasts when called during React's initial render/hydration phase.
+    // See: https://github.com/emilkowalski/sonner/issues/168
     useEffect(() => {
         if (!enabled) return;
+
+        // Clear any pending timeouts from previous renders
+        timeoutRefs.current.forEach(clearTimeout);
+        timeoutRefs.current = [];
 
         notifications.forEach((notification) => {
             const key = getNotificationKey(notification.id);
@@ -88,25 +98,36 @@ export function useNotifications({
                 // Mark as shown immediately to prevent duplicates during SPA navigation
                 shownNotificationIds.add(key);
 
-                toast(notification.message, {
-                    // Use session-scoped ID to ensure toast shows after page refresh
-                    // Sonner's ID tracking can persist unexpectedly, so we include pageSessionId
-                    id: `notification-${pageSessionId}-${notification.id}`,
-                    icon: <Lightbulb className="size-5 text-amber-500" />,
-                    duration: 8000,
-                    className:
-                        'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700/30',
-                    classNames: {
-                        actionButton:
-                            'bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-md px-3 py-1.5 transition-colors',
-                    },
-                    action: {
-                        label: 'Begrepen',
-                        onClick: () =>
-                            dismissNotificationOnServer(notification.id),
-                    },
-                });
+                // Defer toast call to next event loop tick to ensure Sonner is ready
+                // This fixes the issue where toasts don't appear after page refresh
+                const timeoutId = setTimeout(() => {
+                    toast(notification.message, {
+                        // Use session-scoped ID to ensure toast shows after page refresh
+                        // Sonner's ID tracking can persist unexpectedly, so we include pageSessionId
+                        id: `notification-${pageSessionId}-${notification.id}`,
+                        icon: <Lightbulb className="size-5 text-amber-500" />,
+                        duration: 8000,
+                        className:
+                            'bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700/30',
+                        classNames: {
+                            actionButton:
+                                'bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-md px-3 py-1.5 transition-colors',
+                        },
+                        action: {
+                            label: 'Begrepen',
+                            onClick: () =>
+                                dismissNotificationOnServer(notification.id),
+                        },
+                    });
+                }, 0);
+
+                timeoutRefs.current.push(timeoutId);
             }
         });
+
+        // Cleanup timeouts on unmount
+        return () => {
+            timeoutRefs.current.forEach(clearTimeout);
+        };
     }, [notifications, enabled]);
 }
