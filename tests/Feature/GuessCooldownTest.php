@@ -13,6 +13,7 @@ beforeEach(function () {
         'email' => $this->user->email,
         'points' => 100,
         'last_guess_at' => null,
+        'cooldown_ends_at' => null,
     ]);
 
     Http::fake([
@@ -29,7 +30,11 @@ it('allows asking question when no previous guess', function () {
 });
 
 it('blocks question when cooldown is active', function () {
-    $this->player->update(['last_guess_at' => now()->subHours(2)]);
+    $cooldownHours = $this->game->cooldown_hours ?? config('game.guess_cooldown_hours', 8);
+    $this->player->update([
+        'last_guess_at' => now()->subHours(2),
+        'cooldown_ends_at' => now()->subHours(2)->addHours($cooldownHours),
+    ]);
     $this->player->refresh();
 
     expect($this->player->isOnCooldown())->toBeTrue();
@@ -46,7 +51,10 @@ it('blocks question when cooldown is active', function () {
 
 it('allows question after cooldown expires', function () {
     $cooldownHours = config('game.guess_cooldown_hours', 8);
-    $this->player->update(['last_guess_at' => now()->subHours($cooldownHours + 1)]);
+    $this->player->update([
+        'last_guess_at' => now()->subHours($cooldownHours + 1),
+        'cooldown_ends_at' => now()->subHours(1), // Already expired
+    ]);
 
     expect($this->player->isOnCooldown())->toBeFalse();
     expect($this->player->getCooldownRemainingSeconds())->toBe(0);
@@ -56,9 +64,12 @@ it('allows question after cooldown expires', function () {
 it('calculates cooldown remaining seconds correctly', function () {
     Carbon::setTestNow(now());
 
-    $this->player->update(['last_guess_at' => now()->subHours(4)]);
+    $cooldownHours = $this->game->cooldown_hours ?? config('game.guess_cooldown_hours', 8);
+    $this->player->update([
+        'last_guess_at' => now()->subHours(4),
+        'cooldown_ends_at' => now()->subHours(4)->addHours($cooldownHours),
+    ]);
 
-    $cooldownHours = config('game.guess_cooldown_hours', 8);
     $expectedRemaining = ($cooldownHours - 4) * 3600;
 
     $remaining = $this->player->getCooldownRemainingSeconds();
@@ -70,7 +81,11 @@ it('calculates cooldown remaining seconds correctly', function () {
 });
 
 it('returns cooldown info in show endpoint', function () {
-    $this->player->update(['last_guess_at' => now()->subHours(2)]);
+    $cooldownHours = $this->game->cooldown_hours ?? config('game.guess_cooldown_hours', 8);
+    $this->player->update([
+        'last_guess_at' => now()->subHours(2),
+        'cooldown_ends_at' => now()->subHours(2)->addHours($cooldownHours),
+    ]);
 
     $response = $this->actingAs($this->user)->get('/play/guess');
 

@@ -25,6 +25,7 @@ class Game extends Model
         'wordle_hour',
         'cooldown_hours',
         'wordle_interval_hours',
+        'next_wordle_at',
         'starting_points',
     ];
 
@@ -37,6 +38,7 @@ class Game extends Model
             'wordle_hour' => 'integer',
             'cooldown_hours' => 'integer',
             'wordle_interval_hours' => 'integer',
+            'next_wordle_at' => 'datetime',
             'starting_points' => 'integer',
         ];
     }

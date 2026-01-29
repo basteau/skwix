@@ -100,6 +100,12 @@ class GameService
 
     public function getNextWordleUnlockTime(Game $game): Carbon
     {
+        // If next_wordle_at is set and in the future, use it
+        if ($game->next_wordle_at && $game->next_wordle_at->isFuture()) {
+            return Carbon::parse($game->next_wordle_at)->setTimezone(self::TIMEZONE);
+        }
+
+        // Otherwise calculate from schedule
         $intervalHours = $game->wordle_interval_hours ?? 24;
         $now = Carbon::now(self::TIMEZONE);
         $firstUnlock = $this->getFirstWordleUnlockTime($game);
@@ -111,6 +117,21 @@ class GameService
         $lastUnlock = $this->getLastWordleUnlockTime($game);
 
         return $lastUnlock->copy()->addHours($intervalHours);
+    }
+
+    /**
+     * Update next_wordle_at after a wordle interval passes.
+     * Called when the current wordle period ends.
+     */
+    public function updateNextWordleTime(Game $game): void
+    {
+        $intervalHours = $game->wordle_interval_hours ?? 24;
+
+        // If next_wordle_at is in the past or not set, calculate from last unlock + interval
+        if (! $game->next_wordle_at || $game->next_wordle_at->isPast()) {
+            $lastUnlock = $this->getLastWordleUnlockTime($game);
+            $game->update(['next_wordle_at' => $lastUnlock->copy()->addHours($intervalHours)]);
+        }
     }
 
     public function getCurrentWordleWord(Game $game): ?string
@@ -156,6 +177,12 @@ class GameService
         $now = Carbon::now(self::TIMEZONE);
         if ($game->starts_at && $now->gte($game->starts_at)) {
             $game->status = 'active';
+
+            // Set initial next_wordle_at if not already set
+            if (! $game->next_wordle_at) {
+                $game->next_wordle_at = $this->getNextWordleUnlockTime($game);
+            }
+
             $game->save();
         }
 

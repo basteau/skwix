@@ -49,6 +49,9 @@ class NotifyWordleAvailable extends Command
             $intervalHours = $game->wordle_interval_hours ?? 24;
             Cache::put($cacheKey, true, now()->addHours($intervalHours + 2));
 
+            // Update next_wordle_at for the next interval
+            $gameService->updateNextWordleTime($game);
+
             $this->info("Game #{$game->id}: Wordle #{$wordleNumber} notification sent (interval: {$intervalHours}h).");
         }
 
