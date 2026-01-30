@@ -110,7 +110,7 @@ export function useNotifications({
                         className: 'border-border bg-card',
                         classNames: {
                             actionButton:
-                                'bg-primary hover:bg-primary-hover text-primary-foreground font-medium rounded-md px-3 py-1.5 transition-colors',
+                                '!bg-primary hover:!bg-primary-hover !text-primary-foreground font-medium rounded-md px-3 py-1.5 transition-colors',
                         },
                         action: {
                             label: 'Begrepen',

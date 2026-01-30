@@ -22,16 +22,11 @@ class GameService
             return false;
         }
 
-        $hour = $game->wordle_hour ?? 8;
         $now = Carbon::now(self::TIMEZONE);
-        $todayUnlock = $now->copy()->setTime($hour, 0, 0);
-
-        if ($now->lt($todayUnlock)) {
-            return false;
-        }
-
         $firstUnlock = $this->getFirstWordleUnlockTime($game);
 
+        // After first unlock, wordle is always available (24-hour window per day)
+        // The getDayNumber method determines which wordle word is active
         return $now->gte($firstUnlock);
     }
 
