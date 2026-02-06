@@ -71,11 +71,11 @@ const PLAYERS_INFO: GameInfoContent = {
     rules: [
         {
             icon: <Skull className="size-3 text-destructive" />,
-            text: 'Sabotage (10 pts): draait het volgende ja/nee antwoord om',
+            text: 'Sabotage (8 pts): draait het volgende ja/nee antwoord om',
         },
         {
             icon: <Eye className="size-3 text-amber-500" />,
-            text: 'Onthullen (12 pts): check of je gesaboteerd bent',
+            text: 'Onthullen (10 pts): check of je gesaboteerd bent',
         },
         { text: 'Je kunt dezelfde speler pas opnieuw saboteren na gebruik' },
     ],
@@ -344,7 +344,7 @@ function PlayerCard({ player, onSabotage, sabotageEnabled }: PlayerCardProps) {
                         <TooltipContent side="left">
                             {player.has_pending_sabotage
                                 ? 'Sabotage actief - wacht op volgende vraag'
-                                : 'Saboteer (10 pts)'}
+                                : 'Saboteer (8 pts)'}
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
