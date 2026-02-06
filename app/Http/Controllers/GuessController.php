@@ -10,6 +10,7 @@ use App\Services\SabotageService;
 use App\Services\TestGameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -353,6 +354,115 @@ class GuessController extends Controller
                 'created_at' => $question->created_at->toISOString(),
             ],
             'points_remaining' => $player->points,
+        ]);
+    }
+
+    /**
+     * Regenerate the AI answer for an already-answered question.
+     * Rate limited to 1 regeneration per player per 5 minutes.
+     * Does not deduct points (already paid for the question).
+     */
+    public function regenerate(Request $request, Question $question): JsonResponse
+    {
+        $user = $request->user();
+        $player = $user->activePlayer();
+
+        if (! $player) {
+            return response()->json(['error' => 'no_active_game'], 403);
+        }
+
+        if ($question->player_id !== $player->id) {
+            return response()->json(['error' => 'unauthorized'], 403);
+        }
+
+        // Only allow regeneration for answered questions (yes/no/unclear/unknown)
+        $regenerableAnswers = ['yes', 'no', 'unclear', 'unknown'];
+        if (! in_array($question->answer, $regenerableAnswers)) {
+            return response()->json(['error' => 'not_regenerable'], 400);
+        }
+
+        $game = $player->game;
+
+        if ($game->status !== 'active') {
+            return response()->json(['error' => 'game_not_active'], 400);
+        }
+
+        // Rate limit: 1 regeneration per player per 5 minutes
+        $rateLimitKey = "question-regenerate:player:{$player->id}";
+        $cooldownSeconds = config('game.regenerate_cooldown_seconds', 300);
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 1)) {
+            $retryAfter = RateLimiter::availableIn($rateLimitKey);
+
+            return response()->json([
+                'error' => 'regenerate_rate_limited',
+                'retry_after' => $retryAfter,
+                'message' => "Je kunt over {$retryAfter} seconden opnieuw genereren.",
+            ], 429);
+        }
+
+        // Re-ask the question to the AI
+        $result = $this->openRouterService->askQuestion(
+            $game->secret_word,
+            $question->question_text,
+            $game->word_description,
+            $player->name,
+        );
+
+        if (! $result['success']) {
+            return response()->json([
+                'success' => false,
+                'error' => 'ai_error',
+                'message' => $result['error'] ?? 'Er ging iets mis met de AI',
+            ], 500);
+        }
+
+        $answer = $result['answer'];
+        $wit = $result['wit'] ?? null;
+
+        // Hit the rate limiter only on success
+        RateLimiter::hit($rateLimitKey, $cooldownSeconds);
+
+        // Update the question with the new answer
+        $wasSabotaged = false;
+        \DB::transaction(function () use ($player, $question, $answer, $wit, &$wasSabotaged) {
+            $question->update([
+                'answer' => $answer,
+                'wit' => $wit,
+            ]);
+
+            // Re-apply sabotage if there's still a pending one
+            if (in_array($answer, ['yes', 'no'])) {
+                $sabotage = $this->sabotageService->consumePendingSabotage($player, $question);
+                if ($sabotage) {
+                    $flippedAnswer = $this->sabotageService->flipAnswer($answer);
+                    $flippedWit = $this->openRouterService->generateBomaWit($flippedAnswer, $question->question_text, $player->name);
+                    $question->update([
+                        'answer' => $flippedAnswer,
+                        'wit' => $flippedWit ?? $wit,
+                    ]);
+                    $wasSabotaged = true;
+                }
+            }
+        });
+
+        $question->refresh();
+
+        return response()->json([
+            'success' => true,
+            'question' => [
+                'id' => $question->id,
+                'question' => $question->question_text,
+                'answer' => $question->answer,
+                'wit' => $question->wit,
+                'player' => [
+                    'id' => $player->id,
+                    'name' => $player->name,
+                    'avatar_url' => $player->avatar_url,
+                ],
+                'created_at' => $question->created_at->toISOString(),
+            ],
+            'retry_after' => $cooldownSeconds,
         ]);
     }
 

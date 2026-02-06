@@ -7,11 +7,8 @@ import { PlayerAvatar } from '@/components/player-avatar';
 import { Button } from '@/components/ui/button';
 import { useCooldownTimer } from '@/hooks/use-cooldown-timer';
 import { getInitials } from '@/hooks/use-initials';
-import type {
-    NotificationItem} from '@/hooks/use-notifications';
-import {
-    useNotifications,
-} from '@/hooks/use-notifications';
+import type { NotificationItem } from '@/hooks/use-notifications';
+import { useNotifications } from '@/hooks/use-notifications';
 import PlayLayout from '@/layouts/play-layout';
 import { cn, getCsrfToken } from '@/lib/utils';
 import { Head, router } from '@inertiajs/react';
@@ -117,6 +114,15 @@ export default function GuessPage({
     // Track which questions are being retried
     const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
 
+    // Track which questions are being regenerated
+    const [regeneratingIds, setRegeneratingIds] = useState<Set<number>>(
+        new Set(),
+    );
+
+    // Rate limit for regeneration (5 min cooldown)
+    const [regenCooldownUntil, setRegenCooldownUntil] = useState<number>(0);
+    const [regenCooldownLeft, setRegenCooldownLeft] = useState(0);
+
     // Notifications toast display
     useNotifications({
         notifications: initialNotifications,
@@ -206,6 +212,117 @@ export default function GuessPage({
     useEffect(() => {
         if (player?.points !== undefined) setPoints(player.points);
     }, [player?.points]);
+
+    // Regeneration cooldown countdown
+    useEffect(() => {
+        if (regenCooldownUntil <= Date.now()) {
+            setRegenCooldownLeft(0);
+            return;
+        }
+        const tick = () => {
+            const remaining = Math.max(
+                0,
+                Math.ceil((regenCooldownUntil - Date.now()) / 1000),
+            );
+            setRegenCooldownLeft(remaining);
+        };
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [regenCooldownUntil]);
+
+    const handleRegenerate = useCallback(
+        async (questionId: number) => {
+            if (regeneratingIds.has(questionId)) return;
+            if (regenCooldownLeft > 0) {
+                const mins = Math.ceil(regenCooldownLeft / 60);
+                setMessage({
+                    type: 'error',
+                    text: `Wacht nog ${mins > 1 ? `${mins} minuten` : `${regenCooldownLeft} seconden`} voor regeneratie`,
+                });
+                setTimeout(() => setMessage(null), 3000);
+                return;
+            }
+
+            setRegeneratingIds((prev) => new Set(prev).add(questionId));
+            setMessage(null);
+
+            try {
+                const res = await fetch(
+                    `/play/guess/regenerate/${questionId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            Accept: 'application/json',
+                        },
+                    },
+                );
+
+                let data: Record<string, unknown> | null = null;
+                try {
+                    const contentType = res.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        data = await res.json();
+                    }
+                } catch {
+                    data = null;
+                }
+
+                if (res.status === 429 && data) {
+                    const retryAfter = (data.retry_after as number) || 300;
+                    setRegenCooldownUntil(Date.now() + retryAfter * 1000);
+                    setMessage({
+                        type: 'error',
+                        text:
+                            (data.message as string) ||
+                            'Wacht even voor je opnieuw genereert',
+                    });
+                    setTimeout(() => setMessage(null), 3000);
+                    return;
+                }
+
+                if (data?.success && data.question) {
+                    setQuestions((prev) =>
+                        prev.map((q) =>
+                            q.id === questionId
+                                ? (data.question as QuestionItem)
+                                : q,
+                        ),
+                    );
+                    // Set the cooldown from server response
+                    const retryAfter = (data.retry_after as number) || 300;
+                    setRegenCooldownUntil(Date.now() + retryAfter * 1000);
+                    setMessage({
+                        type: 'success',
+                        text: 'Antwoord opnieuw gegenereerd',
+                    });
+                    setTimeout(() => setMessage(null), 2500);
+                } else {
+                    setMessage({
+                        type: 'error',
+                        text:
+                            (data?.message as string) || 'Regeneratie mislukt',
+                    });
+                    setTimeout(() => setMessage(null), 3000);
+                }
+            } catch {
+                setMessage({
+                    type: 'error',
+                    text: 'Verbinding mislukt',
+                });
+                setTimeout(() => setMessage(null), 3000);
+            } finally {
+                setRegeneratingIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(questionId);
+                    return next;
+                });
+            }
+        },
+        [regeneratingIds, regenCooldownLeft],
+    );
 
     const handleSubmit = useCallback(async () => {
         if (!canAsk || isSubmitting) return;
@@ -331,47 +448,52 @@ export default function GuessPage({
         }
     };
 
-    const handleRetry = useCallback(async (questionId: number) => {
-        if (retryingIds.has(questionId)) return;
+    const handleRetry = useCallback(
+        async (questionId: number) => {
+            if (retryingIds.has(questionId)) return;
 
-        setRetryingIds((prev) => new Set(prev).add(questionId));
+            setRetryingIds((prev) => new Set(prev).add(questionId));
 
-        try {
-            const res = await fetch(`/play/guess/retry/${questionId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                },
-            });
-
-            const data = await res.json();
-
-            if (data.success && data.question) {
-                setQuestions((prev) =>
-                    prev.map((q) =>
-                        q.id === questionId ? (data.question as QuestionItem) : q,
-                    ),
-                );
-                setPoints(data.points_remaining as number);
-            } else {
-                setMessage({
-                    type: 'error',
-                    text: data.message || 'Retry mislukt',
+            try {
+                const res = await fetch(`/play/guess/retry/${questionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                    },
                 });
+
+                const data = await res.json();
+
+                if (data.success && data.question) {
+                    setQuestions((prev) =>
+                        prev.map((q) =>
+                            q.id === questionId
+                                ? (data.question as QuestionItem)
+                                : q,
+                        ),
+                    );
+                    setPoints(data.points_remaining as number);
+                } else {
+                    setMessage({
+                        type: 'error',
+                        text: data.message || 'Retry mislukt',
+                    });
+                    setTimeout(() => setMessage(null), 3000);
+                }
+            } catch {
+                setMessage({ type: 'error', text: 'Verbinding mislukt' });
                 setTimeout(() => setMessage(null), 3000);
+            } finally {
+                setRetryingIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(questionId);
+                    return next;
+                });
             }
-        } catch {
-            setMessage({ type: 'error', text: 'Verbinding mislukt' });
-            setTimeout(() => setMessage(null), 3000);
-        } finally {
-            setRetryingIds((prev) => {
-                const next = new Set(prev);
-                next.delete(questionId);
-                return next;
-            });
-        }
-    }, [retryingIds]);
+        },
+        [retryingIds],
+    );
 
     if (error === 'no_active_game') {
         return <NoActiveGame title="Vraag" />;
@@ -482,6 +604,21 @@ export default function GuessPage({
                                                 : undefined
                                         }
                                         isRetrying={retryingIds.has(q.id)}
+                                        onRegenerate={
+                                            q.player.id === player?.id &&
+                                            [
+                                                'yes',
+                                                'no',
+                                                'unclear',
+                                                'unknown',
+                                            ].includes(q.answer)
+                                                ? () => handleRegenerate(q.id)
+                                                : undefined
+                                        }
+                                        isRegenerating={regeneratingIds.has(
+                                            q.id,
+                                        )}
+                                        regenCooldownLeft={regenCooldownLeft}
                                     />
                                 ))}
                                 {pendingQuestion && player && (
@@ -508,7 +645,7 @@ export default function GuessPage({
                                     <Timer className="size-3.5 shrink-0 animate-pulse" />
                                     <span>
                                         Cooldown:{' '}
-                                        <span className="font-medium tabular-nums text-foreground">
+                                        <span className="font-medium text-foreground tabular-nums">
                                             {cooldownFormatted}
                                         </span>
                                     </span>
@@ -732,6 +869,9 @@ function QuestionBubble({
     isSabotaged = false,
     onRetry,
     isRetrying = false,
+    onRegenerate,
+    isRegenerating = false,
+    regenCooldownLeft = 0,
 }: {
     question: QuestionItem;
     isOwn: boolean;
@@ -740,10 +880,14 @@ function QuestionBubble({
     isSabotaged?: boolean;
     onRetry?: () => void;
     isRetrying?: boolean;
+    onRegenerate?: () => void;
+    isRegenerating?: boolean;
+    regenCooldownLeft?: number;
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
-    const isUnclear = question.answer === 'unclear' || question.answer === 'unknown';
+    const isUnclear =
+        question.answer === 'unclear' || question.answer === 'unknown';
     const isWinner = question.answer === 'winner';
     const isFailed = question.answer === 'failed';
     const playerColor = PLAYER_COLORS[playerColorIdx];
@@ -844,7 +988,12 @@ function QuestionBubble({
                             ? 'Correct! 🎉'
                             : isFailed
                               ? 'AI fout'
-                              : question.wit || (isYes ? 'Ja' : isUnclear ? 'Onduidelijk' : 'Nee')}
+                              : question.wit ||
+                                (isYes
+                                    ? 'Ja'
+                                    : isUnclear
+                                      ? 'Onduidelijk'
+                                      : 'Nee')}
                     </span>
                 </div>
                 {/* Retry button for failed questions */}
@@ -856,12 +1005,48 @@ function QuestionBubble({
                             'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
                             'border border-amber-500/40 bg-amber-500/10 text-amber-600',
                             'transition-all duration-150 ease-out',
-                            'hover:bg-amber-500/20 hover:border-amber-500/60 active:scale-95',
-                            'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
+                            'hover:border-amber-500/60 hover:bg-amber-500/20 active:scale-95',
+                            'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
                         )}
                     >
-                        <RefreshCw className={cn('size-3', isRetrying && 'animate-spin')} />
+                        <RefreshCw
+                            className={cn(
+                                'size-3',
+                                isRetrying && 'animate-spin',
+                            )}
+                        />
                         {isRetrying ? 'Bezig...' : 'Opnieuw'}
+                    </button>
+                )}
+                {/* Regenerate button for answered questions */}
+                {!isFailed && onRegenerate && (
+                    <button
+                        onClick={onRegenerate}
+                        disabled={isRegenerating || regenCooldownLeft > 0}
+                        title={
+                            regenCooldownLeft > 0
+                                ? `Beschikbaar over ${Math.ceil(regenCooldownLeft / 60)} min`
+                                : 'Antwoord opnieuw genereren'
+                        }
+                        className={cn(
+                            'ml-0.5 inline-flex items-center justify-center rounded-full p-1',
+                            'text-muted-foreground/40 transition-all duration-200',
+                            'hover:bg-muted/60 hover:text-muted-foreground/70',
+                            'active:scale-90',
+                            'disabled:cursor-not-allowed disabled:hover:bg-transparent',
+                            isRegenerating && 'text-primary/60',
+                            regenCooldownLeft > 0 &&
+                                !isRegenerating &&
+                                'opacity-30',
+                        )}
+                    >
+                        <RefreshCw
+                            className={cn(
+                                'size-3',
+                                isRegenerating &&
+                                    'animate-spin text-primary/60',
+                            )}
+                        />
                     </button>
                 )}
             </div>

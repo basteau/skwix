@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { WordlistSheet } from '@/components/wordlist-sheet';
 
-import { Snowflake, Timer, X } from 'lucide-react';
+import { RefreshCw, Snowflake, Timer, X } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
 const SNOWFLAKES = Array.from({ length: 6 }).map((_, i) => ({
@@ -203,6 +203,10 @@ export const GUESS_INFO: GameInfoContent = {
         },
         { text: 'Iedereen ziet elkaars vragen' },
         { text: 'Raad correct = win de hoofdprijs!' },
+        {
+            icon: <RefreshCw className="size-3.5 text-muted-foreground" />,
+            text: 'Regenereer een antwoord via het icoon (max 1x per 5 min)',
+        },
         { text: 'Pas op: sabotage draait je antwoord om (ja↔nee)' },
     ],
     pointsInfo:

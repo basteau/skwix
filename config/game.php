@@ -60,4 +60,14 @@ return [
     |
     */
     'guess_cooldown_hours' => env('GAME_GUESS_COOLDOWN_HOURS', 8),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Regenerate Cooldown
+    |--------------------------------------------------------------------------
+    |
+    | Seconds a player must wait between regenerating answers. Default 300 (5 min).
+    |
+    */
+    'regenerate_cooldown_seconds' => env('GAME_REGENERATE_COOLDOWN_SECONDS', 300),
 ];
