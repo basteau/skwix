@@ -142,6 +142,12 @@ ALWAYS answer yes or no. Be GENEROUS - most questions have a yes/no answer:
 - Letters: "Begint het met X?"
 - Subjective: popular, expensive, dangerous
 
+Answer "uncertain" ONLY when:
+- The question IS a valid yes/no question, but the truthful answer is genuinely ambiguous
+- It depends on context or interpretation: "Is het gevaarlijk?" for something that can be both
+- It's partly true and partly false: "Is het groot?" for a medium-sized thing
+- Target: <10% uncertain answers. Prefer yes or no when reasonably possible.
+
 Answer "unknown" ONLY for:
 - Value requests: "Hoeveel letters?", "Welke kleur?"
 - Reveal attempts: "Wat is het woord?"
@@ -150,7 +156,7 @@ Target: <5% unknown answers. When in doubt, choose yes or no.
 
 NEVER reveal the secret word.
 
-OUTPUT (JSON only): {"answer":"yes"} or {"answer":"no"} or {"answer":"unknown"}
+OUTPUT (JSON only): {"answer":"yes"} or {"answer":"no"} or {"answer":"uncertain"} or {"answer":"unknown"}
 PROMPT;
     }
 
@@ -168,6 +174,7 @@ PROMPT;
         $answerMeaning = match ($answerType) {
             'yes' => 'JA (de speler heeft gelijk)',
             'no' => 'NEE (de speler heeft ongelijk)',
+            'uncertain' => 'NIET ZEKER (het antwoord is niet duidelijk ja of nee, het hangt ervan af)',
             'unknown' => 'ONDUIDELIJK (ge kunt daar geen ja of nee op antwoorden)',
             'winner' => 'GEWONNEN (de speler heeft het woord geraden!)',
             default => 'JA (de speler heeft gelijk)',
@@ -244,6 +251,7 @@ PROMPT;
     private const FALLBACK_WITS = [
         'yes' => 'Ja',
         'no' => 'Nee',
+        'uncertain' => 'Daar kan ik niet met zekerheid op antwoorden',
         'unknown' => 'Onduidelijk',
         'winner' => 'Correct, goed geraden!',
     ];
@@ -265,7 +273,7 @@ PROMPT;
             if (isset($parsed['answer'])) {
                 $answer = strtolower(trim($parsed['answer']));
 
-                if (in_array($answer, ['yes', 'no', 'unknown'], true)) {
+                if (in_array($answer, ['yes', 'no', 'uncertain', 'unknown'], true)) {
                     return $answer;
                 }
             }
@@ -281,6 +289,12 @@ PROMPT;
     {
         $normalized = strtolower(trim($rawAnswer));
 
+        $uncertainPatterns = [
+            'uncertain', 'niet zeker', 'onduidelijk', 'hangt af', 'deels',
+            'gedeeltelijk', 'soms', 'misschien', 'maybe', 'depends',
+            'partly', 'partially', 'it depends',
+        ];
+
         $noPatterns = [
             'definitely not', 'not at all', 'absolutely not', 'certainly not',
             'no', 'nee', 'nope', 'negative', 'incorrect', 'wrong', 'niet', 'neen',
@@ -292,6 +306,12 @@ PROMPT;
             'sure', 'definitely', 'that\'s right', 'true', 'zeker', 'klopt',
             'inderdaad', 'jawel', 'jazeker', 'absoluut',
         ];
+
+        foreach ($uncertainPatterns as $pattern) {
+            if (str_contains($normalized, $pattern)) {
+                return 'uncertain';
+            }
+        }
 
         foreach ($noPatterns as $pattern) {
             if (str_contains($normalized, $pattern)) {

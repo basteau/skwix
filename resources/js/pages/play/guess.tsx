@@ -15,6 +15,7 @@ import { Head, router } from '@inertiajs/react';
 import {
     AlertTriangle,
     Check,
+    HelpCircle,
     RefreshCw,
     Search,
     Skull,
@@ -29,7 +30,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 interface QuestionItem {
     id: number;
     question: string;
-    answer: 'yes' | 'no' | 'winner' | 'unclear' | 'unknown' | 'failed';
+    answer: 'yes' | 'no' | 'winner' | 'uncertain' | 'unclear' | 'unknown' | 'failed';
     wit?: string;
     player: {
         id: number;
@@ -612,6 +613,7 @@ export default function GuessPage({
                                             [
                                                 'yes',
                                                 'no',
+                                                'uncertain',
                                                 'unclear',
                                                 'unknown',
                                             ].includes(q.answer)
@@ -889,6 +891,7 @@ function QuestionBubble({
 }) {
     const initials = getInitials(question.player.name);
     const isYes = question.answer === 'yes';
+    const isUncertain = question.answer === 'uncertain';
     const isUnclear =
         question.answer === 'unclear' || question.answer === 'unknown';
     const isWinner = question.answer === 'winner';
@@ -949,6 +952,8 @@ function QuestionBubble({
                         <Trophy className="size-4 text-amber-500" />
                     ) : isFailed ? (
                         <AlertTriangle className="size-4 text-amber-500" />
+                    ) : isUncertain ? (
+                        <HelpCircle className="size-4 text-amber-500/70" />
                     ) : (
                         <Snowflake className="size-4 text-primary/60" />
                     )}
@@ -964,9 +969,11 @@ function QuestionBubble({
                               ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/10 text-amber-600'
                               : isYes
                                 ? 'bg-gradient-to-r from-success/20 to-success/10 text-success'
-                                : isUnclear
-                                  ? 'bg-gradient-to-r from-muted/60 to-muted/40 text-muted-foreground'
-                                  : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
+                                : isUncertain
+                                  ? 'bg-gradient-to-r from-amber-400/20 to-amber-500/10 text-amber-600'
+                                  : isUnclear
+                                    ? 'bg-gradient-to-r from-muted/60 to-muted/40 text-muted-foreground'
+                                    : 'bg-gradient-to-r from-destructive/15 to-destructive/5 text-destructive',
                     )}
                 >
                     {isSabotaged && (
@@ -981,6 +988,8 @@ function QuestionBubble({
                         <AlertTriangle className="size-4 shrink-0" />
                     ) : isYes ? (
                         <Check className="size-4 shrink-0" />
+                    ) : isUncertain ? (
+                        <HelpCircle className="size-4 shrink-0" />
                     ) : isUnclear ? (
                         <Snowflake className="size-4 shrink-0" />
                     ) : (
@@ -994,9 +1003,11 @@ function QuestionBubble({
                               : question.wit ||
                                 (isYes
                                     ? 'Ja'
-                                    : isUnclear
-                                      ? 'Onduidelijk'
-                                      : 'Nee')}
+                                    : isUncertain
+                                      ? 'Niet zeker'
+                                      : isUnclear
+                                        ? 'Onduidelijk'
+                                        : 'Nee')}
                     </span>
                 </div>
                 {/* Retry button for failed questions */}

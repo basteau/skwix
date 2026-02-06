@@ -382,7 +382,7 @@ class GuessController extends Controller
         }
 
         // Only allow regeneration for answered questions (yes/no/unclear/unknown)
-        $regenerableAnswers = ['yes', 'no', 'unclear', 'unknown'];
+        $regenerableAnswers = ['yes', 'no', 'uncertain', 'unclear', 'unknown'];
         if (! in_array($question->answer, $regenerableAnswers)) {
             return response()->json(['error' => 'not_regenerable'], 400);
         }
@@ -705,7 +705,7 @@ class GuessController extends Controller
         $existingQuestion = $questions[$idx];
 
         // Only allow regeneration for answered questions
-        $regenerableAnswers = ['yes', 'no', 'unclear', 'unknown'];
+        $regenerableAnswers = ['yes', 'no', 'uncertain', 'unclear', 'unknown'];
         if (! in_array($existingQuestion['answer'], $regenerableAnswers)) {
             return response()->json(['error' => 'not_regenerable'], 400);
         }
