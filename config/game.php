@@ -67,7 +67,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | Seconds a player must wait between regenerating answers. Default 300 (5 min).
+    | Test mode uses a shorter cooldown (10 seconds) for faster admin testing.
     |
     */
     'regenerate_cooldown_seconds' => env('GAME_REGENERATE_COOLDOWN_SECONDS', 300),
+    'regenerate_cooldown_seconds_test' => 10,
 ];

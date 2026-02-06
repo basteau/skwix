@@ -119,7 +119,7 @@ export default function GuessPage({
         new Set(),
     );
 
-    // Rate limit for regeneration (5 min cooldown)
+    // Rate limit for regeneration (5 min regular, 10s test mode)
     const [regenCooldownUntil, setRegenCooldownUntil] = useState<number>(0);
     const [regenCooldownLeft, setRegenCooldownLeft] = useState(0);
 
@@ -235,10 +235,13 @@ export default function GuessPage({
         async (questionId: number) => {
             if (regeneratingIds.has(questionId)) return;
             if (regenCooldownLeft > 0) {
-                const mins = Math.ceil(regenCooldownLeft / 60);
+                const text =
+                    regenCooldownLeft >= 60
+                        ? `${Math.ceil(regenCooldownLeft / 60)} minuten`
+                        : `${regenCooldownLeft} seconden`;
                 setMessage({
                     type: 'error',
-                    text: `Wacht nog ${mins > 1 ? `${mins} minuten` : `${regenCooldownLeft} seconden`} voor regeneratie`,
+                    text: `Wacht nog ${text} voor regeneratie`,
                 });
                 setTimeout(() => setMessage(null), 3000);
                 return;
@@ -1025,7 +1028,7 @@ function QuestionBubble({
                         disabled={isRegenerating || regenCooldownLeft > 0}
                         title={
                             regenCooldownLeft > 0
-                                ? `Beschikbaar over ${Math.ceil(regenCooldownLeft / 60)} min`
+                                ? `Beschikbaar over ${regenCooldownLeft >= 60 ? `${Math.ceil(regenCooldownLeft / 60)} min` : `${regenCooldownLeft}s`}`
                                 : 'Antwoord opnieuw genereren'
                         }
                         className={cn(

@@ -359,11 +359,17 @@ class GuessController extends Controller
 
     /**
      * Regenerate the AI answer for an already-answered question.
-     * Rate limited to 1 regeneration per player per 5 minutes.
+     * Rate limited to 1 regeneration per 5 minutes (regular) or 10 seconds (test mode).
      * Does not deduct points (already paid for the question).
      */
-    public function regenerate(Request $request, Question $question): JsonResponse
+    public function regenerate(Request $request, int $questionId): JsonResponse
     {
+        if ($this->testGameService->isTestMode()) {
+            return $this->regenerateTestMode($questionId);
+        }
+
+        $question = Question::findOrFail($questionId);
+
         $user = $request->user();
         $player = $user->activePlayer();
 
@@ -681,6 +687,85 @@ class GuessController extends Controller
                 'created_at' => now()->toISOString(),
             ],
             'points_remaining' => $newPoints,
+        ]);
+    }
+
+    private function regenerateTestMode(int $questionIndex): JsonResponse
+    {
+        $testGame = $this->testGameService->getTestGame();
+        $player = $testGame['player'];
+        $questions = $testGame['questions'] ?? [];
+
+        // Question IDs in test mode are 1-indexed
+        $idx = $questionIndex - 1;
+        if ($idx < 0 || $idx >= count($questions)) {
+            return response()->json(['error' => 'not_found'], 404);
+        }
+
+        $existingQuestion = $questions[$idx];
+
+        // Only allow regeneration for answered questions
+        $regenerableAnswers = ['yes', 'no', 'unclear', 'unknown'];
+        if (! in_array($existingQuestion['answer'], $regenerableAnswers)) {
+            return response()->json(['error' => 'not_regenerable'], 400);
+        }
+
+        // Rate limit: 1 regeneration per 10 seconds in test mode
+        $rateLimitKey = 'question-regenerate:test-player';
+        $cooldownSeconds = config('game.regenerate_cooldown_seconds_test', 10);
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 1)) {
+            $retryAfter = RateLimiter::availableIn($rateLimitKey);
+
+            return response()->json([
+                'error' => 'regenerate_rate_limited',
+                'retry_after' => $retryAfter,
+                'message' => "Je kunt over {$retryAfter} seconden opnieuw genereren.",
+            ], 429);
+        }
+
+        // Re-ask the question to the AI
+        $result = $this->openRouterService->askQuestion(
+            $testGame['secret_word'],
+            $existingQuestion['question'],
+            null,
+            $player['name'],
+        );
+
+        if (! $result['success']) {
+            return response()->json([
+                'success' => false,
+                'error' => 'ai_error',
+                'message' => $result['error'] ?? 'Er ging iets mis met de AI',
+            ], 500);
+        }
+
+        // Hit the rate limiter only on success
+        RateLimiter::hit($rateLimitKey, $cooldownSeconds);
+
+        // Update the question in session
+        $questions[$idx]['answer'] = $result['answer'];
+        $questions[$idx]['wit'] = $result['wit'] ?? null;
+
+        $this->testGameService->updateTestGame([
+            'questions' => $questions,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'question' => [
+                'id' => $questionIndex,
+                'question' => $existingQuestion['question'],
+                'answer' => $result['answer'],
+                'wit' => $result['wit'] ?? null,
+                'player' => [
+                    'id' => $player['id'],
+                    'name' => $player['name'],
+                    'avatar_url' => $player['avatar_url'] ?? null,
+                ],
+                'created_at' => now()->toISOString(),
+            ],
+            'retry_after' => $cooldownSeconds,
         ]);
     }
 }

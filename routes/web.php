@@ -100,7 +100,7 @@ Route::middleware('auth')->group(function () {
         Route::get('guess', [GuessController::class, 'show'])->name('guess');
         Route::post('guess/ask', [GuessController::class, 'ask'])->name('guess.ask');
         Route::post('guess/retry/{question}', [GuessController::class, 'retry'])->name('guess.retry');
-        Route::post('guess/regenerate/{question}', [GuessController::class, 'regenerate'])->name('guess.regenerate');
+        Route::post('guess/regenerate/{questionId}', [GuessController::class, 'regenerate'])->name('guess.regenerate');
         Route::get('fortune', [FortuneController::class, 'show'])->name('fortune');
         Route::post('fortune/spin', [FortuneController::class, 'spin'])->name('fortune.spin');
         Route::get('players', [PlayersController::class, 'show'])->name('players');
