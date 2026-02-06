@@ -201,7 +201,6 @@ export const GUESS_INFO: GameInfoContent = {
             icon: <Timer className="size-3.5 text-muted-foreground" />,
             text: '8 uur cooldown na elke vraag',
         },
-        { text: 'Iedereen ziet elkaars vragen' },
         { text: 'Raad correct = win de hoofdprijs!' },
         {
             icon: <RefreshCw className="size-3.5 text-muted-foreground" />,
