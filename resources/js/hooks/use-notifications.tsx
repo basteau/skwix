@@ -106,7 +106,7 @@ export function useNotifications({
                         // Sonner's ID tracking can persist unexpectedly, so we include pageSessionId
                         id: `notification-${pageSessionId}-${notification.id}`,
                         icon: <Lightbulb className="size-5 text-primary" />,
-                        duration: 8000,
+                        duration: 13000,
                         className: 'border-border bg-card',
                         classNames: {
                             actionButton:
