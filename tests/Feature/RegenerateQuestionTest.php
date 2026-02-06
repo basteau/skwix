@@ -5,6 +5,7 @@ use App\Models\Player;
 use App\Models\Question;
 use App\Models\User;
 use App\Services\OpenRouterService;
+use App\Services\TestGameService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,6 +15,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 0, 'Europe/Brussels'));
     RateLimiter::clear('question-regenerate:player:*');
+    RateLimiter::clear('question-regenerate:test-player');
 });
 
 afterEach(function () {
@@ -371,5 +373,145 @@ describe('GuessController regenerate', function () {
 
         // Second attempt should still be allowed (rate limit not consumed on failure)
         $this->actingAs($user)->postJson("/play/guess/regenerate/{$question->id}")->assertOk();
+    });
+});
+
+describe('Test mode regeneration', function () {
+    it('regenerates a test mode question with 10 second cooldown', function () {
+        $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('askQuestion')
+                ->once()
+                ->andReturn(['success' => true, 'answer' => 'no', 'wit' => 'New test wit']);
+        });
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $testGameService = app(TestGameService::class);
+        $testGameService->startTestGame();
+        $testGameService->updateTestGame([
+            'questions' => [
+                ['question' => 'Is het koud?', 'answer' => 'yes', 'wit' => 'Old wit'],
+            ],
+        ]);
+
+        $response = $this->actingAs($admin)->postJson('/play/guess/regenerate/1');
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'question' => [
+                'id' => 1,
+                'answer' => 'no',
+                'wit' => 'New test wit',
+            ],
+            'retry_after' => 10,
+        ]);
+    });
+
+    it('rate limits test mode regeneration to 10 seconds', function () {
+        $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('askQuestion')
+                ->once()
+                ->andReturn(['success' => true, 'answer' => 'no', 'wit' => 'Wit']);
+        });
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $testGameService = app(TestGameService::class);
+        $testGameService->startTestGame();
+        $testGameService->updateTestGame([
+            'questions' => [
+                ['question' => 'Is het koud?', 'answer' => 'yes'],
+                ['question' => 'Is het een dier?', 'answer' => 'no'],
+            ],
+        ]);
+
+        // First regeneration should succeed
+        $this->actingAs($admin)->postJson('/play/guess/regenerate/1')->assertOk();
+
+        // Second regeneration within 10 seconds should be rate limited
+        $response = $this->actingAs($admin)->postJson('/play/guess/regenerate/2');
+
+        $response->assertStatus(429);
+        $response->assertJson(['error' => 'regenerate_rate_limited']);
+    });
+
+    it('allows test mode regeneration after 10 second cooldown', function () {
+        $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('askQuestion')
+                ->twice()
+                ->andReturn(['success' => true, 'answer' => 'no', 'wit' => 'Wit']);
+        });
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $testGameService = app(TestGameService::class);
+        $testGameService->startTestGame();
+        $testGameService->updateTestGame([
+            'questions' => [
+                ['question' => 'Is het koud?', 'answer' => 'yes'],
+            ],
+        ]);
+
+        // First regeneration
+        $this->actingAs($admin)->postJson('/play/guess/regenerate/1')->assertOk();
+
+        // Travel 11 seconds forward
+        Carbon::setTestNow(Carbon::create(2026, 1, 24, 10, 0, 11, 'Europe/Brussels'));
+
+        // Should be allowed again
+        $this->actingAs($admin)->postJson('/play/guess/regenerate/1')->assertOk();
+    });
+
+    it('rejects test mode regeneration for non-regenerable answers', function () {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $testGameService = app(TestGameService::class);
+        $testGameService->startTestGame();
+        $testGameService->updateTestGame([
+            'questions' => [
+                ['question' => 'Is het woord winter?', 'answer' => 'winner'],
+            ],
+        ]);
+
+        $response = $this->actingAs($admin)->postJson('/play/guess/regenerate/1');
+
+        $response->assertStatus(400);
+        $response->assertJson(['error' => 'not_regenerable']);
+    });
+
+    it('returns 404 for non-existent test mode question index', function () {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $testGameService = app(TestGameService::class);
+        $testGameService->startTestGame();
+
+        $response = $this->actingAs($admin)->postJson('/play/guess/regenerate/99');
+
+        $response->assertNotFound();
+    });
+
+    it('updates session with regenerated answer', function () {
+        $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('askQuestion')
+                ->once()
+                ->andReturn(['success' => true, 'answer' => 'no', 'wit' => 'Updated wit']);
+        });
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $testGameService = app(TestGameService::class);
+        $testGameService->startTestGame();
+        $testGameService->updateTestGame([
+            'questions' => [
+                ['question' => 'Is het koud?', 'answer' => 'yes', 'wit' => 'Old wit'],
+            ],
+        ]);
+
+        $this->actingAs($admin)->postJson('/play/guess/regenerate/1')->assertOk();
+
+        $testGame = $testGameService->getTestGame();
+        expect($testGame['questions'][0]['answer'])->toBe('no');
+        expect($testGame['questions'][0]['wit'])->toBe('Updated wit');
     });
 });
