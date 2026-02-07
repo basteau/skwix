@@ -146,7 +146,6 @@ Answer "uncertain" ONLY when:
 - The question IS a valid yes/no question, but the truthful answer is genuinely ambiguous
 - It depends on context or interpretation: "Is het gevaarlijk?" for something that can be both
 - It's partly true and partly false: "Is het groot?" for a medium-sized thing
-- Target: <10% uncertain answers. Prefer yes or no when reasonably possible.
 
 Answer "unknown" ONLY for:
 - Value requests: "Hoeveel letters?", "Welke kleur?"
