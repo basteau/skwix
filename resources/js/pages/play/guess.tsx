@@ -298,11 +298,6 @@ export default function GuessPage({
                     // Set the cooldown from server response
                     const retryAfter = (data.retry_after as number) || 300;
                     setRegenCooldownUntil(Date.now() + retryAfter * 1000);
-                    setMessage({
-                        type: 'success',
-                        text: 'Antwoord opnieuw gegenereerd',
-                    });
-                    setTimeout(() => setMessage(null), 2500);
                 } else {
                     setMessage({
                         type: 'error',
