@@ -11,7 +11,7 @@ composer dev      # Start server + queue + logs + vite
 
 Open http://localhost:8000
 
-**Admin access:** `/sudo/local-test-admin-token`
+**Admin access:** set a unique `ADMIN_SECRET_TOKEN` in your local `.env`, then visit `/sudo/<your-token>`. Generate a token with `openssl rand -hex 32`. Never deploy with the E2E test token.
 
 ## Commands
 
@@ -35,12 +35,18 @@ php artisan db:seed        # Seed test data
 
 ## Deployment
 
-Auto-deploys to [Laravel Cloud](https://cloud.laravel.com) on push to `main`.
+This public repository has GitHub Actions disabled and no deployment configured. To deploy your own instance, configure a separate [Laravel Cloud](https://cloud.laravel.com) application with fresh secrets.
 
-Configure in Laravel Cloud dashboard:
+Configure in your Laravel Cloud dashboard:
 - Environment variables (see `.env.example`)
 - Database (Postgres)
 - Queue workers
+
+## Public-source edition
+
+Personal photos have been replaced with generated, metadata-free placeholders. Demo players use generic names and anonymized addresses. Cookies, runtime databases, activity exports, screenshots, and private planning notes have been removed from the entire published history.
+
+The tracked `.env.example` and `.env.e2e` files are templates only. Generate a fresh application key with `php artisan key:generate`; use unique production credentials. See [SECURITY.md](SECURITY.md).
 
 ## Stack
 

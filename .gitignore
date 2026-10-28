@@ -31,3 +31,31 @@ tmp/
 
 # Browser test screenshots
 tests/Browser/Screenshots/
+
+# Environment files: only sanitized templates belong in source control.
+.env.*
+!.env.example
+!.env.e2e
+
+# Credentials, session captures, and private exports.
+**/auth.json
+**/cookies*.txt
+*.pem
+*.key
+*.har
+openrouter_activity_*.csv
+
+# Local databases, logs, and runtime artifacts.
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.db
+*.log
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+
+# Private planning notes and original personal photographs.
+.tickets/
+/assets/players/original/*
